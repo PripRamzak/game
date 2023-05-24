@@ -14,7 +14,8 @@ class shader_program
 
 public:
     bool         create();
-    unsigned int get_program();
     bool         create_shader(const char* file_path, shader_type type);
+    void         bind(const char* attribute_name, int index);
+    unsigned int get_program();
     void         delete_program();
 };

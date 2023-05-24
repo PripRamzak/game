@@ -68,8 +68,8 @@ public:
         }
         else
         {
-            gl_major_version = 3;
-            gl_minor_version = 2;
+            gl_major_version = 2;
+            gl_minor_version = 0;
             gl_profile_mask  = SDL_GL_CONTEXT_PROFILE_ES;
         }
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, gl_major_version);
@@ -97,7 +97,7 @@ public:
         }
 
         if (platform == "Linux"sv &&
-            (gl_major_version != 3 || gl_minor_version != 2 ||
+            (gl_major_version != 2 || gl_minor_version != 0 ||
              gl_profile_mask != SDL_GL_CONTEXT_PROFILE_ES))
         {
             std::cerr << "Current OpenGL version: " << gl_major_version << '.'
@@ -174,6 +174,9 @@ public:
             SDL_Quit();
             return false;
         }
+
+        program.bind("a_position", 0);
+        program.bind("t_coord", 1);
 
         return true;
     }

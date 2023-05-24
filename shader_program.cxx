@@ -94,11 +94,6 @@ bool shader_program::create()
     return true;
 }
 
-unsigned int shader_program::get_program()
-{
-    return program;
-}
-
 bool shader_program::create_shader(const char* file_path, shader_type type)
 {
     GLuint shader;
@@ -161,6 +156,17 @@ bool shader_program::create_shader(const char* file_path, shader_type type)
     }
 
     return true;
+}
+
+void shader_program::bind(const char* attribute_name, int index)
+{
+    glBindAttribLocation(program, index, attribute_name);
+    gl_check();
+}
+
+unsigned int shader_program::get_program()
+{
+    return program;
 }
 
 void shader_program::delete_program()

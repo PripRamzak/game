@@ -1,10 +1,10 @@
-#version 320 es
+#version 100
 precision mediump float;
 
-layout (location = 0) in vec2 a_position;
-layout (location = 1) in vec2 t_coord;
+attribute vec2 a_position;
+attribute vec2 t_coord;
 
-out vec2 v_t_coord;
+varying vec2 v_t_coord;
 
 void main()
 {
