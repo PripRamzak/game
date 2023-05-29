@@ -3,7 +3,6 @@ precision mediump float;
 
 varying vec2 v_t_coord;
 uniform sampler2D texture;
-// out vec4 fragColor;
 
 void main()
 {

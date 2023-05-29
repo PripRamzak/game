@@ -15,8 +15,8 @@ int main(int /*argc*/, char** /*argv*/)
     std::vector<triangle_2d> texture_triangles;
     texture_triangles.resize(2);
 
-    if (!engine->load_texture("./img/knight.png", texture_triangles))
-        return EXIT_FAILURE;
+    texture* knight_texture =
+        engine->create_texture("./img/knight.png", 0, texture_triangles);
 
     int direction = 0;
 

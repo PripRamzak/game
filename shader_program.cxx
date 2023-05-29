@@ -158,13 +158,22 @@ bool shader_program::create_shader(const char* file_path, shader_type type)
     return true;
 }
 
+void shader_program::set_uniform(int index)
+{
+    GLint location = glGetUniformLocation(program, "texture");
+    gl_check();
+    assert(-1 != location);
+    glUniform1i(location, index);
+    gl_check();
+}
+
 void shader_program::bind(const char* attribute_name, int index)
 {
     glBindAttribLocation(program, index, attribute_name);
     gl_check();
 }
 
-unsigned int shader_program::get_program()
+unsigned int shader_program::get()
 {
     return program;
 }

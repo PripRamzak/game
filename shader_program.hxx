@@ -1,5 +1,7 @@
 #pragma once
 
+#include "texture.hxx"
+
 enum shader_type
 {
     vertex,
@@ -15,7 +17,8 @@ class shader_program
 public:
     bool         create();
     bool         create_shader(const char* file_path, shader_type type);
+    void         set_uniform(int index);
     void         bind(const char* attribute_name, int index);
-    unsigned int get_program();
+    unsigned int get();
     void         delete_program();
 };

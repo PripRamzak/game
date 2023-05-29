@@ -4,7 +4,6 @@
 #include <algorithm>
 #include <array>
 #include <cassert>
-#include <cmath>
 #include <stdexcept>
 
 #include <SDL3/SDL.h>
@@ -16,9 +15,13 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
+#include "imgui.h"
+
 bool check_pressing_key(SDL_Event sdl_event, event& event);
 
 void gl_check();
+
+void ImGui_Impl_game_engine_Init();
 
 class game_engine final : public engine
 {
@@ -102,7 +105,7 @@ public:
         {
             std::cerr << "Current OpenGL version: " << gl_major_version << '.'
                       << gl_minor_version << " ES" << std::endl;
-            std::cerr << "Need OpenGL version: 3.2 ES" << std::endl;
+            std::cerr << "Need OpenGL version: 2.0 ES" << std::endl;
             SDL_GL_DeleteContext(context);
             SDL_DestroyWindow(window);
             SDL_Quit();
@@ -200,78 +203,22 @@ public:
         return false;
     }
 
-    float get_time() final
+    texture* create_texture(const char*               file_path,
+                            int                       index,
+                            std::vector<triangle_2d>& texture_triangles) final
     {
-        std::uint32_t ms = SDL_GetTicks();
-        return ms * 0.001f;
-    }
-
-    void clear() final
-    {
-        glClearColor(0.f, 0.f, 0.f, 0.f);
-        gl_check();
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        gl_check();
-    }
-
-    void set_uniform(const char* name, float value) final
-    {
-        GLint uniform_location =
-            glGetUniformLocation(program.get_program(), name);
-        glUniform1f(uniform_location, value);
-    }
-
-    bool load_texture(const char*               file_path,
-                      std::vector<triangle_2d>& texture_triangles) final
-    {
-        int width, height, channels;
-        stbi_set_flip_vertically_on_load(true);
-        unsigned char* image =
-            stbi_load(file_path, &width, &height, &channels, 0);
-        if (image == nullptr)
-        {
-            std::cerr << "Failed to load image" << std::endl;
-            return false;
-        }
-
-        glActiveTexture(GL_TEXTURE0);
-        gl_check();
-        GLuint texture = 0;
-        glGenTextures(1, &texture);
-        gl_check();
-        glBindTexture(GL_TEXTURE_2D, texture);
-        gl_check();
-        glTexImage2D(GL_TEXTURE_2D,
-                     0,
-                     GL_RGBA,
-                     width,
-                     height,
-                     0,
-                     GL_RGBA,
-                     GL_UNSIGNED_BYTE,
-                     image);
-        gl_check();
-        glGenerateMipmap(GL_TEXTURE_2D);
-        gl_check();
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        gl_check();
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        gl_check();
-
-        GLint location = glGetUniformLocation(program.get_program(), "texture");
-        gl_check();
-        assert(-1 != location);
-        glUniform1i(location, 0);
-        gl_check();
-
-        stbi_image_free(image);
+        texture* texture = ::create_texture();
+        texture->load(file_path, index);
+        program.set_uniform(index);
 
         int window_width;
         int window_height;
         SDL_GetWindowSize(window, &window_width, &window_height);
 
-        float normalized_width  = static_cast<float>(width) / window_width;
-        float normalized_height = static_cast<float>(height) / window_height;
+        float normalized_width =
+            static_cast<float>(texture->get_width()) / window_width;
+        float normalized_height =
+            static_cast<float>(texture->get_height()) / window_height;
 
         texture_triangles[0] = {
             { -normalized_width, normalized_height, 0.f, 1.f },
@@ -284,7 +231,7 @@ public:
             { -normalized_width, -normalized_height, 0.f, 0.f }
         };
 
-        return true;
+        return texture;
     }
 
     void move_texture(std::vector<triangle_2d>& texture_triangles,
@@ -348,21 +295,19 @@ public:
         glEnableVertexAttribArray(1);
         gl_check();
 
-        glValidateProgram(program.get_program());
+        glValidateProgram(program.get());
         gl_check();
         GLint validate_status = 0;
-        glGetProgramiv(
-            program.get_program(), GL_VALIDATE_STATUS, &validate_status);
+        glGetProgramiv(program.get(), GL_VALIDATE_STATUS, &validate_status);
         gl_check();
         if (validate_status == GL_FALSE)
         {
             GLint info_length = 0;
-            glGetProgramiv(
-                program.get_program(), GL_INFO_LOG_LENGTH, &info_length);
+            glGetProgramiv(program.get(), GL_INFO_LOG_LENGTH, &info_length);
             gl_check();
             std::vector<char> info_log(static_cast<size_t>(info_length));
             glGetProgramInfoLog(
-                program.get_program(), info_length, nullptr, info_log.data());
+                program.get(), info_length, nullptr, info_log.data());
             gl_check();
 
             std::cerr << "Incorrect validate status: " << info_log.data()
@@ -374,6 +319,20 @@ public:
 
         glDrawArrays(GL_TRIANGLES, 0, 3);
         gl_check();
+    }
+
+    void clear() final
+    {
+        glClearColor(0.f, 0.f, 0.f, 0.f);
+        gl_check();
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        gl_check();
+    }
+
+    float get_time() final
+    {
+        std::uint32_t ms = SDL_GetTicks();
+        return ms * 0.001f;
     }
 
     bool swap_buffers() final
@@ -418,3 +377,11 @@ void destroy_engine(engine* engine)
 }
 
 engine::~engine() = default;
+
+void ImGui_Impl_game_engine_Init()
+{
+    ImGui::CreateContext();
+    ImGuiIO&       io = ImGui::GetIO();
+    int            width, height;
+    unsigned char* pixels = nullptr;
+}
