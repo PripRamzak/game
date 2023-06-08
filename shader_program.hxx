@@ -10,15 +10,14 @@ enum shader_type
 
 class shader_program
 {
-    unsigned int program         = 0;
-    unsigned int vertex_shader   = 0;
-    unsigned int fragment_shader = 0;
-
 public:
-    bool         create();
-    bool         create_shader(const char* file_path, shader_type type);
-    void         set_uniform(int index);
-    void         bind(const char* attribute_name, int index);
-    unsigned int get();
-    void         delete_program();
+    virtual bool link()                                                 = 0;
+    virtual bool create_shader(const char* file_path, shader_type type) = 0;
+    virtual void set_uniform(const char* name, int index)               = 0;
+    virtual void bind(const char* attribute_name, int index)            = 0;
+    virtual void use()                                                  = 0;
+    virtual unsigned int get()                                          = 0;
+    virtual void         delete_program()                               = 0;
 };
+
+shader_program* create_shader_program();

@@ -59,6 +59,42 @@ public:
 
         return true;
     }
+    bool load(unsigned char* pixels, int width, int height)
+    {
+        this->width  = width;
+        this->height = height;
+
+        glActiveTexture(GL_TEXTURE0 + index);
+        gl_check();
+        glGenTextures(1, &texture);
+        gl_check();
+        glBindTexture(GL_TEXTURE_2D, texture);
+        gl_check();
+        glTexImage2D(GL_TEXTURE_2D,
+                     0,
+                     GL_RGBA,
+                     width,
+                     height,
+                     0,
+                     GL_RGBA,
+                     GL_UNSIGNED_BYTE,
+                     pixels);
+        gl_check();
+        glGenerateMipmap(GL_TEXTURE_2D);
+        gl_check();
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        gl_check();
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        gl_check();
+
+        return true;
+    }
+    void bind() final
+    {
+        glBindTexture(GL_TEXTURE_2D, texture);
+        gl_check();
+    }
+    int get() final { return texture; }
     int get_width() final { return width; }
     int get_height() final { return height; }
     int get_index() final { return index; }

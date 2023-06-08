@@ -15,8 +15,9 @@ int main(int /*argc*/, char** /*argv*/)
     std::vector<triangle_2d> texture_triangles;
     texture_triangles.resize(2);
 
-    texture* knight_texture =
-        engine->create_texture("./img/knight.png", 0, texture_triangles);
+    texture* knight_texture = create_texture();
+    knight_texture->load("./img/knight.png", 0);
+    engine->create_triangles(knight_texture, texture_triangles);
 
     int direction = 0;
 
@@ -44,8 +45,8 @@ int main(int /*argc*/, char** /*argv*/)
             }
         }
 
-        engine->draw_triangles_2d(texture_triangles[0]);
-        engine->draw_triangles_2d(texture_triangles[1]);
+        // engine->render(texture_triangles[0]);
+        // engine->render(texture_triangles[1]);
 
         if (!engine->swap_buffers())
         {
@@ -54,6 +55,7 @@ int main(int /*argc*/, char** /*argv*/)
         }
     }
 
+    delete knight_texture;
     engine->uninitialize();
 
     return EXIT_SUCCESS;

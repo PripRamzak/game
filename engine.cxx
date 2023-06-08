@@ -3,7 +3,6 @@
 
 #include <algorithm>
 #include <array>
-#include <cassert>
 #include <stdexcept>
 
 #include <SDL3/SDL.h>
@@ -21,13 +20,18 @@ bool check_pressing_key(SDL_Event sdl_event, event& event);
 
 void gl_check();
 
-void ImGui_Impl_game_engine_Init();
+void        ImGui_ImplGame_engine_Init();
+void        ImGui_ImplGame_engine_NewFrame(SDL_Window* window);
+void        ImGui_ImplGame_engine_CreateDeviceObject();
+void        ImGui_ImplGame_engine_RenderDrawData(ImDrawData* draw_data);
+static void ImGui_ImplGame_engine_SetClipboardText(void*, const char* text);
+static const char* ImGui_ImplGame_engine_GetClipboardText(void*);
 
 class game_engine final : public engine
 {
-    SDL_Window*    window;
-    SDL_GLContext  context;
-    shader_program program;
+    SDL_Window*     window;
+    SDL_GLContext   context;
+    shader_program* texture_program;
 
 public:
     game_engine()
@@ -44,7 +48,7 @@ public:
             return false;
         }
 
-        window = SDL_CreateWindow("Game", 800, 600, SDL_WINDOW_OPENGL);
+        window = SDL_CreateWindow("Game", 1280, 720, SDL_WINDOW_OPENGL);
         if (!window)
         {
             std::cerr << "CreateWindow error: " << SDL_GetError() << std::endl;
@@ -136,6 +140,7 @@ public:
 
         std::cout << "OpenGL " << gl_major_version << '.' << gl_minor_version
                   << std::endl;
+        SDL_ShowWindow(window);
 
         // load OpenGL functions
         auto gl_function_loader = [](const char* function_name)
@@ -154,15 +159,18 @@ public:
             return false;
         }
 
-        if (!program.create_shader("./vertex_shader.glsl", shader_type::vertex))
+        texture_program = create_shader_program();
+
+        if (!texture_program->create_shader("./vertex_shader.glsl",
+                                            shader_type::vertex))
         {
             SDL_GL_DeleteContext(context);
             SDL_DestroyWindow(window);
             SDL_Quit();
             return false;
         }
-        if (!program.create_shader("./fragment_shader.glsl",
-                                   shader_type::fragment))
+        if (!texture_program->create_shader("./fragment_shader.glsl",
+                                            shader_type::fragment))
         {
             SDL_GL_DeleteContext(context);
             SDL_DestroyWindow(window);
@@ -170,7 +178,7 @@ public:
             return false;
         }
 
-        if (!program.create())
+        if (!texture_program->link())
         {
             SDL_GL_DeleteContext(context);
             SDL_DestroyWindow(window);
@@ -178,8 +186,30 @@ public:
             return false;
         }
 
-        program.bind("a_position", 0);
-        program.bind("t_coord", 1);
+        texture_program->bind("a_position", 0);
+        texture_program->bind("t_coord", 1);
+
+        glEnable(GL_BLEND);
+        gl_check();
+        glBlendEquation(GL_FUNC_ADD);
+        gl_check();
+        glBlendFuncSeparate(GL_SRC_ALPHA,
+                            GL_ONE_MINUS_SRC_ALPHA,
+                            GL_ONE,
+                            GL_ONE_MINUS_SRC_ALPHA);
+        gl_check();
+        /*glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        gl_check();*/
+        glDisable(GL_CULL_FACE);
+        gl_check();
+        glDisable(GL_DEPTH_TEST);
+        gl_check();
+        glDisable(GL_STENCIL_TEST);
+        gl_check();
+        glEnable(GL_SCISSOR_TEST);
+        gl_check();
+
+        ImGui_ImplGame_engine_Init();
 
         return true;
     }
@@ -203,13 +233,10 @@ public:
         return false;
     }
 
-    texture* create_texture(const char*               file_path,
-                            int                       index,
-                            std::vector<triangle_2d>& texture_triangles) final
+    texture* create_triangles(texture*                  texture,
+                              std::vector<triangle_2d>& texture_triangles) final
     {
-        texture* texture = ::create_texture();
-        texture->load(file_path, index);
-        program.set_uniform(index);
+        texture_program->set_uniform("texture", texture->get_index());
 
         int window_width;
         int window_height;
@@ -273,7 +300,7 @@ public:
             texture_triangles[i] = buffer_triangles[i];
     }
 
-    void draw_triangles_2d(const triangle_2d& triangle) final
+    void render(const triangle_2d& triangle) final
     {
         glVertexAttribPointer(0,
                               2,
@@ -295,19 +322,21 @@ public:
         glEnableVertexAttribArray(1);
         gl_check();
 
-        glValidateProgram(program.get());
+        glValidateProgram(texture_program->get());
         gl_check();
         GLint validate_status = 0;
-        glGetProgramiv(program.get(), GL_VALIDATE_STATUS, &validate_status);
+        glGetProgramiv(
+            texture_program->get(), GL_VALIDATE_STATUS, &validate_status);
         gl_check();
         if (validate_status == GL_FALSE)
         {
             GLint info_length = 0;
-            glGetProgramiv(program.get(), GL_INFO_LOG_LENGTH, &info_length);
+            glGetProgramiv(
+                texture_program->get(), GL_INFO_LOG_LENGTH, &info_length);
             gl_check();
             std::vector<char> info_log(static_cast<size_t>(info_length));
             glGetProgramInfoLog(
-                program.get(), info_length, nullptr, info_log.data());
+                texture_program->get(), info_length, nullptr, info_log.data());
             gl_check();
 
             std::cerr << "Incorrect validate status: " << info_log.data()
@@ -325,7 +354,7 @@ public:
     {
         glClearColor(0.f, 0.f, 0.f, 0.f);
         gl_check();
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT);
         gl_check();
     }
 
@@ -337,19 +366,23 @@ public:
 
     bool swap_buffers() final
     {
+        ImGui_ImplGame_engine_NewFrame(window);
+        bool show_demo_window = true;
+        ImGui::ShowDemoWindow(&show_demo_window);
+        ImGui::Render();
+        ImGui_ImplGame_engine_RenderDrawData(ImGui::GetDrawData());
         if (SDL_GL_SwapWindow(window) != 0)
         {
             std::cerr << "Swap Window error:" << SDL_GetError() << std::endl;
             return false;
         }
         clear();
-
         return true;
     }
 
     void uninitialize() final
     {
-        program.delete_program();
+        texture_program->delete_program();
         SDL_GL_DeleteContext(context);
         SDL_DestroyWindow(window);
         SDL_Quit();
@@ -378,10 +411,227 @@ void destroy_engine(engine* engine)
 
 engine::~engine() = default;
 
-void ImGui_Impl_game_engine_Init()
+shader_program* shader_program_imgui = nullptr;
+uint64_t        imgui_time           = 0;
+GLuint          VBO                  = 0;
+GLuint          EBO                  = 0;
+
+void ImGui_ImplGame_engine_Init()
 {
     ImGui::CreateContext();
-    ImGuiIO&       io = ImGui::GetIO();
+    ImGuiIO& io = ImGui::GetIO();
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+
+    ImGui::StyleColorsDark();
+
+    io.BackendPlatformName = "custom_game_engine";
+
+    io.BackendFlags |= ImGuiBackendFlags_HasMouseCursors;
+
+    io.SetClipboardTextFn = ImGui_ImplGame_engine_SetClipboardText;
+    io.GetClipboardTextFn = ImGui_ImplGame_engine_GetClipboardText;
+    io.ClipboardUserData  = nullptr;
+
+    ImGuiViewport* main_viewport     = ImGui::GetMainViewport();
+    main_viewport->PlatformHandleRaw = nullptr;
+
+    imgui_time = SDL_GetPerformanceCounter();
+}
+
+void ImGui_ImplGame_engine_NewFrame(SDL_Window* window)
+{
+    if (shader_program_imgui == nullptr)
+        ImGui_ImplGame_engine_CreateDeviceObject();
+
+    ImGuiIO& io = ImGui::GetIO();
+
+    int width, height;
+    int display_width, display_height;
+    SDL_GetWindowSize(window, &width, &height);
+    if (SDL_GetWindowFlags(window) & SDL_WINDOW_MINIMIZED)
+        width = height = 0;
+    SDL_GetWindowSizeInPixels(window, &display_width, &display_height);
+
+    io.DisplaySize =
+        ImVec2(static_cast<float>(width), static_cast<float>(height));
+    if (width > 0 && height > 0)
+        io.DisplayFramebufferScale =
+            ImVec2(static_cast<float>(display_width) / width,
+                   static_cast<float>(display_height) / height);
+
+    uint64_t frequency    = SDL_GetPerformanceFrequency();
+    uint64_t current_time = SDL_GetPerformanceCounter();
+    if (current_time < imgui_time)
+        current_time = imgui_time + 1;
+
+    io.DeltaTime = static_cast<float>(current_time - imgui_time) / frequency;
+    imgui_time   = current_time;
+
+    ImGui::NewFrame();
+}
+
+void ImGui_ImplGame_engine_CreateDeviceObject()
+{
+    shader_program_imgui = create_shader_program();
+
+    if (!shader_program_imgui->create_shader("./vertex_shader_imgui.glsl",
+                                             shader_type::vertex))
+        return;
+
+    if (!shader_program_imgui->create_shader("./fragment_shader_imgui.glsl",
+                                             shader_type::fragment))
+        return;
+
+    if (!shader_program_imgui->link())
+        return;
+
+    shader_program_imgui->bind("Position", 0);
+    shader_program_imgui->bind("UV", 1);
+    shader_program_imgui->bind("Color", 2);
+
+    glGenBuffers(1, &VBO);
+    glGenBuffers(1, &EBO);
+
+    ImGuiIO& io = ImGui::GetIO();
+
     int            width, height;
     unsigned char* pixels = nullptr;
+
+    io.Fonts->GetTexDataAsRGBA32(&pixels, &width, &height);
+
+    texture* texture = create_texture();
+    texture->load(pixels, width, height);
+    // io.Fonts->SetTexID((ImTextureID)(intptr_t)texture->get());
+    io.Fonts->SetTexID((void*)texture);
+}
+
+void ImGui_ImplGame_engine_RenderDrawData(ImDrawData* draw_data)
+{
+    ImGuiIO& io = ImGui::GetIO();
+
+    int fb_width =
+        static_cast<int>(io.DisplaySize.x * io.DisplayFramebufferScale.x);
+    int fb_height =
+        static_cast<int>(io.DisplaySize.y * io.DisplayFramebufferScale.y);
+
+    // glActiveTexture(GL_TEXTURE0);
+
+    glViewport(0, 0, fb_width, fb_height);
+    gl_check();
+
+    float L = draw_data->DisplayPos.x;
+    float R = draw_data->DisplayPos.x + draw_data->DisplaySize.x;
+    float T = draw_data->DisplayPos.y;
+    float B = draw_data->DisplayPos.y + draw_data->DisplaySize.y;
+
+    glm::mat4 ortho_projection{
+        { 2.0f / (R - L), 0.0f, 0.0f, 0.0f },
+        { 0.0f, 2.0f / (T - B), 0.0f, 0.0f },
+        { 0.0f, 0.0f, -1.0f, 0.0f },
+        { (R + L) / (L - R), (T + B) / (B - T), 0.0f, 1.0f },
+    };
+
+    shader_program_imgui->use();
+    shader_program_imgui->set_uniform("Texture", 0);
+    GLuint location_matrix =
+        glGetUniformLocation(shader_program_imgui->get(), "ProjMtx");
+    gl_check();
+    glUniformMatrix4fv(location_matrix, 1, GL_FALSE, &ortho_projection[0][0]);
+    gl_check();
+
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    gl_check();
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    gl_check();
+
+    glEnableVertexAttribArray(0);
+    gl_check();
+    glVertexAttribPointer(0,
+                          2,
+                          GL_FLOAT,
+                          GL_FALSE,
+                          sizeof(ImDrawVert),
+                          (GLvoid*)IM_OFFSETOF(ImDrawVert, pos));
+    gl_check();
+
+    glEnableVertexAttribArray(1);
+    gl_check();
+    glVertexAttribPointer(1,
+                          2,
+                          GL_FLOAT,
+                          GL_FALSE,
+                          sizeof(ImDrawVert),
+                          (GLvoid*)IM_OFFSETOF(ImDrawVert, uv));
+
+    glEnableVertexAttribArray(2);
+    gl_check();
+    glVertexAttribPointer(2,
+                          4,
+                          GL_UNSIGNED_BYTE,
+                          GL_TRUE,
+                          sizeof(ImDrawVert),
+                          (GLvoid*)IM_OFFSETOF(ImDrawVert, col));
+    gl_check();
+
+    ImVec2 clip_off   = draw_data->DisplayPos;
+    ImVec2 clip_scale = draw_data->FramebufferScale;
+
+    for (int n = 0; n < draw_data->CmdListsCount; n++)
+    {
+        const ImDrawList* cmd_list = draw_data->CmdLists[n];
+        const GLsizeiptr  vtx_buffer_size =
+            (GLsizeiptr)cmd_list->VtxBuffer.Size * (int)sizeof(ImDrawVert);
+        const GLsizeiptr idx_buffer_size =
+            (GLsizeiptr)cmd_list->IdxBuffer.Size * (int)sizeof(ImDrawIdx);
+        glBufferData(GL_ARRAY_BUFFER,
+                     vtx_buffer_size,
+                     (const GLvoid*)cmd_list->VtxBuffer.Data,
+                     GL_STREAM_DRAW);
+        gl_check();
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER,
+                     idx_buffer_size,
+                     (const GLvoid*)cmd_list->IdxBuffer.Data,
+                     GL_STREAM_DRAW);
+        gl_check();
+
+        for (int cmd_i = 0; cmd_i < cmd_list->CmdBuffer.Size; cmd_i++)
+        {
+            const ImDrawCmd* pcmd = &cmd_list->CmdBuffer[cmd_i];
+
+            // Project scissor/clipping rectangles into framebuffer space
+            ImVec2 clip_min((pcmd->ClipRect.x - clip_off.x) * clip_scale.x,
+                            (pcmd->ClipRect.y - clip_off.y) * clip_scale.y);
+            ImVec2 clip_max((pcmd->ClipRect.z - clip_off.x) * clip_scale.x,
+                            (pcmd->ClipRect.w - clip_off.y) * clip_scale.y);
+            if (clip_max.x <= clip_min.x || clip_max.y <= clip_min.y)
+                continue;
+
+            // Apply scissor/clipping rectangle (Y is inverted in OpenGL)
+            glScissor((int)clip_min.x,
+                      (int)((float)fb_height - clip_max.y),
+                      (int)(clip_max.x - clip_min.x),
+                      (int)(clip_max.y - clip_min.y));
+            gl_check();
+
+            // Bind texture, Draw
+            texture* imgui_texture = (texture*)pcmd->GetTexID();
+            imgui_texture->bind();
+            glDrawElements(
+                GL_TRIANGLES,
+                (GLsizei)pcmd->ElemCount,
+                sizeof(ImDrawIdx) == 2 ? GL_UNSIGNED_SHORT : GL_UNSIGNED_INT,
+                (void*)(intptr_t)(pcmd->IdxOffset * sizeof(ImDrawIdx)));
+            gl_check();
+        }
+    }
+}
+
+void ImGui_ImplGame_engine_SetClipboardText(void*, const char* text)
+{
+    SDL_SetClipboardText(text);
+}
+
+const char* ImGui_ImplGame_engine_GetClipboardText(void*)
+{
+    return SDL_GetClipboardText();
 }
