@@ -158,12 +158,23 @@ public:
 
         return true;
     }
-    void set_uniform(const char* name, int index) final
+    void set_uniform_1i(const char* name, int value) final
     {
         GLint location = glGetUniformLocation(program, name);
         gl_check();
-        assert(-1 != location);
-        glUniform1i(location, index);
+        assert(location != -1);
+        glUniform1i(location, value);
+        gl_check();
+    }
+    void set_uniform_matrix4fv(const char* name,
+                               int         count,
+                               bool        transpose,
+                               float*      value) final
+    {
+        GLint location = glGetUniformLocation(program, name);
+        gl_check();
+        assert(location != -1);
+        glUniformMatrix4fv(location, count, transpose, value);
         gl_check();
     }
     void bind(const char* attribute_name, int index) final
@@ -183,6 +194,8 @@ public:
         gl_check();
     }
 };
+
+shader_program::~shader_program() = default;
 
 shader_program* create_shader_program()
 {

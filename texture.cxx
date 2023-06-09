@@ -1,7 +1,5 @@
 #include "texture.hxx"
-#include "shader_program.hxx"
 
-#include <cassert>
 #include <iostream>
 
 #include "glad/glad.h"
@@ -15,13 +13,10 @@ class opengl_texture : public texture
     GLuint texture = 0;
     int    width   = 0;
     int    height  = 0;
-    int    index   = 0;
 
 public:
     bool load(const char* file_path, int texture_index) final
     {
-        index = texture_index;
-
         int channels;
         stbi_set_flip_vertically_on_load(true);
         unsigned char* image =
@@ -32,7 +27,7 @@ public:
             return false;
         }
 
-        glActiveTexture(GL_TEXTURE0 + index);
+        glActiveTexture(GL_TEXTURE0 + texture_index);
         gl_check();
         glGenTextures(1, &texture);
         gl_check();
@@ -59,12 +54,12 @@ public:
 
         return true;
     }
-    bool load(unsigned char* pixels, int width, int height)
+    bool load(unsigned char* pixels, int width, int height) final
     {
         this->width  = width;
         this->height = height;
 
-        glActiveTexture(GL_TEXTURE0 + index);
+        glActiveTexture(GL_TEXTURE0);
         gl_check();
         glGenTextures(1, &texture);
         gl_check();
@@ -82,9 +77,9 @@ public:
         gl_check();
         glGenerateMipmap(GL_TEXTURE_2D);
         gl_check();
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         gl_check();
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
         gl_check();
 
         return true;
@@ -94,11 +89,16 @@ public:
         glBindTexture(GL_TEXTURE_2D, texture);
         gl_check();
     }
-    int get() final { return texture; }
+    void active(int index) final
+    {
+        glActiveTexture(GL_TEXTURE0 + index);
+        gl_check();
+    }
     int get_width() final { return width; }
     int get_height() final { return height; }
-    int get_index() final { return index; }
 };
+
+texture::~texture() = default;
 
 texture* create_texture()
 {

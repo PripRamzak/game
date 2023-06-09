@@ -21,6 +21,7 @@ bool check_pressing_key(SDL_Event sdl_event, event& event);
 void gl_check();
 
 void        ImGui_ImplGame_engine_Init();
+bool        ImGui_ImplGame_engine_ProcessEvent(const SDL_Event* event);
 void        ImGui_ImplGame_engine_NewFrame(SDL_Window* window);
 void        ImGui_ImplGame_engine_CreateDeviceObject();
 void        ImGui_ImplGame_engine_RenderDrawData(ImDrawData* draw_data);
@@ -191,15 +192,8 @@ public:
 
         glEnable(GL_BLEND);
         gl_check();
-        glBlendEquation(GL_FUNC_ADD);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         gl_check();
-        glBlendFuncSeparate(GL_SRC_ALPHA,
-                            GL_ONE_MINUS_SRC_ALPHA,
-                            GL_ONE,
-                            GL_ONE_MINUS_SRC_ALPHA);
-        gl_check();
-        /*glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        gl_check();*/
         glDisable(GL_CULL_FACE);
         gl_check();
         glDisable(GL_DEPTH_TEST);
@@ -220,6 +214,7 @@ public:
 
         if (SDL_PollEvent(&sdl_event))
         {
+            ImGui_ImplGame_engine_ProcessEvent(&sdl_event);
             if (sdl_event.type == SDL_EVENT_QUIT)
             {
                 event = event::turn_off;
@@ -236,7 +231,7 @@ public:
     texture* create_triangles(texture*                  texture,
                               std::vector<triangle_2d>& texture_triangles) final
     {
-        texture_program->set_uniform("texture", texture->get_index());
+        texture_program->set_uniform_1i("texture", 0);
 
         int window_width;
         int window_height;
@@ -411,6 +406,8 @@ void destroy_engine(engine* engine)
 
 engine::~engine() = default;
 
+// Dear ImGui setup
+
 shader_program* shader_program_imgui = nullptr;
 uint64_t        imgui_time           = 0;
 GLuint          VBO                  = 0;
@@ -436,6 +433,64 @@ void ImGui_ImplGame_engine_Init()
     main_viewport->PlatformHandleRaw = nullptr;
 
     imgui_time = SDL_GetPerformanceCounter();
+}
+
+bool ImGui_ImplGame_engine_ProcessEvent(const SDL_Event* event)
+{
+    ImGuiIO& io = ImGui::GetIO();
+
+    switch (event->type)
+    {
+        case SDL_EVENT_MOUSE_MOTION:
+        {
+            ImVec2 mouse_pos((float)event->motion.x, (float)event->motion.y);
+            io.AddMouseSourceEvent(event->motion.which == SDL_TOUCH_MOUSEID
+                                       ? ImGuiMouseSource_TouchScreen
+                                       : ImGuiMouseSource_Mouse);
+            io.AddMousePosEvent(mouse_pos.x, mouse_pos.y);
+            return true;
+        }
+        case SDL_EVENT_MOUSE_WHEEL:
+        {
+            float wheel_x = -event->wheel.x;
+            float wheel_y = event->wheel.y;
+            io.AddMouseSourceEvent(event->wheel.which == SDL_TOUCH_MOUSEID
+                                       ? ImGuiMouseSource_TouchScreen
+                                       : ImGuiMouseSource_Mouse);
+            io.AddMouseWheelEvent(wheel_x, wheel_y);
+            return true;
+        }
+        case SDL_EVENT_MOUSE_BUTTON_DOWN:
+        case SDL_EVENT_MOUSE_BUTTON_UP:
+        {
+            int mouse_button = -1;
+            if (event->button.button == SDL_BUTTON_LEFT)
+                mouse_button = 0;
+            if (event->button.button == SDL_BUTTON_RIGHT)
+                mouse_button = 1;
+            if (event->button.button == SDL_BUTTON_MIDDLE)
+                mouse_button = 2;
+            if (event->button.button == SDL_BUTTON_X1)
+                mouse_button = 3;
+            if (event->button.button == SDL_BUTTON_X2)
+                mouse_button = 4;
+            if (mouse_button == -1)
+                break;
+            io.AddMouseSourceEvent(event->button.which == SDL_TOUCH_MOUSEID
+                                       ? ImGuiMouseSource_TouchScreen
+                                       : ImGuiMouseSource_Mouse);
+            io.AddMouseButtonEvent(
+                mouse_button, (event->type == SDL_EVENT_MOUSE_BUTTON_DOWN));
+            return true;
+        }
+        case SDL_EVENT_WINDOW_FOCUS_GAINED:
+            io.AddFocusEvent(true);
+            return true;
+        case SDL_EVENT_WINDOW_FOCUS_LOST:
+            io.AddFocusEvent(false);
+            return true;
+    }
+    return false;
 }
 
 void ImGui_ImplGame_engine_NewFrame(SDL_Window* window)
@@ -490,7 +545,9 @@ void ImGui_ImplGame_engine_CreateDeviceObject()
     shader_program_imgui->bind("Color", 2);
 
     glGenBuffers(1, &VBO);
+    gl_check();
     glGenBuffers(1, &EBO);
+    gl_check();
 
     ImGuiIO& io = ImGui::GetIO();
 
@@ -500,8 +557,8 @@ void ImGui_ImplGame_engine_CreateDeviceObject()
     io.Fonts->GetTexDataAsRGBA32(&pixels, &width, &height);
 
     texture* texture = create_texture();
+    io.Fonts->Flags |= ImFontAtlasFlags_NoBakedLines;
     texture->load(pixels, width, height);
-    // io.Fonts->SetTexID((ImTextureID)(intptr_t)texture->get());
     io.Fonts->SetTexID((void*)texture);
 }
 
@@ -514,7 +571,7 @@ void ImGui_ImplGame_engine_RenderDrawData(ImDrawData* draw_data)
     int fb_height =
         static_cast<int>(io.DisplaySize.y * io.DisplayFramebufferScale.y);
 
-    // glActiveTexture(GL_TEXTURE0);
+    glActiveTexture(GL_TEXTURE0);
 
     glViewport(0, 0, fb_width, fb_height);
     gl_check();
@@ -532,12 +589,9 @@ void ImGui_ImplGame_engine_RenderDrawData(ImDrawData* draw_data)
     };
 
     shader_program_imgui->use();
-    shader_program_imgui->set_uniform("Texture", 0);
-    GLuint location_matrix =
-        glGetUniformLocation(shader_program_imgui->get(), "ProjMtx");
-    gl_check();
-    glUniformMatrix4fv(location_matrix, 1, GL_FALSE, &ortho_projection[0][0]);
-    gl_check();
+    shader_program_imgui->set_uniform_1i("Texture", 0);
+    shader_program_imgui->set_uniform_matrix4fv(
+        "ProjMtx", 1, GL_FALSE, &ortho_projection[0][0]);
 
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     gl_check();
@@ -612,7 +666,6 @@ void ImGui_ImplGame_engine_RenderDrawData(ImDrawData* draw_data)
                       (int)(clip_max.x - clip_min.x),
                       (int)(clip_max.y - clip_min.y));
             gl_check();
-
             // Bind texture, Draw
             texture* imgui_texture = (texture*)pcmd->GetTexID();
             imgui_texture->bind();
