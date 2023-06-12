@@ -94,8 +94,13 @@ public:
         glActiveTexture(GL_TEXTURE0 + index);
         gl_check();
     }
-    int get_width() final { return width; }
-    int get_height() final { return height; }
+    int  get_width() final { return width; }
+    int  get_height() final { return height; }
+    void delete_texture() final
+    {
+        glDeleteTextures(1, &texture);
+        gl_check();
+    }
 };
 
 texture::~texture() = default;

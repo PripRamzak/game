@@ -20,13 +20,16 @@ bool check_pressing_key(SDL_Event sdl_event, event& event);
 
 void gl_check();
 
-void        ImGui_ImplGame_engine_Init();
-bool        ImGui_ImplGame_engine_ProcessEvent(const SDL_Event* event);
-void        ImGui_ImplGame_engine_NewFrame(SDL_Window* window);
-void        ImGui_ImplGame_engine_CreateDeviceObject();
-void        ImGui_ImplGame_engine_RenderDrawData(ImDrawData* draw_data);
-static void ImGui_ImplGame_engine_SetClipboardText(void*, const char* text);
-static const char* ImGui_ImplGame_engine_GetClipboardText(void*);
+void        ImGui_ImplGameEngine_Init();
+bool        ImGui_ImplGameEngine_ProcessEvent(const SDL_Event* event);
+void        ImGui_ImplGameEngine_NewFrame(SDL_Window* window);
+void        ImGui_ImplGameEngine_CreateDeviceObject();
+void        ImGui_ImplGameEngine_DestroyDeviceObject();
+void        ImGui_ImplGameEngine_RenderDrawData(ImDrawData* draw_data);
+void        ImGui_ImplGameEngine_Shutdown();
+static void ImGui_ImplGameEngine_UpdateMouseData(SDL_Window* window);
+static void ImGui_ImplGameEngine_SetClipboardText(void*, const char* text);
+static const char* ImGui_ImplGameEngine_GetClipboardText(void*);
 
 class game_engine final : public engine
 {
@@ -139,6 +142,8 @@ public:
             return false;
         }
 
+        SDL_GL_SetSwapInterval(1);
+
         std::cout << "OpenGL " << gl_major_version << '.' << gl_minor_version
                   << std::endl;
         SDL_ShowWindow(window);
@@ -203,7 +208,7 @@ public:
         glEnable(GL_SCISSOR_TEST);
         gl_check();
 
-        ImGui_ImplGame_engine_Init();
+        ImGui_ImplGameEngine_Init();
 
         return true;
     }
@@ -214,7 +219,7 @@ public:
 
         if (SDL_PollEvent(&sdl_event))
         {
-            ImGui_ImplGame_engine_ProcessEvent(&sdl_event);
+            ImGui_ImplGameEngine_ProcessEvent(&sdl_event);
             if (sdl_event.type == SDL_EVENT_QUIT)
             {
                 event = event::turn_off;
@@ -361,11 +366,11 @@ public:
 
     bool swap_buffers() final
     {
-        ImGui_ImplGame_engine_NewFrame(window);
+        ImGui_ImplGameEngine_NewFrame(window);
         bool show_demo_window = true;
         ImGui::ShowDemoWindow(&show_demo_window);
         ImGui::Render();
-        ImGui_ImplGame_engine_RenderDrawData(ImGui::GetDrawData());
+        ImGui_ImplGameEngine_RenderDrawData(ImGui::GetDrawData());
         if (SDL_GL_SwapWindow(window) != 0)
         {
             std::cerr << "Swap Window error:" << SDL_GetError() << std::endl;
@@ -377,6 +382,7 @@ public:
 
     void uninitialize() final
     {
+        ImGui_ImplGameEngine_Shutdown();
         texture_program->delete_program();
         SDL_GL_DeleteContext(context);
         SDL_DestroyWindow(window);
@@ -408,13 +414,14 @@ engine::~engine() = default;
 
 // Dear ImGui setup
 
-shader_program* shader_program_imgui = nullptr;
+shader_program* imgui_shader_program = nullptr;
 uint64_t        imgui_time           = 0;
-GLuint          VBO                  = 0;
-GLuint          EBO                  = 0;
+GLuint          imgui_VBO            = 0;
+GLuint          imgui_EBO            = 0;
 
-void ImGui_ImplGame_engine_Init()
+void ImGui_ImplGameEngine_Init()
 {
+    IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO();
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
@@ -425,17 +432,20 @@ void ImGui_ImplGame_engine_Init()
 
     io.BackendFlags |= ImGuiBackendFlags_HasMouseCursors;
 
-    io.SetClipboardTextFn = ImGui_ImplGame_engine_SetClipboardText;
-    io.GetClipboardTextFn = ImGui_ImplGame_engine_GetClipboardText;
+    io.SetClipboardTextFn = ImGui_ImplGameEngine_SetClipboardText;
+    io.GetClipboardTextFn = ImGui_ImplGameEngine_GetClipboardText;
     io.ClipboardUserData  = nullptr;
 
     ImGuiViewport* main_viewport     = ImGui::GetMainViewport();
     main_viewport->PlatformHandleRaw = nullptr;
 
+    SDL_SetHint(SDL_HINT_MOUSE_FOCUS_CLICKTHROUGH, "1");
+    SDL_SetHint(SDL_HINT_MOUSE_AUTO_CAPTURE, "0");
+
     imgui_time = SDL_GetPerformanceCounter();
 }
 
-bool ImGui_ImplGame_engine_ProcessEvent(const SDL_Event* event)
+bool ImGui_ImplGameEngine_ProcessEvent(const SDL_Event* event)
 {
     ImGuiIO& io = ImGui::GetIO();
 
@@ -444,6 +454,7 @@ bool ImGui_ImplGame_engine_ProcessEvent(const SDL_Event* event)
         case SDL_EVENT_MOUSE_MOTION:
         {
             ImVec2 mouse_pos((float)event->motion.x, (float)event->motion.y);
+            std::cout << mouse_pos.x << " " << mouse_pos.y << std::endl;
             io.AddMouseSourceEvent(event->motion.which == SDL_TOUCH_MOUSEID
                                        ? ImGuiMouseSource_TouchScreen
                                        : ImGuiMouseSource_Mouse);
@@ -483,20 +494,14 @@ bool ImGui_ImplGame_engine_ProcessEvent(const SDL_Event* event)
                 mouse_button, (event->type == SDL_EVENT_MOUSE_BUTTON_DOWN));
             return true;
         }
-        case SDL_EVENT_WINDOW_FOCUS_GAINED:
-            io.AddFocusEvent(true);
-            return true;
-        case SDL_EVENT_WINDOW_FOCUS_LOST:
-            io.AddFocusEvent(false);
-            return true;
     }
     return false;
 }
 
-void ImGui_ImplGame_engine_NewFrame(SDL_Window* window)
+void ImGui_ImplGameEngine_NewFrame(SDL_Window* window)
 {
-    if (shader_program_imgui == nullptr)
-        ImGui_ImplGame_engine_CreateDeviceObject();
+    if (imgui_shader_program == nullptr)
+        ImGui_ImplGameEngine_CreateDeviceObject();
 
     ImGuiIO& io = ImGui::GetIO();
 
@@ -514,39 +519,44 @@ void ImGui_ImplGame_engine_NewFrame(SDL_Window* window)
             ImVec2(static_cast<float>(display_width) / width,
                    static_cast<float>(display_height) / height);
 
-    uint64_t frequency    = SDL_GetPerformanceFrequency();
-    uint64_t current_time = SDL_GetPerformanceCounter();
+    static uint64_t frequency    = SDL_GetPerformanceFrequency();
+    uint64_t        current_time = SDL_GetPerformanceCounter();
     if (current_time < imgui_time)
         current_time = imgui_time + 1;
 
-    io.DeltaTime = static_cast<float>(current_time - imgui_time) / frequency;
-    imgui_time   = current_time;
+    io.DeltaTime =
+        imgui_time > 0
+            ? (float)((double)(current_time - imgui_time) / frequency)
+            : (float)(1.0f / 60.0f);
+    imgui_time = current_time;
+
+    ImGui_ImplGameEngine_UpdateMouseData(window);
 
     ImGui::NewFrame();
 }
 
-void ImGui_ImplGame_engine_CreateDeviceObject()
+void ImGui_ImplGameEngine_CreateDeviceObject()
 {
-    shader_program_imgui = create_shader_program();
+    imgui_shader_program = create_shader_program();
 
-    if (!shader_program_imgui->create_shader("./vertex_shader_imgui.glsl",
+    if (!imgui_shader_program->create_shader("./vertex_shader_imgui.glsl",
                                              shader_type::vertex))
         return;
 
-    if (!shader_program_imgui->create_shader("./fragment_shader_imgui.glsl",
+    if (!imgui_shader_program->create_shader("./fragment_shader_imgui.glsl",
                                              shader_type::fragment))
         return;
 
-    if (!shader_program_imgui->link())
+    if (!imgui_shader_program->link())
         return;
 
-    shader_program_imgui->bind("Position", 0);
-    shader_program_imgui->bind("UV", 1);
-    shader_program_imgui->bind("Color", 2);
+    imgui_shader_program->bind("Position", 0);
+    imgui_shader_program->bind("UV", 1);
+    imgui_shader_program->bind("Color", 2);
 
-    glGenBuffers(1, &VBO);
+    glGenBuffers(1, &imgui_VBO);
     gl_check();
-    glGenBuffers(1, &EBO);
+    glGenBuffers(1, &imgui_EBO);
     gl_check();
 
     ImGuiIO& io = ImGui::GetIO();
@@ -562,7 +572,16 @@ void ImGui_ImplGame_engine_CreateDeviceObject()
     io.Fonts->SetTexID((void*)texture);
 }
 
-void ImGui_ImplGame_engine_RenderDrawData(ImDrawData* draw_data)
+void ImGui_ImplGameEngine_DestroyDeviceObject()
+{
+    glDeleteBuffers(1, &imgui_VBO);
+    gl_check();
+    glDeleteBuffers(1, &imgui_EBO);
+    gl_check();
+    imgui_shader_program->delete_program();
+}
+
+void ImGui_ImplGameEngine_RenderDrawData(ImDrawData* draw_data)
 {
     ImGuiIO& io = ImGui::GetIO();
 
@@ -570,6 +589,9 @@ void ImGui_ImplGame_engine_RenderDrawData(ImDrawData* draw_data)
         static_cast<int>(io.DisplaySize.x * io.DisplayFramebufferScale.x);
     int fb_height =
         static_cast<int>(io.DisplaySize.y * io.DisplayFramebufferScale.y);
+
+    GLint last_scissor_box[4];
+    glGetIntegerv(GL_SCISSOR_BOX, last_scissor_box);
 
     glActiveTexture(GL_TEXTURE0);
 
@@ -588,14 +610,14 @@ void ImGui_ImplGame_engine_RenderDrawData(ImDrawData* draw_data)
         { (R + L) / (L - R), (T + B) / (B - T), 0.0f, 1.0f },
     };
 
-    shader_program_imgui->use();
-    shader_program_imgui->set_uniform_1i("Texture", 0);
-    shader_program_imgui->set_uniform_matrix4fv(
+    imgui_shader_program->use();
+    imgui_shader_program->set_uniform_1i("Texture", 0);
+    imgui_shader_program->set_uniform_matrix4fv(
         "ProjMtx", 1, GL_FALSE, &ortho_projection[0][0]);
 
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBindBuffer(GL_ARRAY_BUFFER, imgui_VBO);
     gl_check();
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, imgui_EBO);
     gl_check();
 
     glEnableVertexAttribArray(0);
@@ -677,14 +699,56 @@ void ImGui_ImplGame_engine_RenderDrawData(ImDrawData* draw_data)
             gl_check();
         }
     }
+
+    glScissor(last_scissor_box[0],
+              last_scissor_box[1],
+              (GLsizei)last_scissor_box[2],
+              (GLsizei)last_scissor_box[3]);
 }
 
-void ImGui_ImplGame_engine_SetClipboardText(void*, const char* text)
+void ImGui_ImplGameEngine_Shutdown()
+{
+    ImGuiIO& io = ImGui::GetIO();
+
+    ImGui_ImplGameEngine_DestroyDeviceObject();
+    texture* imgui_texture = (texture*)io.Fonts->TexID;
+    imgui_texture->delete_texture();
+    io.Fonts->SetTexID(0);
+
+    io.BackendPlatformName = nullptr;
+
+    ImGui::DestroyContext();
+}
+
+void ImGui_ImplGameEngine_UpdateMouseData(SDL_Window* window)
+{
+    ImGuiIO&    io             = ImGui::GetIO();
+    SDL_Window* focused_window = SDL_GetKeyboardFocus();
+    const bool  app_is_focused = (window == focused_window);
+    if (app_is_focused)
+    {
+        if (io.WantSetMousePos)
+            SDL_WarpMouseInWindow(window, io.MousePos.x, io.MousePos.y);
+
+        SDL_Event* event;
+        if (event->type != SDL_EVENT_MOUSE_BUTTON_DOWN)
+        {
+            float mouse_x_global, mouse_y_global;
+            int   window_x, window_y;
+            SDL_GetGlobalMouseState(&mouse_x_global, &mouse_y_global);
+            SDL_GetWindowPosition(focused_window, &window_x, &window_y);
+            io.AddMousePosEvent(mouse_x_global - window_x,
+                                mouse_y_global - window_y);
+        }
+    }
+}
+
+void ImGui_ImplGameEngine_SetClipboardText(void*, const char* text)
 {
     SDL_SetClipboardText(text);
 }
 
-const char* ImGui_ImplGame_engine_GetClipboardText(void*)
+const char* ImGui_ImplGameEngine_GetClipboardText(void*)
 {
     return SDL_GetClipboardText();
 }
