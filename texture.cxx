@@ -8,7 +8,7 @@
 
 void gl_check();
 
-class opengl_texture : public texture
+class opengl_texture final : public texture
 {
     GLuint texture = 0;
     int    width   = 0;

@@ -37,7 +37,7 @@ void gl_check()
     }
 }
 
-class opengl_shader_program : public shader_program
+class opengl_shader_program final : public shader_program
 {
     GLuint program         = 0;
     GLuint vertex_shader   = 0;
