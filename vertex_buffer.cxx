@@ -4,32 +4,41 @@
 
 void gl_check();
 
-class opengl_vertex_buffer : public vertex_buffer
+class opengl_vertex_buffer final : public vertex_buffer
 {
-    GLuint VBO;
+    GLuint VBO  = 0;
+    size_t size = 0;
 
 public:
-    void generate() final
+    opengl_vertex_buffer()
     {
         glGenBuffers(1, &VBO);
         gl_check();
     }
-    void buffer_data(const triangle_2d& triangles, std::size_t quantity) final
+    void buffer_data(const std::vector<triangle_2d>& triangles,
+                     size_t                          quantity) final
     {
+        size = quantity;
+
         bind();
 
-        GLsizeiptr size =
+        GLsizeiptr buffer_size =
             static_cast<GLsizeiptr>(quantity * sizeof(vertex_2d) * 3);
-        glBufferData(
-            GL_ARRAY_BUFFER, size, &triangles.vertices[0], GL_STREAM_DRAW);
+        glBufferData(GL_ARRAY_BUFFER,
+                     buffer_size,
+                     &triangles[0].vertices[0],
+                     GL_STREAM_DRAW);
         gl_check();
     }
-    void bind() final
+    size_t get_size() final { return size; }
+    void   bind() final
     {
         glBindBuffer(GL_ARRAY_BUFFER, VBO);
         gl_check();
     }
 };
+
+vertex_buffer::~vertex_buffer() = default;
 
 vertex_buffer* create_vertex_buffer()
 {

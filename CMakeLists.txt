@@ -16,7 +16,7 @@ add_library(engine SHARED
         glad/glad.c
         glad/glad.h
         KHR/khrplatform.h
-        stb_image.h texture.cxx texture.hxx vertex_buffer.cxx vertex_buffer.hxx)
+        stb_image.h texture.cxx texture.hxx vertex_buffer.cxx vertex_buffer.hxx index_buffer.cxx index_buffer.hxx)
 target_compile_features(engine PUBLIC cxx_std_20)
 target_include_directories(engine PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 
