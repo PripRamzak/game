@@ -300,13 +300,19 @@ public:
 
     void render(vertex_buffer* vertex_buffer,
                 index_buffer*  index_buffer,
-                texture*       texture) final
+                texture*       texture,
+                int            index) final
     {
         texture_program->use();
+        texture_program->set_uniform_1f(
+            "quantity", static_cast<float>(texture->get_quantity()));
+        texture_program->set_uniform_1f(
+            "number",
+            static_cast<float>(texture->get_current_texture_number()));
         texture_program->set_uniform_1i("texture", 0);
 
         texture->bind();
-        texture->active(0);
+        texture->active(index);
 
         vertex_buffer->bind();
         index_buffer->bind();
@@ -425,7 +431,7 @@ public:
 
     void clear() final
     {
-        glClearColor(0.f, 0.f, 0.f, 0.f);
+        glClearColor(1.f, 1.f, 1.f, 0.f);
         gl_check();
         glClear(GL_COLOR_BUFFER_BIT);
         gl_check();
@@ -451,7 +457,7 @@ public:
     void uninitialize() final
     {
         ImGui_ImplGameEngine_Shutdown();
-        texture_program->delete_program();
+        delete texture_program;
         SDL_GL_DeleteContext(context);
         SDL_DestroyWindow(window);
         SDL_Quit();
@@ -646,7 +652,7 @@ void ImGui_ImplGameEngine_DestroyDeviceObject()
     gl_check();
     glDeleteBuffers(1, &imgui_EBO);
     gl_check();
-    imgui_shader_program->delete_program();
+    delete imgui_shader_program;
 }
 
 void ImGui_ImplGameEngine_RenderDrawData(ImDrawData* draw_data)

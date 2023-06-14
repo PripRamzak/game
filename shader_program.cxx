@@ -166,6 +166,14 @@ public:
         glUniform1i(location, value);
         gl_check();
     }
+    void set_uniform_1f(const char* name, float value) final
+    {
+        GLint location = glGetUniformLocation(program, name);
+        gl_check();
+        assert(location != -1);
+        glUniform1f(location, value);
+        gl_check();
+    }
     void set_uniform_matrix4fv(const char* name,
                                int         count,
                                bool        transpose,
@@ -188,7 +196,7 @@ public:
         gl_check();
     }
     unsigned int get() final { return static_cast<unsigned int>(program); }
-    void         delete_program() final
+    ~opengl_shader_program()
     {
         glDeleteProgram(program);
         gl_check();
