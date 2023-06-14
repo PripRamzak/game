@@ -19,9 +19,18 @@ int main(int /*argc*/, char** /*argv*/)
     knight_texture->load("./img/knight.png", 0);
     engine->create_triangles(knight_texture, texture_triangles);
 
+    vertex_buffer* knight_vertex_buffer = create_vertex_buffer();
+    knight_vertex_buffer->buffer_data(texture_triangles,
+                                      texture_triangles.size());
+
+    std::vector<uint16_t> indexes             = { 0, 1, 2, 3, 4, 5 };
+    index_buffer*         knight_index_buffer = create_index_buffer();
+    knight_index_buffer->buffer_data(indexes, indexes.size());
+
     int direction = 0;
 
-    bool  quit = false;
+    bool  quit             = false;
+    bool  show_menu_window = true;
     event event;
 
     while (!quit)
@@ -45,8 +54,11 @@ int main(int /*argc*/, char** /*argv*/)
             }
         }
 
-        // engine->render(texture_triangles[0]);
-        // engine->render(texture_triangles[1]);
+        if (show_menu_window)
+            engine->render_menu(show_menu_window);
+        else
+            engine->render(
+                knight_vertex_buffer, knight_index_buffer, knight_texture);
 
         if (!engine->swap_buffers())
         {
@@ -55,6 +67,7 @@ int main(int /*argc*/, char** /*argv*/)
         }
     }
 
+    knight_texture->delete_texture();
     delete knight_texture;
     engine->uninitialize();
 

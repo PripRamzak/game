@@ -236,8 +236,6 @@ public:
     texture* create_triangles(texture*                  texture,
                               std::vector<triangle_2d>& texture_triangles) final
     {
-        texture_program->set_uniform_1i("texture", 0);
-
         int window_width;
         int window_height;
         SDL_GetWindowSize(window, &window_width, &window_height);
@@ -300,8 +298,50 @@ public:
             texture_triangles[i] = buffer_triangles[i];
     }
 
-    void render(const triangle_2d& triangle) final
+    void render(vertex_buffer* vertex_buffer,
+                index_buffer*  index_buffer,
+                texture*       texture) final
     {
+        texture_program->use();
+        texture_program->set_uniform_1i("texture", 0);
+
+        texture->bind();
+        texture->active(0);
+
+        vertex_buffer->bind();
+        index_buffer->bind();
+
+        glVertexAttribPointer(0,
+                              2,
+                              GL_FLOAT,
+                              GL_FALSE,
+                              sizeof(vertex_2d),
+                              reinterpret_cast<void*>(0));
+        gl_check();
+        glEnableVertexAttribArray(0);
+        gl_check();
+
+        glVertexAttribPointer(1,
+                              2,
+                              GL_FLOAT,
+                              GL_FALSE,
+                              sizeof(vertex_2d),
+                              reinterpret_cast<void*>(2 * sizeof(float)));
+        gl_check();
+        glEnableVertexAttribArray(1);
+        gl_check();
+
+        glDrawElements(
+            GL_TRIANGLES, index_buffer->get_size(), GL_UNSIGNED_SHORT, 0);
+    }
+
+    void render(const triangle_2d& triangle, texture* texture) final
+    {
+        texture_program->use();
+        texture->bind();
+        texture->active(0);
+        texture_program->set_uniform_1i("texture", 0);
+
         glVertexAttribPointer(0,
                               2,
                               GL_FLOAT,
@@ -350,6 +390,39 @@ public:
         gl_check();
     }
 
+    void render_menu(bool& show_menu_window) final
+    {
+        ImGui_ImplGameEngine_NewFrame(window);
+
+        int window_width, window_height;
+        SDL_GetWindowSize(window, &window_width, &window_height);
+
+        int menu_width  = window_width / 4;
+        int menu_height = window_height / 4;
+
+        ImGui::SetNextWindowPos(ImVec2((window_width - menu_width) / 2,
+                                       (window_height - menu_height) / 2),
+                                ImGuiCond_Always);
+        ImGui::SetNextWindowSize(ImVec2(menu_width, menu_height),
+                                 ImGuiCond_Always);
+
+        ImGuiWindowFlags flags = 0;
+        flags |= ImGuiWindowFlags_NoResize;
+        flags |= ImGuiWindowFlags_NoTitleBar;
+
+        ImGui::Begin("Menu", nullptr, flags);
+        ImGui::SetCursorPos(ImVec2(10, 10));
+        if (ImGui::Button("Play",
+                          ImVec2(menu_width - 20, menu_height / 2 - 15)))
+            show_menu_window = false;
+        ImGui::SetCursorPos(ImVec2(10, menu_height / 2 + 5));
+        ImGui::Button("Exit", ImVec2(menu_width - 20, menu_height / 2 - 15));
+        ImGui::End();
+
+        ImGui::Render();
+        ImGui_ImplGameEngine_RenderDrawData(ImGui::GetDrawData());
+    }
+
     void clear() final
     {
         glClearColor(0.f, 0.f, 0.f, 0.f);
@@ -366,11 +439,6 @@ public:
 
     bool swap_buffers() final
     {
-        ImGui_ImplGameEngine_NewFrame(window);
-        bool show_demo_window = true;
-        ImGui::ShowDemoWindow(&show_demo_window);
-        ImGui::Render();
-        ImGui_ImplGameEngine_RenderDrawData(ImGui::GetDrawData());
         if (SDL_GL_SwapWindow(window) != 0)
         {
             std::cerr << "Swap Window error:" << SDL_GetError() << std::endl;

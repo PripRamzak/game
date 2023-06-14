@@ -1,7 +1,5 @@
 #pragma once
 
-#include "texture.hxx"
-
 enum shader_type
 {
     vertex,
