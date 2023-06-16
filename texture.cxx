@@ -17,12 +17,9 @@ class opengl_texture final : public texture
     int    texture_current_number = 0;
 
 public:
-    bool load(const char* file_path,
-              int         texture_quantity,
-              int         texture_current_number) final
+    bool load(const char* file_path, int texture_quantity = 1) final
     {
-        this->texture_quantity       = texture_quantity;
-        this->texture_current_number = texture_current_number;
+        this->texture_quantity = texture_quantity;
 
         int channels;
         stbi_set_flip_vertically_on_load(true);
@@ -107,6 +104,7 @@ public:
         glActiveTexture(GL_TEXTURE0 + index);
         gl_check();
     }
+    void reset() final { texture_current_number = 0; }
     int  get_quantity() final { return texture_quantity; }
     int  get_current_texture_number() final { return texture_current_number; }
     int  get_width() final { return width; }

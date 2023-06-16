@@ -27,12 +27,15 @@ public:
     virtual void render(vertex_buffer* vertex_buffer,
                         index_buffer*  index_buffer,
                         texture*       texture,
-                        int index)                                     = 0;
+                        int index,
+                        float* first_value)                             = 0;
     // clang-format on
     virtual void  render_menu(bool& show_gui_window) = 0;
     virtual bool  swap_buffers()                     = 0;
     virtual void  clear()                            = 0;
     virtual float get_time()                         = 0;
+    virtual int   get_window_width()                 = 0;
+    virtual int   get_window_height()                = 0;
     virtual void  uninitialize()                     = 0;
     virtual ~engine();
 };

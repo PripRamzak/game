@@ -11,12 +11,20 @@ add_library(engine SHARED
         event.hxx
         geometry.cxx
         geometry.hxx
+        index_buffer.cxx
+        index_buffer.hxx
         shader_program.cxx
         shader_program.hxx
+        sprite.cxx
+        sprite.hxx
+        texture.cxx
+        texture.hxx
+        vertex_buffer.cxx
+        vertex_buffer.hxx
         glad/glad.c
         glad/glad.h
         KHR/khrplatform.h
-        stb_image.h texture.cxx texture.hxx vertex_buffer.cxx vertex_buffer.hxx index_buffer.cxx index_buffer.hxx)
+        stb_image.h)
 target_compile_features(engine PUBLIC cxx_std_20)
 target_include_directories(engine PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 

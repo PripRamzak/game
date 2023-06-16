@@ -34,6 +34,8 @@ static const char* ImGui_ImplGameEngine_GetClipboardText(void*);
 class game_engine final : public engine
 {
     SDL_Window*     window;
+    int             window_width  = 0;
+    int             window_height = 0;
     SDL_GLContext   context;
     shader_program* texture_program;
 
@@ -43,7 +45,6 @@ public:
         , context(nullptr)
     {
     }
-
     bool initialize() final
     {
         if (SDL_Init(SDL_INIT_EVERYTHING) != 0)
@@ -52,7 +53,11 @@ public:
             return false;
         }
 
-        window = SDL_CreateWindow("Game", 1280, 720, SDL_WINDOW_OPENGL);
+        window_width  = 1280;
+        window_height = 720;
+
+        window = SDL_CreateWindow(
+            "Game", window_width, window_height, SDL_WINDOW_OPENGL);
         if (!window)
         {
             std::cerr << "CreateWindow error: " << SDL_GetError() << std::endl;
@@ -212,7 +217,6 @@ public:
 
         return true;
     }
-
     bool read_input(event& event) final
     {
         SDL_Event sdl_event;
@@ -232,12 +236,9 @@ public:
         }
         return false;
     }
-
     texture* create_triangles(texture*                  texture,
                               std::vector<triangle_2d>& texture_triangles) final
     {
-        int window_width;
-        int window_height;
         SDL_GetWindowSize(window, &window_width, &window_height);
 
         float normalized_width =
@@ -258,7 +259,6 @@ public:
 
         return texture;
     }
-
     void move_texture(std::vector<triangle_2d>& texture_triangles,
                       float                     dx,
                       float                     dy,
@@ -297,11 +297,11 @@ public:
         for (int i = 0; i < texture_triangles.size(); i++)
             texture_triangles[i] = buffer_triangles[i];
     }
-
     void render(vertex_buffer* vertex_buffer,
                 index_buffer*  index_buffer,
                 texture*       texture,
-                int            index) final
+                int            index,
+                float*         first_value) final
     {
         texture_program->use();
         texture_program->set_uniform_1f(
@@ -310,6 +310,8 @@ public:
             "number",
             static_cast<float>(texture->get_current_texture_number()));
         texture_program->set_uniform_1i("texture", 0);
+        texture_program->set_uniform_matrix3fv(
+            "Matrix", 1, GL_FALSE, first_value);
 
         texture->bind();
         texture->active(index);
@@ -340,7 +342,6 @@ public:
         glDrawElements(
             GL_TRIANGLES, index_buffer->get_size(), GL_UNSIGNED_SHORT, 0);
     }
-
     void render(const triangle_2d& triangle, texture* texture) final
     {
         texture_program->use();
@@ -395,12 +396,10 @@ public:
         glDrawArrays(GL_TRIANGLES, 0, 3);
         gl_check();
     }
-
     void render_menu(bool& show_menu_window) final
     {
         ImGui_ImplGameEngine_NewFrame(window);
 
-        int window_width, window_height;
         SDL_GetWindowSize(window, &window_width, &window_height);
 
         int menu_width  = window_width / 4;
@@ -428,7 +427,6 @@ public:
         ImGui::Render();
         ImGui_ImplGameEngine_RenderDrawData(ImGui::GetDrawData());
     }
-
     void clear() final
     {
         glClearColor(1.f, 1.f, 1.f, 0.f);
@@ -436,13 +434,13 @@ public:
         glClear(GL_COLOR_BUFFER_BIT);
         gl_check();
     }
-
     float get_time() final
     {
         std::uint32_t ms = SDL_GetTicks();
         return ms * 0.001f;
     }
-
+    int  get_window_width() final { return window_width; }
+    int  get_window_height() final { return window_height; }
     bool swap_buffers() final
     {
         if (SDL_GL_SwapWindow(window) != 0)
@@ -453,7 +451,6 @@ public:
         clear();
         return true;
     }
-
     void uninitialize() final
     {
         ImGui_ImplGameEngine_Shutdown();

@@ -174,6 +174,17 @@ public:
         glUniform1f(location, value);
         gl_check();
     }
+    void set_uniform_matrix3fv(const char* name,
+                               int         count,
+                               bool        transpose,
+                               float*      value) final
+    {
+        GLint location = glGetUniformLocation(program, name);
+        gl_check();
+        assert(location != -1);
+        glUniformMatrix3fv(location, count, transpose, value);
+        gl_check();
+    }
     void set_uniform_matrix4fv(const char* name,
                                int         count,
                                bool        transpose,

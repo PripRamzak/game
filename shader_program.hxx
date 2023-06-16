@@ -13,6 +13,10 @@ public:
     virtual bool create_shader(const char* file_path, shader_type type) = 0;
     virtual void set_uniform_1i(const char* name, int value)            = 0;
     virtual void set_uniform_1f(const char* name, float value)          = 0;
+    virtual void set_uniform_matrix3fv(const char* name,
+                                       int         count,
+                                       bool        transpose,
+                                       float*      value)                    = 0;
     virtual void set_uniform_matrix4fv(const char* name,
                                        int         count,
                                        bool        transpose,
