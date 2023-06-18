@@ -15,21 +15,6 @@ public:
         glGenBuffers(1, &VBO);
         gl_check();
     }
-    void buffer_data(const std::vector<triangle_2d>& triangles,
-                     size_t                          quantity) final
-    {
-        size = quantity;
-
-        bind();
-
-        GLsizeiptr buffer_size =
-            static_cast<GLsizeiptr>(quantity * sizeof(vertex_2d) * 3);
-        glBufferData(GL_ARRAY_BUFFER,
-                     buffer_size,
-                     &triangles[0].vertices[0],
-                     GL_STREAM_DRAW);
-        gl_check();
-    }
     void buffer_data(const vertex_2d* vertices, std::size_t quantity) final
     {
         size = quantity;

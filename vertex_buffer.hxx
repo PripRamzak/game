@@ -7,8 +7,6 @@
 class vertex_buffer
 {
 public:
-    virtual void   buffer_data(const std::vector<triangle_2d>& triangles,
-                               std::size_t                     quantity) = 0;
     virtual void   buffer_data(const vertex_2d* vertices,
                                std::size_t      quantity) = 0;
     virtual void   bind()                            = 0;

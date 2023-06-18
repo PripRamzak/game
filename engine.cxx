@@ -43,6 +43,7 @@ public:
     game_engine()
         : window(nullptr)
         , context(nullptr)
+        , texture_program(nullptr)
     {
     }
     bool initialize() final
@@ -236,67 +237,6 @@ public:
         }
         return false;
     }
-    texture* create_triangles(texture*                  texture,
-                              std::vector<triangle_2d>& texture_triangles) final
-    {
-        SDL_GetWindowSize(window, &window_width, &window_height);
-
-        float normalized_width =
-            static_cast<float>(texture->get_width()) / window_width;
-        float normalized_height =
-            static_cast<float>(texture->get_height()) / window_height;
-
-        texture_triangles[0] = {
-            { -normalized_width, normalized_height, 0.f, 1.f },
-            { normalized_width, normalized_height, 1.f, 1.f },
-            { normalized_width, -normalized_height, 1.f, 0.f }
-        };
-        texture_triangles[1] = {
-            { -normalized_width, normalized_height, 0.f, 1.f },
-            { normalized_width, -normalized_height, 1.f, 0.f },
-            { -normalized_width, -normalized_height, 0.f, 0.f }
-        };
-
-        return texture;
-    }
-    void move_texture(std::vector<triangle_2d>& texture_triangles,
-                      float                     dx,
-                      float                     dy,
-                      int&                      direction) final
-    {
-        bool new_direction = false;
-        if (dx < 0 && direction != 1 || dx > 0 && direction != 0)
-        {
-            new_direction = true;
-            direction     = direction == 0 ? 1 : 0;
-        }
-
-        glm::mat3 mat_move(1.f, 0.f, 0.f, 0.f, 1.f, 0.f, dx, dy, 1);
-        std::vector<triangle_2d> buffer_triangles = texture_triangles;
-
-        for (int i = 0; i < texture_triangles.size(); i++)
-            for (int j = 0; j < 3; j++)
-            {
-                glm::vec3 vec_move(texture_triangles[i].vertices[j].x,
-                                   texture_triangles[i].vertices[j].y,
-                                   1);
-
-                if (new_direction)
-                    buffer_triangles[i].vertices[j].u =
-                        buffer_triangles[i].vertices[j].u == 0.f ? 1.f : 0.f;
-
-                vec_move = mat_move * vec_move;
-
-                if (std::abs(vec_move.y) > 1.f || std::abs(vec_move.x) > 1.f)
-                    return;
-
-                buffer_triangles[i].vertices[j].x = vec_move.x;
-                buffer_triangles[i].vertices[j].y = vec_move.y;
-            }
-
-        for (int i = 0; i < texture_triangles.size(); i++)
-            texture_triangles[i] = buffer_triangles[i];
-    }
     void render(vertex_buffer* vertex_buffer,
                 index_buffer*  index_buffer,
                 texture*       texture,
@@ -343,60 +283,6 @@ public:
 
         glDrawElements(
             GL_TRIANGLES, index_buffer->get_size(), GL_UNSIGNED_SHORT, 0);
-    }
-    void render(const triangle_2d& triangle, texture* texture) final
-    {
-        texture_program->use();
-        texture->bind();
-        texture->active(0);
-        texture_program->set_uniform_1i("texture", 0);
-
-        glVertexAttribPointer(0,
-                              2,
-                              GL_FLOAT,
-                              GL_FALSE,
-                              sizeof(vertex_2d),
-                              &triangle.vertices[0].x);
-        gl_check();
-        glEnableVertexAttribArray(0);
-        gl_check();
-
-        glVertexAttribPointer(1,
-                              2,
-                              GL_FLOAT,
-                              GL_FALSE,
-                              sizeof(vertex_2d),
-                              &triangle.vertices[0].u);
-        gl_check();
-        glEnableVertexAttribArray(1);
-        gl_check();
-
-        glValidateProgram(texture_program->get());
-        gl_check();
-        GLint validate_status = 0;
-        glGetProgramiv(
-            texture_program->get(), GL_VALIDATE_STATUS, &validate_status);
-        gl_check();
-        if (validate_status == GL_FALSE)
-        {
-            GLint info_length = 0;
-            glGetProgramiv(
-                texture_program->get(), GL_INFO_LOG_LENGTH, &info_length);
-            gl_check();
-            std::vector<char> info_log(static_cast<size_t>(info_length));
-            glGetProgramInfoLog(
-                texture_program->get(), info_length, nullptr, info_log.data());
-            gl_check();
-
-            std::cerr << "Incorrect validate status: " << info_log.data()
-                      << std::endl;
-            uninitialize();
-
-            throw std::runtime_error("Error");
-        }
-
-        glDrawArrays(GL_TRIANGLES, 0, 3);
-        gl_check();
     }
     void render_menu(bool& show_menu_window) final
     {
