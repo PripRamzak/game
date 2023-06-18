@@ -81,12 +81,14 @@ int main(int /*argc*/, char** /*argv*/)
                 warrior_idle = false;
                 warrior_run  = true;
                 warrior_sprite->move(-0.03f, 0.f);
+                direction = 1;
             }
             else if (event == event::right_pressed)
             {
                 warrior_idle = false;
                 warrior_run  = true;
                 warrior_sprite->move(0.03f, 0.f);
+                direction = 0;
             }
             else
             {
@@ -134,6 +136,7 @@ int main(int /*argc*/, char** /*argv*/)
                            warrior_index_buffer,
                            warrior_sprite->get_sprite(),
                            0,
+                           direction,
                            &mat_result[0][0]);
             if (engine->get_time() - last_time > 0.15f)
             {

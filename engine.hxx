@@ -28,7 +28,8 @@ public:
                         index_buffer*  index_buffer,
                         texture*       texture,
                         int index,
-                        float* first_value)                             = 0;
+                        int direction,
+                        float* matrix_first_value)                             = 0;
     // clang-format on
     virtual void  render_menu(bool& show_gui_window) = 0;
     virtual bool  swap_buffers()                     = 0;

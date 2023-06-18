@@ -301,7 +301,8 @@ public:
                 index_buffer*  index_buffer,
                 texture*       texture,
                 int            index,
-                float*         first_value) final
+                int            direction,
+                float*         matrix_first_value) final
     {
         texture_program->use();
         texture_program->set_uniform_1f(
@@ -309,9 +310,10 @@ public:
         texture_program->set_uniform_1f(
             "number",
             static_cast<float>(texture->get_current_texture_number()));
+        texture_program->set_uniform_1i("direction", direction);
         texture_program->set_uniform_1i("texture", 0);
         texture_program->set_uniform_matrix3fv(
-            "Matrix", 1, GL_FALSE, first_value);
+            "Matrix", 1, GL_FALSE, matrix_first_value);
 
         texture->bind();
         texture->active(index);
