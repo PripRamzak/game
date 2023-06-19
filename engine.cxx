@@ -308,10 +308,7 @@ public:
         ImGui::SetCursorPos(ImVec2(10, 10));
         if (ImGui::Button("Play",
                           ImVec2(menu_width - 20, menu_height / 2 - 15)))
-        {
-            show_menu_window    = false;
-            imgui_procces_event = false;
-        }
+            show_menu_window = false;
 
         ImGui::SetCursorPos(ImVec2(10, menu_height / 2 + 5));
         bool close_window = false;
