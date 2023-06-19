@@ -284,7 +284,7 @@ public:
         glDrawElements(
             GL_TRIANGLES, index_buffer->get_size(), GL_UNSIGNED_SHORT, 0);
     }
-    void render_menu(bool& show_menu_window) final
+    bool render_menu(bool& show_menu_window) final
     {
         ImGui_ImplGameEngine_NewFrame(window);
 
@@ -304,16 +304,27 @@ public:
         flags |= ImGuiWindowFlags_NoTitleBar;
 
         ImGui::Begin("Menu", nullptr, flags);
+
         ImGui::SetCursorPos(ImVec2(10, 10));
         if (ImGui::Button("Play",
                           ImVec2(menu_width - 20, menu_height / 2 - 15)))
-            show_menu_window = false;
+        {
+            show_menu_window    = false;
+            imgui_procces_event = false;
+        }
+
         ImGui::SetCursorPos(ImVec2(10, menu_height / 2 + 5));
-        ImGui::Button("Exit", ImVec2(menu_width - 20, menu_height / 2 - 15));
+        bool close_window = false;
+        if (ImGui::Button("Exit",
+                          ImVec2(menu_width - 20, menu_height / 2 - 15)))
+            close_window = true;
+
         ImGui::End();
 
         ImGui::Render();
         ImGui_ImplGameEngine_RenderDrawData(ImGui::GetDrawData());
+
+        return close_window;
     }
     void clear() final
     {
@@ -383,7 +394,6 @@ void ImGui_ImplGameEngine_Init()
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO();
-    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
 
     ImGui::StyleColorsDark();
 

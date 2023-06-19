@@ -21,7 +21,7 @@ public:
                         int direction,
                         float* matrix_first_value)   = 0;
     // clang-format on
-    virtual void  render_menu(bool& show_gui_window) = 0;
+    virtual bool  render_menu(bool& show_gui_window) = 0;
     virtual bool  swap_buffers()                     = 0;
     virtual void  clear()                            = 0;
     virtual float get_time()                         = 0;

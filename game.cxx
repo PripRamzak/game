@@ -112,7 +112,10 @@ int main(int /*argc*/, char** /*argv*/)
         mat_move[2].y = warrior_sprite->get_current_pos_y();
 
         if (show_menu_window)
-            engine->render_menu(show_menu_window);
+        {
+            if (engine->render_menu(show_menu_window))
+                quit = true;
+        }
         else
         {
             glm::mat3 mat_result =
