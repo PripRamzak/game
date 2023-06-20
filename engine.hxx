@@ -2,6 +2,7 @@
 
 #include "event.hxx"
 #include "index_buffer.hxx"
+#include "sound_buffer.hxx"
 #include "texture.hxx"
 #include "vertex_buffer.hxx"
 
@@ -11,8 +12,9 @@
 class engine
 {
 public:
-    virtual bool initialize()         = 0;
-    virtual bool read_input(event& e) = 0;
+    virtual bool          initialize()                               = 0;
+    virtual bool          read_input(event& e)                       = 0;
+    virtual sound_buffer* create_sound_buffer(const char* file_path) = 0;
     // clang-format off
     virtual void render(vertex_buffer* vertex_buffer,
                         index_buffer*  index_buffer,

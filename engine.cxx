@@ -31,13 +31,70 @@ static void ImGui_ImplGameEngine_UpdateMouseData(SDL_Window* window);
 static void ImGui_ImplGameEngine_SetClipboardText(void*, const char* text);
 static const char* ImGui_ImplGameEngine_GetClipboardText(void*);
 
+class game_sound_buffer;
+
 class game_engine final : public engine
 {
-    SDL_Window*     window;
-    int             window_width  = 0;
-    int             window_height = 0;
-    SDL_GLContext   context;
-    shader_program* texture_program;
+    SDL_Window*                window;
+    int                        window_width  = 0;
+    int                        window_height = 0;
+    SDL_GLContext              context;
+    shader_program*            texture_program;
+    SDL_AudioDeviceID          audio_device;
+    SDL_AudioSpec              device_audio_spec;
+    std::vector<sound_buffer*> sounds;
+
+    static void audio_callback(void* ptr, uint8_t* stream, int stream_size)
+    {
+        std::fill_n(stream, stream_size, '\0');
+
+        game_engine* e = static_cast<game_engine*>(ptr);
+
+        for (sound_buffer* snd : e->sounds)
+        {
+            snd->lock_thread();
+            if (snd->get_playing_status())
+            {
+                uint32_t rest = snd->get_length() - snd->get_current_position();
+                uint8_t* current_buff =
+                    &snd->get_start()[snd->get_current_position()];
+
+                if (rest <= static_cast<uint32_t>(stream_size))
+                {
+                    // copy rest to buffer
+                    SDL_MixAudioFormat(stream,
+                                       current_buff,
+                                       e->device_audio_spec.format,
+                                       rest,
+                                       SDL_MIX_MAXVOLUME);
+                    snd->add_rest(rest);
+                }
+                else
+                {
+                    SDL_MixAudioFormat(stream,
+                                       current_buff,
+                                       e->device_audio_spec.format,
+                                       static_cast<uint32_t>(stream_size),
+                                       SDL_MIX_MAXVOLUME);
+                    snd->add_rest(static_cast<uint32_t>(stream_size));
+                }
+
+                if (snd->get_current_position() == snd->get_length())
+                {
+                    if (snd->get_loop_property())
+                    {
+                        // start from begining
+                        snd->reset();
+                    }
+                    else
+                    {
+                        // snd->is_playing = false;
+                    }
+                }
+                snd->unlock_thread();
+            }
+        }
+    }
 
 public:
     game_engine()
@@ -216,6 +273,40 @@ public:
 
         ImGui_ImplGameEngine_Init();
 
+        SDL_AudioSpec desired_audio_spec{};
+        desired_audio_spec.freq     = 44100;
+        desired_audio_spec.format   = AUDIO_S16LSB;
+        desired_audio_spec.channels = 2;
+        desired_audio_spec.samples  = 1024;
+        desired_audio_spec.callback = audio_callback;
+        desired_audio_spec.userdata = this;
+
+        const char* audio_device_name = nullptr;
+        const int   num_audio_devices = SDL_GetNumAudioDevices(SDL_FALSE);
+        for (int i = 0; i < num_audio_devices; i++)
+        {
+            std::cout << "audio device #" << i << ": "
+                      << SDL_GetAudioDeviceName(i, SDL_FALSE) << '\n';
+        }
+        audio_device_name = SDL_GetAudioDeviceName(0, SDL_FALSE);
+
+        audio_device = SDL_OpenAudioDevice(audio_device_name,
+                                           SDL_FALSE,
+                                           &desired_audio_spec,
+                                           &device_audio_spec,
+                                           SDL_AUDIO_ALLOW_ANY_CHANGE);
+
+        if (audio_device == 0)
+        {
+            ImGui_ImplGameEngine_Shutdown();
+            SDL_GL_DeleteContext(context);
+            SDL_DestroyWindow(window);
+            SDL_Quit();
+            return false;
+        }
+
+        SDL_PlayAudioDevice(audio_device);
+
         return true;
     }
     bool read_input(event& event) final
@@ -236,6 +327,15 @@ public:
                     return true;
         }
         return false;
+    }
+    sound_buffer* create_sound_buffer(const char* file_path) final
+    {
+        sound_buffer* sound_buffer = ::create_sound_buffer(
+            file_path, reinterpret_cast<void*>(&device_audio_spec));
+        sound_buffer->lock_thread();
+        sounds.push_back(sound_buffer);
+        sound_buffer->unlock_thread();
+        return sound_buffer;
     }
     void render(vertex_buffer* vertex_buffer,
                 index_buffer*  index_buffer,

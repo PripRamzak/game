@@ -14,6 +14,8 @@ add_library(engine SHARED
         index_buffer.hxx
         shader_program.cxx
         shader_program.hxx
+        sound_buffer.cxx
+        sound_buffer.hxx
         sprite.cxx
         sprite.hxx
         texture.cxx

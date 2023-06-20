@@ -49,6 +49,9 @@ int main(int /*argc*/, char** /*argv*/)
     mat_projection[1].y = static_cast<float>(engine->get_window_width()) /
                           engine->get_window_height();
 
+    sound_buffer* music = engine->create_sound_buffer("./8-bit_detective.wav");
+    music->play(audio_properties::looped);
+    
     float last_time        = engine->get_time();
     bool  quit             = false;
     bool  show_menu_window = true;
