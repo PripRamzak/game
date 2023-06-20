@@ -48,51 +48,45 @@ class game_engine final : public engine
     {
         std::fill_n(stream, stream_size, '\0');
 
-        game_engine* e = static_cast<game_engine*>(ptr);
+        game_engine* engine = static_cast<game_engine*>(ptr);
 
-        for (sound_buffer* snd : e->sounds)
+        for (sound_buffer* snd : engine->sounds)
         {
             snd->lock_thread();
             if (snd->get_playing_status())
             {
-                uint32_t rest = snd->get_length() - snd->get_current_position();
+                uint32_t rest = snd->get_length() - snd->get_current_index();
                 uint8_t* current_buff =
-                    &snd->get_start()[snd->get_current_position()];
+                    &snd->get_buffer()[snd->get_current_index()];
 
                 if (rest <= static_cast<uint32_t>(stream_size))
                 {
-                    // copy rest to buffer
                     SDL_MixAudioFormat(stream,
                                        current_buff,
-                                       e->device_audio_spec.format,
+                                       engine->device_audio_spec.format,
                                        rest,
                                        SDL_MIX_MAXVOLUME);
-                    snd->add_rest(rest);
+                    snd->update_buffer(rest);
                 }
                 else
                 {
                     SDL_MixAudioFormat(stream,
                                        current_buff,
-                                       e->device_audio_spec.format,
+                                       engine->device_audio_spec.format,
                                        static_cast<uint32_t>(stream_size),
                                        SDL_MIX_MAXVOLUME);
-                    snd->add_rest(static_cast<uint32_t>(stream_size));
+                    snd->update_buffer(static_cast<uint32_t>(stream_size));
                 }
 
-                if (snd->get_current_position() == snd->get_length())
+                if (snd->get_current_index() == snd->get_length())
                 {
                     if (snd->get_loop_property())
-                    {
-                        // start from begining
-                        snd->reset();
-                    }
+                        snd->replay();
                     else
-                    {
-                        // snd->is_playing = false;
-                    }
+                        snd->stop();
                 }
-                snd->unlock_thread();
             }
+            snd->unlock_thread();
         }
     }
 
