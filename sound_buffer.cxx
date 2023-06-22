@@ -64,6 +64,7 @@ public:
             length = static_cast<uint32_t>(output_length);
         }
     }
+    void update_buffer(uint32_t rest) final { current_index += rest; }
     void play(audio_properties properties)
     {
         lock_thread();
@@ -72,6 +73,8 @@ public:
         is_looped     = (properties == audio_properties::looped);
         unlock_thread();
     }
+    void     replay() final { current_index = 0; }
+    void     stop() final { is_playing = 0; }
     void     lock_thread() final { audio_mutex.lock(); }
     void     unlock_thread() final { audio_mutex.unlock(); }
     uint8_t* get_buffer() final { return buffer; }
@@ -79,9 +82,6 @@ public:
     size_t   get_current_index() final { return current_index; }
     bool     get_playing_status() final { return is_playing; }
     bool     get_loop_property() final { return is_looped; }
-    void     update_buffer(uint32_t rest) final { current_index += rest; }
-    void     replay() final { current_index = 0; }
-    void     stop() final { is_playing = 0; }
 };
 
 sound_buffer* create_sound_buffer(const char* file_path, void* audio_spec)

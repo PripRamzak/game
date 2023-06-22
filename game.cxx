@@ -32,7 +32,6 @@ int main(int /*argc*/, char** /*argv*/)
     vertex_buffer* warrior_vertex_buffer = create_vertex_buffer();
     warrior_vertex_buffer->buffer_data(warrior_sprite->get_vertices(),
                                        static_cast<size_t>(4));
-
     std::vector<uint16_t> indexes              = { 0, 1, 2, 0, 2, 3 };
     index_buffer*         warrior_index_buffer = create_index_buffer();
     warrior_index_buffer->buffer_data(indexes, indexes.size());
@@ -49,9 +48,12 @@ int main(int /*argc*/, char** /*argv*/)
     mat_projection[1].y = static_cast<float>(engine->get_window_width()) /
                           engine->get_window_height();
 
-    sound_buffer* music = engine->create_sound_buffer("./8-bit_detective.wav");
+    sound_buffer* music =
+        engine->create_sound_buffer("./sound/dungeon_music.wav");
     music->play(audio_properties::looped);
-    
+    sound_buffer* sound_attack =
+        engine->create_sound_buffer("./sound/attack.wav");
+
     float last_time        = engine->get_time();
     bool  quit             = false;
     bool  show_menu_window = true;
@@ -100,7 +102,10 @@ int main(int /*argc*/, char** /*argv*/)
             }
 
             if (event == event::select_pressed)
+            {
                 warrior_attack = true;
+                sound_attack->play(audio_properties::once);
+            }
             else
                 warrior_attack = false;
 
