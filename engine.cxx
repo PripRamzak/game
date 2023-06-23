@@ -18,6 +18,7 @@
 #include "imgui.h"
 
 bool check_pressing_key(SDL_Event sdl_event, event& event);
+bool is_key_down(action action);
 
 void gl_check();
 
@@ -335,6 +336,7 @@ public:
         }
         return false;
     }
+    bool check_action(action action) final { return is_key_down(action); }
     sound_buffer* create_sound_buffer(const char* file_path) final
     {
         sound_buffer* sound_buffer = ::create_sound_buffer(

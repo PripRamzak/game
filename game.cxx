@@ -69,51 +69,53 @@ int main(int /*argc*/, char** /*argv*/)
         glm::mat3 mat_move{ 1 };
         if (engine->read_input(event))
         {
-            std::cout << event << std::endl;
-            if (event == event::up_pressed)
+            if (event == event::turn_off)
             {
-                warrior_idle = false;
-                warrior_run  = true;
-                warrior_sprite->move(0.f, 0.03f);
+                quit = true;
+                break;
             }
-            else if (event == event::down_pressed)
+
+            if (event == event::pressed)
             {
-                warrior_idle = false;
-                warrior_run  = true;
-                warrior_sprite->move(0.f, -0.03f);
-            }
-            else if (event == event::left_pressed)
-            {
-                warrior_idle = false;
-                warrior_run  = true;
-                warrior_sprite->move(-0.03f, 0.f);
-                direction = 1;
-            }
-            else if (event == event::right_pressed)
-            {
-                warrior_idle = false;
-                warrior_run  = true;
-                warrior_sprite->move(0.03f, 0.f);
-                direction = 0;
+                if (engine->check_action(action::up))
+                {
+                    warrior_idle = false;
+                    warrior_run  = true;
+                    warrior_sprite->move(0.f, 0.03f);
+                }
+                else if (engine->check_action(action::down))
+                {
+                    warrior_idle = false;
+                    warrior_run  = true;
+                    warrior_sprite->move(0.f, -0.03f);
+                }
+                else if (engine->check_action(action::left))
+                {
+                    warrior_idle = false;
+                    warrior_run  = true;
+                    warrior_sprite->move(-0.03f, 0.f);
+                    direction = 1;
+                }
+                else if (engine->check_action(action::right))
+                {
+                    warrior_idle = false;
+                    warrior_run  = true;
+                    warrior_sprite->move(0.03f, 0.f);
+                    direction = 0;
+                }
+
+                if (engine->check_action(action::attack))
+                {
+                    warrior_attack = true;
+                    sound_attack->play(audio_properties::once);
+                }
+                else
+                    warrior_attack = false;
             }
             else
             {
                 warrior_idle = true;
                 warrior_run  = false;
-            }
-
-            if (event == event::select_pressed)
-            {
-                warrior_attack = true;
-                sound_attack->play(audio_properties::once);
-            }
-            else
-                warrior_attack = false;
-
-            if (event == event::turn_off)
-            {
-                quit = true;
-                break;
             }
         }
 

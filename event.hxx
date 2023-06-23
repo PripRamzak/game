@@ -4,24 +4,19 @@
 
 enum class event
 {
-    up_pressed,
-    up_released,
-    down_pressed,
-    down_released,
-    left_pressed,
-    left_released,
-    right_pressed,
-    right_released,
-    button1_pressed,
-    button1_released,
-    button2_pressed,
-    button2_released,
-    select_pressed,
-    select_released,
-    start_pressed,
-    start_released,
-    turn_off,
-    null_event
+    pressed,
+    released,
+    turn_off
+};
+
+enum class action
+{
+    up,
+    down,
+    left,
+    right,
+    attack,
+    menu
 };
 
 std::ostream& operator<<(std::ostream& out, const event& event);
