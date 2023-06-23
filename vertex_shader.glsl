@@ -10,7 +10,7 @@ uniform mat3 Matrix;
 
 void main()
 {
-    vec3 result_coord = Matrix * vec3(a_position, 1.f);
+    vec3 result_coord = Matrix * vec3(a_position, 1.0);
     v_t_coord = t_coord;
     gl_Position = vec4(result_coord, 1.0);
 }

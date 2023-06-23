@@ -2,7 +2,7 @@
 
 #include "geometry.hxx"
 
-#include <vector>
+#include <cstddef>
 
 class vertex_buffer
 {

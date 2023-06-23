@@ -2,6 +2,7 @@
 precision mediump float;
 
 varying vec2 v_t_coord;
+
 uniform float quantity;
 uniform float number;
 uniform int direction;

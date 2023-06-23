@@ -6,6 +6,7 @@
 #include <stdexcept>
 
 #include <SDL3/SDL.h>
+#include <SDL3/SDL_syswm.h>
 
 #include "glad/glad.h"
 
@@ -20,7 +21,9 @@ bool check_pressing_key(SDL_Event sdl_event, event& event);
 
 void gl_check();
 
-void        ImGui_ImplGameEngine_Init();
+bool mouse_button_pressed = false;
+
+void        ImGui_ImplGameEngine_Init(SDL_Window* window);
 bool        ImGui_ImplGameEngine_ProcessEvent(const SDL_Event* event);
 void        ImGui_ImplGameEngine_NewFrame(SDL_Window* window);
 void        ImGui_ImplGameEngine_CreateDeviceObject();
@@ -130,8 +133,8 @@ public:
         int        gl_profile_mask;
         if (it != os_list.end())
         {
-            gl_major_version = 4;
-            gl_minor_version = (platform == "Mac OS X"sv) ? 1 : 3;
+            gl_major_version = (platform == "Windows"sv) ? 2 : 4;
+            gl_minor_version = 1;
             gl_profile_mask  = SDL_GL_CONTEXT_PROFILE_CORE;
         }
         else
@@ -176,8 +179,8 @@ public:
             SDL_Quit();
             return false;
         }
-        else if (platform == "Windows"sv && gl_major_version < 4 &&
-                 gl_minor_version < 3)
+        else if (platform == "Windows"sv && gl_major_version < 2 &&
+                 gl_minor_version < 1)
         {
             std::cerr << "Current OpenGL version: " << gl_major_version << '.'
                       << gl_minor_version << std::endl;
@@ -265,7 +268,7 @@ public:
         glEnable(GL_SCISSOR_TEST);
         gl_check();
 
-        ImGui_ImplGameEngine_Init();
+        ImGui_ImplGameEngine_Init(window);
 
         SDL_AudioSpec desired_audio_spec{};
         desired_audio_spec.freq     = 44100;
@@ -283,6 +286,9 @@ public:
                       << SDL_GetAudioDeviceName(i, SDL_FALSE) << '\n';
         }
         audio_device_name = SDL_GetAudioDeviceName(0, SDL_FALSE);
+
+        if (platform == "Windows"sv)
+            audio_device_name = SDL_GetAudioDeviceName(1, SDL_FALSE);
 
         audio_device = SDL_OpenAudioDevice(audio_device_name,
                                            SDL_FALSE,
@@ -315,10 +321,17 @@ public:
                 event = event::turn_off;
                 return true;
             }
-            else if (sdl_event.type == SDL_EVENT_KEY_DOWN ||
-                     sdl_event.type == SDL_EVENT_KEY_UP)
-                if (check_pressing_key(sdl_event, event))
-                    return true;
+            else
+            {
+                mouse_button_pressed =
+                    sdl_event.type != SDL_EVENT_MOUSE_BUTTON_DOWN ? false
+                                                                  : true;
+
+                if (sdl_event.type == SDL_EVENT_KEY_DOWN ||
+                    sdl_event.type == SDL_EVENT_KEY_UP)
+                    if (check_pressing_key(sdl_event, event))
+                        return true;
+            }
         }
         return false;
     }
@@ -480,7 +493,7 @@ uint64_t        imgui_time           = 0;
 GLuint          imgui_VBO            = 0;
 GLuint          imgui_EBO            = 0;
 
-void ImGui_ImplGameEngine_Init()
+void ImGui_ImplGameEngine_Init(SDL_Window* window)
 {
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
@@ -501,6 +514,12 @@ void ImGui_ImplGameEngine_Init()
 
     SDL_SetHint(SDL_HINT_MOUSE_FOCUS_CLICKTHROUGH, "1");
     SDL_SetHint(SDL_HINT_MOUSE_AUTO_CAPTURE, "0");
+
+#ifdef _WIN32
+    SDL_SysWMinfo wmInfo;
+    SDL_GetWindowWMInfo(window, &wmInfo, SDL_SYSWM_CURRENT_VERSION);
+    io.ImeWindowHandle = wmInfo.info.win.window;
+#endif
 
     imgui_time = SDL_GetPerformanceCounter();
 }
@@ -790,8 +809,7 @@ void ImGui_ImplGameEngine_UpdateMouseData(SDL_Window* window)
         if (io.WantSetMousePos)
             SDL_WarpMouseInWindow(window, io.MousePos.x, io.MousePos.y);
 
-        SDL_Event* event;
-        if (event->type != SDL_EVENT_MOUSE_BUTTON_DOWN)
+        if (mouse_button_pressed)
         {
             float mouse_x_global, mouse_y_global;
             int   window_x, window_y;

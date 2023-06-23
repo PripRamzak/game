@@ -1,5 +1,5 @@
 #version 100
-//precision mediump float;
+precision mediump float;
 
 attribute vec2 Position;
 attribute vec2 UV;
