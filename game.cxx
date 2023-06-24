@@ -1,4 +1,5 @@
 #include "engine.hxx"
+#include "map.hxx"
 #include "sprite.hxx"
 
 #include <chrono>
@@ -24,7 +25,7 @@ int main(int /*argc*/, char** /*argv*/)
     texture* warrior_run_n_attack_sprite_sheet = create_texture();
     warrior_run_n_attack_sprite_sheet->load("./img/warrior_run&attack.png", 4);
 
-    sprite* warrior_sprite = create_sprite(-120.f, 120.f, 288.f, 144.f);
+    sprite* warrior_sprite = create_sprite(-120.f, 120.f, 192.f, 96.f);
     warrior_sprite->add_texture(warrior_idle_sprite_sheet);
     warrior_sprite->add_texture(warrior_run_sprite_sheet);
     warrior_sprite->add_texture(warrior_attack_sprite_sheet);
@@ -33,27 +34,37 @@ int main(int /*argc*/, char** /*argv*/)
     vertex_buffer* warrior_vertex_buffer = create_vertex_buffer();
     warrior_vertex_buffer->buffer_data(warrior_sprite->get_vertices(),
                                        static_cast<size_t>(4));
-    std::vector<uint16_t> indexes              = { 0, 1, 2, 0, 2, 3 };
-    index_buffer*         warrior_index_buffer = create_index_buffer();
-    warrior_index_buffer->buffer_data(indexes, indexes.size());
 
-    int direction = 0;
+    index_buffer* warrior_index_buffer = create_index_buffer();
+    warrior_index_buffer->add_indexes(warrior_vertex_buffer->get_size());
 
-    glm::mat3 mat_to_ndc_coordinates{ 1.f };
-    mat_to_ndc_coordinates[0].x =
-        1.f / static_cast<float>(engine->get_window_width());
-    mat_to_ndc_coordinates[1].y =
-        1.f / static_cast<float>(engine->get_window_height());
+    texture* floor = create_texture();
+    floor->load("./img/floor.png");
 
-    glm::mat3 mat_projection{ 1.f };
-    mat_projection[1].y = static_cast<float>(engine->get_window_width()) /
-                          engine->get_window_height();
+    map* dungeon_map = create_map(7, 7, 64, 64);
+    dungeon_map->fill_rectangle(3, 3, 2, 3, map_tile::floor);
+    dungeon_map->add_tile(floor, map_tile::floor);
+
+    vertex_buffer* floor_vertex_buffer = create_vertex_buffer();
+    dungeon_map->create_tile_vertex_buffer(floor_vertex_buffer,
+                                           map_tile::floor);
+
+    index_buffer* floor_index_buffer = create_index_buffer();
+    floor_index_buffer->add_indexes(floor_vertex_buffer->get_size());
 
     sound_buffer* music =
         engine->create_sound_buffer("./sound/dungeon_music.wav");
     music->play(audio_properties::looped);
     sound_buffer* sound_attack =
         engine->create_sound_buffer("./sound/attack.wav");
+
+    int direction = 0;
+
+    glm::mat3 mat_to_ndc_coordinates{ 1.f };
+    mat_to_ndc_coordinates[0].x =
+        2.f / static_cast<float>(engine->get_window_width());
+    mat_to_ndc_coordinates[1].y =
+        2.f / static_cast<float>(engine->get_window_height());
 
     float last_time        = engine->get_time();
     bool  quit             = false;
@@ -129,8 +140,7 @@ int main(int /*argc*/, char** /*argv*/)
         }
         else
         {
-            glm::mat3 mat_result =
-                mat_move * mat_projection * mat_to_ndc_coordinates;
+            glm::mat3 mat_result = mat_move * mat_to_ndc_coordinates;
             if (warrior_idle)
             {
                 if (warrior_attack)
@@ -146,12 +156,20 @@ int main(int /*argc*/, char** /*argv*/)
                     warrior_sprite->set_current_texture(1);
             }
 
+            engine->render(floor_vertex_buffer,
+                           floor_index_buffer,
+                           dungeon_map->get_tile(map_tile::floor),
+                           0,
+                           direction,
+                           &mat_to_ndc_coordinates[0][0]);
+
             engine->render(warrior_vertex_buffer,
                            warrior_index_buffer,
                            warrior_sprite->get_sprite(),
                            0,
                            direction,
                            &mat_result[0][0]);
+
             if (engine->get_time() - last_time > 0.15f)
             {
                 warrior_sprite->next_sprite();

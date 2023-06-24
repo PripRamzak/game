@@ -16,8 +16,6 @@ add_library(engine SHARED
         shader_program.hxx
         sound_buffer.cxx
         sound_buffer.hxx
-        sprite.cxx
-        sprite.hxx
         texture.cxx
         texture.hxx
         vertex_buffer.cxx
@@ -35,6 +33,11 @@ find_package(OpenGL REQUIRED)
 target_link_libraries(engine PRIVATE imgui)
 target_link_libraries(engine PRIVATE SDL3::SDL3-shared)
 
-add_executable(game game.cxx)
+add_executable(game
+        game.cxx
+        map.cxx
+        map.hxx
+        sprite.cxx
+        sprite.hxx)
 target_compile_features(game PUBLIC cxx_std_20)
 target_link_libraries(game PRIVATE engine)
