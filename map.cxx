@@ -5,16 +5,12 @@
 
 class game_map final : public map
 {
-    int width  = 0;
-    int height = 0;
-    // std::vector<texture*> tiles;
-    int                  current_tile = 0;
-    map_tile**           tiles_positions;
-    int                  tile_width  = 0;
-    int                  tile_height = 0;
-    std::vector<tile>    tiles;
-    std::vector<sprite*> tiles_sprite;
-    std::vector<int>     tiles_sprite_indexes;
+    int               width  = 0;
+    int               height = 0;
+    map_tile**        tiles_positions;
+    int               tile_width  = 0;
+    int               tile_height = 0;
+    std::vector<tile> tiles;
 
 public:
     game_map(int width_, int height_, int tile_width_, int tile_height_)
