@@ -3,6 +3,8 @@
 #include <algorithm>
 #include <iostream>
 
+#include <glm/matrix.hpp>
+
 class game_map final : public map
 {
     int               width  = 0;
@@ -44,36 +46,6 @@ public:
             tile tile;
             tile.type         = type;
             tile.tile_texture = tile_texture;
-
-            for (int i = 0; i < height; i++)
-                for (int j = 0; j < width; j++)
-                    if (type == tiles_positions[i][j])
-                    {
-                        vertex_2d v1 = { static_cast<float>(j) * tile_width,
-                                         static_cast<float>(i) * tile_height,
-                                         0.f,
-                                         1.f };
-                        vertex_2d v2 = { static_cast<float>(j + 1) * tile_width,
-                                         static_cast<float>(i) * tile_height,
-                                         1.f,
-                                         1.f };
-                        vertex_2d v3 = { static_cast<float>(j + 1) * tile_width,
-                                         static_cast<float>(i - 1) *
-                                             tile_height,
-                                         1.f,
-                                         0.f };
-                        vertex_2d v4 = { static_cast<float>(j) * tile_width,
-                                         static_cast<float>(i - 1) *
-                                             tile_height,
-                                         0.f,
-                                         0.f };
-
-                        tile.vertices.push_back(v1);
-                        tile.vertices.push_back(v2);
-                        tile.vertices.push_back(v3);
-                        tile.vertices.push_back(v4);
-                    }
-
             tiles.push_back(tile);
         }
     }
@@ -86,17 +58,62 @@ public:
                          [&](const tile tile) { return tile.type == type; });
 
         if (it != tiles.end())
+        {
             tile_vertex_buffer->buffer_data(it->vertices.data(),
                                             it->vertices.size());
+        }
         else
             std::cout << "Such tile doesn't exists" << std::endl;
     }
-    void fill_rectangle(
-        int start_x, int start_y, int width_, int height_, map_tile type) final
+    void fill_rectangle(int      start_x,
+                        int      start_y,
+                        int      width_,
+                        int      height_,
+                        float    window_width,
+                        float    window_height,
+                        map_tile type) final
     {
-        for (int i = start_y; i < start_y + height_; i++)
-            for (int j = start_x; j < start_x + width_; j++)
-                tiles_positions[i][j] = type;
+        auto it =
+            std::find_if(tiles.begin(),
+                         tiles.end(),
+                         [&](const tile tile) { return tile.type == type; });
+
+        if (it != tiles.end())
+        {
+            for (int i = start_y; i < start_y + height_; i++)
+                for (int j = start_x; j < start_x + width_; j++)
+                {
+                    tiles_positions[i][j] = type;
+
+                    glm::vec3 position = { static_cast<float>(j) * tile_width *
+                                               2.f / window_width,
+                                           static_cast<float>(i) * tile_height *
+                                               2.f / window_height,
+                                           1.f };
+
+                    glm::vec3 size = { tile_width * 2.f / window_width,
+                                       tile_height * 2.f / window_height,
+                                       1.f };
+
+                    vertex_2d v1 = { position.x, position.y, 0.f, 1.f };
+                    vertex_2d v2 = {
+                        position.x + size.x, position.y, 1.f, 1.f
+                    };
+                    vertex_2d v3 = {
+                        position.x + size.x, position.y - size.y, 1.f, 0.f
+                    };
+                    vertex_2d v4 = {
+                        position.x, position.y - size.y, 0.f, 0.f
+                    };
+
+                    it->vertices.push_back(v1);
+                    it->vertices.push_back(v2);
+                    it->vertices.push_back(v3);
+                    it->vertices.push_back(v4);
+                }
+        }
+        else
+            std::cout << "Such tile doesn't exists" << std::endl;
     }
     texture* get_tile(map_tile type) final
     {

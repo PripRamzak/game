@@ -3,21 +3,36 @@
 #include <iostream>
 #include <vector>
 
+#include <glm/matrix.hpp>
+
 class game_sprite final : public sprite
 {
     std::vector<texture*> textures;
     vertex_2d             vertices[4];
+    glm::vec3             position;
     int                   current_texture = 0;
     float                 delta_pos_x     = 0.f;
     float                 delta_pos_y     = 0.f;
 
 public:
-    game_sprite(float pos_x, float pos_y, float width, float height)
+    game_sprite(float pos_x,
+                float pos_y,
+                float width,
+                float height,
+                int   window_width,
+                int   window_height)
     {
-        vertex_2d v1 = { pos_x, pos_y, 0.f, 1.f };
-        vertex_2d v2 = { pos_x + width, pos_y, 1.f, 1.f };
-        vertex_2d v3 = { pos_x + width, pos_y - height, 1.f, 0.f };
-        vertex_2d v4 = { pos_x, pos_y - height, 0.f, 0.f };
+        position = { pos_x * 2.f / window_width,
+                     pos_y * 2.f / window_height,
+                     1.f };
+        glm::vec3 size{ width * 2.f / window_width,
+                        height * 2.f / window_height,
+                        1.f };
+
+        vertex_2d v1 = { position.x, position.y, 0.f, 1.f };
+        vertex_2d v2 = { position.x + size.x, position.y, 1.f, 1.f };
+        vertex_2d v3 = { position.x + size.x, position.y - size.y, 1.f, 0.f };
+        vertex_2d v4 = { position.x, position.y - size.y, 0.f, 0.f };
 
         vertices[0] = v1;
         vertices[1] = v2;
@@ -36,6 +51,8 @@ public:
         delta_pos_y += y;
         std::cout << delta_pos_x << " " << delta_pos_y << std::endl;
     }
+    float      get_position_x() final { return position.x; }
+    float      get_position_y() final { return position.y; }
     float      get_current_pos_x() final { return delta_pos_x; }
     float      get_current_pos_y() final { return delta_pos_y; }
     vertex_2d* get_vertices() final { return vertices; }
@@ -44,8 +61,14 @@ public:
 
 sprite::~sprite() = default;
 
-sprite* create_sprite(float pos_x, float pos_y, float width, float height)
+sprite* create_sprite(float pos_x,
+                      float pos_y,
+                      float width,
+                      float height,
+                      int   window_width,
+                      int   window_height)
 {
-    sprite* sprite = new game_sprite(pos_x, pos_y, width, height);
+    sprite* sprite = new game_sprite(
+        pos_x, pos_y, width, height, window_width, window_height);
     return sprite;
 }
