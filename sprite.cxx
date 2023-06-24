@@ -25,9 +25,9 @@ public:
         vertices[3] = v4;
     }
     void add_texture(texture* texture) final { textures.push_back(texture); }
-    void set_current_texture(int current_texture) final
+    void set_current_texture(int current_texture_) final
     {
-        this->current_texture = current_texture;
+        this->current_texture = current_texture_;
     }
     void next_sprite() final { textures[current_texture]->next_texture(); }
     void move(float x, float y) final
