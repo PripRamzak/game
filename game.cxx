@@ -7,8 +7,6 @@
 #include <cstdlib>
 #include <memory>
 
-#include <glm/matrix.hpp>
-
 int main(int /*argc*/, char** /*argv*/)
 {
     std::unique_ptr<engine, void (*)(engine*)> engine(create_engine(),
@@ -86,7 +84,6 @@ int main(int /*argc*/, char** /*argv*/)
 
     while (!quit)
     {
-        glm::mat4 mat_move{ 1 };
         if (engine->read_input(event))
         {
             if (event == event::turn_off)
@@ -101,26 +98,26 @@ int main(int /*argc*/, char** /*argv*/)
                 {
                     warrior_idle = false;
                     warrior_run  = true;
-                    warrior_sprite->move(0.f, 0.03f);
+                    warrior_sprite->move(0.f, 0.02f);
                 }
                 else if (engine->check_action(action::down))
                 {
                     warrior_idle = false;
                     warrior_run  = true;
-                    warrior_sprite->move(0.f, -0.03f);
+                    warrior_sprite->move(0.f, -0.02f);
                 }
                 else if (engine->check_action(action::left))
                 {
                     warrior_idle = false;
                     warrior_run  = true;
-                    warrior_sprite->move(-0.03f, 0.f);
+                    warrior_sprite->move(-0.02f, 0.f);
                     direction = 1;
                 }
                 else if (engine->check_action(action::right))
                 {
                     warrior_idle = false;
                     warrior_run  = true;
-                    warrior_sprite->move(0.03f, 0.f);
+                    warrior_sprite->move(0.02f, 0.f);
                     direction = 0;
                 }
 
@@ -138,11 +135,6 @@ int main(int /*argc*/, char** /*argv*/)
                 warrior_run  = false;
             }
         }
-
-        mat_move[3].x = warrior_sprite->get_delta_x();
-        mat_move[3].y = warrior_sprite->get_delta_y();
-
-        // glm::mat4 mat_result = mat_move * mat_to_ndc_coordinates;
 
         camera->look_at(warrior_sprite->get_current_pos_x(),
                         warrior_sprite->get_current_pos_y());
@@ -169,24 +161,15 @@ int main(int /*argc*/, char** /*argv*/)
                     warrior_sprite->set_current_texture(1);
             }
 
-            /*glm::mat4 test = mat_move;
-            test[3].x *= -1.f;
-            test[3].y *= -1.f;*/
-            glm::mat4{ 1 };
-
             engine->render(floor_vertex_buffer,
                            floor_index_buffer,
                            dungeon_map->get_tile(map_tile::floor),
-                           0,
-                           0,
                            camera->get_view());
 
             engine->render(warrior_vertex_buffer,
                            warrior_index_buffer,
                            warrior_sprite->get_sprite(),
-                           0,
-                           direction,
-                           &mat_move[0][0]);
+                           direction);
 
             if (engine->get_time() - last_time > 0.15f)
             {

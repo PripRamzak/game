@@ -39,11 +39,14 @@ class game_sound_buffer;
 
 class game_engine final : public engine
 {
-    SDL_Window*                window;
-    int                        window_width  = 0;
-    int                        window_height = 0;
-    SDL_GLContext              context;
-    shader_program*            texture_program;
+    SDL_Window* window;
+    int         window_width  = 0;
+    int         window_height = 0;
+
+    SDL_GLContext   context;
+    shader_program* hero_program;
+    shader_program* map_program;
+
     SDL_AudioDeviceID          audio_device;
     SDL_AudioSpec              device_audio_spec;
     std::vector<sound_buffer*> sounds;
@@ -98,7 +101,8 @@ public:
     game_engine()
         : window(nullptr)
         , context(nullptr)
-        , texture_program(nullptr)
+        , hero_program(nullptr)
+        , map_program(nullptr)
     {
     }
     bool initialize() final
@@ -226,26 +230,18 @@ public:
             return false;
         }
 
-        texture_program = create_shader_program();
+        hero_program = create_shader_program();
 
-        if (!texture_program->create_shader("./vertex_shader.glsl",
-                                            shader_type::vertex))
+        if (!hero_program->create_shader("./vertex_hero_shader.glsl",
+                                         shader_type::vertex))
         {
             SDL_GL_DeleteContext(context);
             SDL_DestroyWindow(window);
             SDL_Quit();
             return false;
         }
-        if (!texture_program->create_shader("./fragment_shader.glsl",
-                                            shader_type::fragment))
-        {
-            SDL_GL_DeleteContext(context);
-            SDL_DestroyWindow(window);
-            SDL_Quit();
-            return false;
-        }
-
-        if (!texture_program->link())
+        if (!hero_program->create_shader("./fragment_hero_shader.glsl",
+                                         shader_type::fragment))
         {
             SDL_GL_DeleteContext(context);
             SDL_DestroyWindow(window);
@@ -253,8 +249,46 @@ public:
             return false;
         }
 
-        texture_program->bind("a_position", 0);
-        texture_program->bind("t_coord", 1);
+        if (!hero_program->link())
+        {
+            SDL_GL_DeleteContext(context);
+            SDL_DestroyWindow(window);
+            SDL_Quit();
+            return false;
+        }
+
+        hero_program->bind("vertex_position", 0);
+        hero_program->bind("texture_coordinates", 1);
+
+        map_program = create_shader_program();
+
+        if (!map_program->create_shader("./vertex_map_shader.glsl",
+                                        shader_type::vertex))
+        {
+            SDL_GL_DeleteContext(context);
+            SDL_DestroyWindow(window);
+            SDL_Quit();
+            return false;
+        }
+        if (!map_program->create_shader("./fragment_map_shader.glsl",
+                                        shader_type::fragment))
+        {
+            SDL_GL_DeleteContext(context);
+            SDL_DestroyWindow(window);
+            SDL_Quit();
+            return false;
+        }
+
+        if (!map_program->link())
+        {
+            SDL_GL_DeleteContext(context);
+            SDL_DestroyWindow(window);
+            SDL_Quit();
+            return false;
+        }
+
+        map_program->bind("vertex_position", 0);
+        map_program->bind("texture_coordinates", 1);
 
         glEnable(GL_BLEND);
         gl_check();
@@ -349,23 +383,58 @@ public:
     void render(vertex_buffer* vertex_buffer,
                 index_buffer*  index_buffer,
                 texture*       texture,
-                int            index,
-                int            direction,
-                float*         matrix_first_value) final
+                int            direction) final
     {
-        texture_program->use();
-        texture_program->set_uniform_1f(
+        hero_program->use();
+        hero_program->set_uniform_1f(
             "quantity", static_cast<float>(texture->get_quantity()));
-        texture_program->set_uniform_1f(
+        hero_program->set_uniform_1f(
             "number",
             static_cast<float>(texture->get_current_texture_number()));
-        texture_program->set_uniform_1i("direction", direction);
-        texture_program->set_uniform_1i("texture", 0);
-        texture_program->set_uniform_matrix4fv(
+        hero_program->set_uniform_1i("direction", direction);
+        hero_program->set_uniform_1i("texture", 0);
+
+        texture->bind();
+        texture->active(0);
+
+        vertex_buffer->bind();
+        index_buffer->bind();
+
+        glVertexAttribPointer(0,
+                              2,
+                              GL_FLOAT,
+                              GL_FALSE,
+                              sizeof(vertex_2d),
+                              reinterpret_cast<void*>(0));
+        gl_check();
+        glEnableVertexAttribArray(0);
+        gl_check();
+
+        glVertexAttribPointer(1,
+                              2,
+                              GL_FLOAT,
+                              GL_FALSE,
+                              sizeof(vertex_2d),
+                              reinterpret_cast<void*>(2 * sizeof(float)));
+        gl_check();
+        glEnableVertexAttribArray(1);
+        gl_check();
+
+        glDrawElements(
+            GL_TRIANGLES, index_buffer->get_size(), GL_UNSIGNED_SHORT, 0);
+    }
+    void render(vertex_buffer* vertex_buffer,
+                index_buffer*  index_buffer,
+                texture*       texture,
+                float*         matrix_first_value) final
+    {
+        map_program->use();
+        map_program->set_uniform_1i("texture", 0);
+        map_program->set_uniform_matrix4fv(
             "matrix", 1, GL_FALSE, matrix_first_value);
 
         texture->bind();
-        texture->active(index);
+        texture->active(0);
 
         vertex_buffer->bind();
         index_buffer->bind();
@@ -434,7 +503,7 @@ public:
     }
     void clear() final
     {
-        glClearColor(0.2f, 0.2f, 0.2f, 0.f);
+        glClearColor(0.1f, 0.1f, 0.1f, 0.f);
         gl_check();
         glClear(GL_COLOR_BUFFER_BIT);
         gl_check();
@@ -459,7 +528,7 @@ public:
     void uninitialize() final
     {
         ImGui_ImplGameEngine_Shutdown();
-        delete texture_program;
+        delete hero_program;
         SDL_GL_DeleteContext(context);
         SDL_DestroyWindow(window);
         SDL_Quit();

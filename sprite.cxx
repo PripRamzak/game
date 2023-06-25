@@ -68,8 +68,6 @@ public:
         delta_pos_y += y;
         std::cout << delta_pos_x << " " << delta_pos_y << std::endl;
     }
-    float      get_delta_x() final { return delta_pos_x; }
-    float      get_delta_y() final { return delta_pos_y; }
     float      get_current_pos_x() final { return position.x + delta_pos_x; }
     float      get_current_pos_y() final { return position.y + delta_pos_y; }
     vertex_2d* get_vertices() final { return vertices; }

@@ -20,8 +20,10 @@ public:
     virtual void render(vertex_buffer* vertex_buffer,
                         index_buffer*  index_buffer,
                         texture*       texture,
-                        int index,
-                        int direction,
+                        int direction)   = 0;
+    virtual void render(vertex_buffer* vertex_buffer,
+                        index_buffer*  index_buffer,
+                        texture*       texture,
                         float* matrix_first_value)   = 0;
     // clang-format on
     virtual bool  render_menu(bool& show_gui_window) = 0;
