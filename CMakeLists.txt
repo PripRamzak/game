@@ -9,6 +9,7 @@ add_library(engine SHARED
         engine.hxx
         event.cxx
         event.hxx
+        geometry.cxx
         geometry.hxx
         index_buffer.cxx
         index_buffer.hxx

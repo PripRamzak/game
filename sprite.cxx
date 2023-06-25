@@ -15,46 +15,20 @@ class game_sprite final : public sprite
     float                 delta_pos_y     = 0.f;
 
 public:
-    game_sprite(float pos_x,
-                float pos_y,
-                float width,
-                float height,
-                int   window_width,
-                int   window_height)
+    game_sprite(float pos_x, float pos_y, float width, float height)
     {
-        if (pos_x <= window_width / 2)
-            pos_x = -1 * (window_width / 2 - pos_x);
-        else
-            pos_x = pos_x - window_width / 2;
-        if (pos_y >= window_height / 2)
-            pos_y = -1 * (pos_y - window_height / 2);
-        else
-            pos_y = window_height / 2 - pos_y;
 
-        position = { pos_x * 2.f / window_width,
-                     pos_y * 2.f / window_height,
-                     1.f };
-        glm::vec3 size{ width * 2.f / window_width,
-                        height * 2.f / window_height,
-                        1.f };
-
-        vertex_2d v1 = {
-            position.x - size.x / 2, position.y + size.y / 2, 0.f, 1.f
-        };
-        vertex_2d v2 = {
-            position.x + size.x / 2, position.y + size.y / 2, 1.f, 1.f
-        };
-        vertex_2d v3 = {
-            position.x + size.x / 2, position.y - size.y / 2, 1.f, 0.f
-        };
-        vertex_2d v4 = {
-            position.x - size.x / 2, position.y - size.y / 2, 0.f, 0.f
-        };
+        vertex_2d v1 = { pos_x - width / 2.f, pos_y - height / 2.f, 0.f, 1.f };
+        vertex_2d v2 = { pos_x + width / 2.f, pos_y - height / 2.f, 1.f, 1.f };
+        vertex_2d v3 = { pos_x + width / 2.f, pos_y + height / 2.f, 1.f, 0.f };
+        vertex_2d v4 = { pos_x - width / 2.f, pos_y + height / 2.f, 0.f, 0.f };
 
         vertices[0] = v1;
         vertices[1] = v2;
         vertices[2] = v3;
         vertices[3] = v4;
+
+        position = { v1.x + v3.x / 2.f, v1.y + v2.y / 2.f, 1.f };
     }
     void add_texture(texture* texture) final { textures.push_back(texture); }
     void set_current_texture(int current_texture_) final
@@ -76,13 +50,7 @@ public:
 
 sprite::~sprite() = default;
 
-sprite* create_sprite(float pos_x,
-                      float pos_y,
-                      float width,
-                      float height,
-                      int   window_width,
-                      int   window_height)
+sprite* create_sprite(float pos_x, float pos_y, float width, float height)
 {
-    return new game_sprite(
-        pos_x, pos_y, width, height, window_width, window_height);
+    return new game_sprite(pos_x, pos_y, width, height);
 }

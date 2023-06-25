@@ -30,9 +30,7 @@ int main(int /*argc*/, char** /*argv*/)
         create_sprite(static_cast<float>(engine->get_window_width()) / 2.f,
                       static_cast<float>(engine->get_window_height()) / 2.f,
                       192.f,
-                      96.f,
-                      static_cast<float>(engine->get_window_width()),
-                      static_cast<float>(engine->get_window_height()));
+                      96.f);
     warrior_sprite->add_texture(warrior_idle_sprite_sheet);
     warrior_sprite->add_texture(warrior_run_sprite_sheet);
     warrior_sprite->add_texture(warrior_attack_sprite_sheet);
@@ -48,15 +46,9 @@ int main(int /*argc*/, char** /*argv*/)
     texture* floor = create_texture();
     floor->load("./img/floor.png");
 
-    map* dungeon_map = create_map(30, 30, 64, 64);
+    map* dungeon_map = create_map(64, 64);
     dungeon_map->add_tile(floor, map_tile::floor);
-    dungeon_map->fill_rectangle(5,
-                                5,
-                                10,
-                                5,
-                                static_cast<float>(engine->get_window_width()),
-                                static_cast<float>(engine->get_window_height()),
-                                map_tile::floor);
+    dungeon_map->fill_rectangle(5, 5, 10, 5, map_tile::floor);
 
     vertex_buffer* floor_vertex_buffer = create_vertex_buffer();
     dungeon_map->create_tile_vertex_buffer(floor_vertex_buffer,

@@ -17,9 +17,4 @@ public:
     ~sprite();
 };
 
-sprite* create_sprite(float pos_x,
-                      float pos_y,
-                      float width,
-                      float height,
-                      int   window_width,
-                      int   window_height);
+sprite* create_sprite(float pos_x, float pos_y, float width, float height);
