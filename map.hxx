@@ -9,7 +9,12 @@
 
 enum class map_tile
 {
-    floor
+    floor,
+    wall,
+    wall_top,
+    wall_left,
+    wall_right,
+    wall_bottom
 };
 
 struct tile
@@ -35,6 +40,7 @@ public:
                                       map_tile type)            = 0;
     virtual void fill_rectangle(
         int start_x, int start_y, int width_, int height_, map_tile type) = 0;
+    virtual bool     check_collision(sprite* sprite, map_tile type)       = 0;
     virtual texture* get_tile(map_tile type)                              = 0;
     ~map();
 };
