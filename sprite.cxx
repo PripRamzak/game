@@ -28,7 +28,7 @@ public:
         vertices[2] = v3;
         vertices[3] = v4;
 
-        position = { v1.x + v3.x / 2.f, v1.y + v2.y / 2.f, 1.f };
+        position = { (v1.x + v3.x) / 2.f, (v1.y + v3.y) / 2.f, 1.f };
     }
     void add_texture(texture* texture) final { textures.push_back(texture); }
     void set_current_texture(int current_texture_) final
