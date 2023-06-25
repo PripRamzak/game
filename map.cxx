@@ -7,9 +7,8 @@
 
 class game_map final : public map
 {
-    int               width  = 0;
-    int               height = 0;
-    map_tile**        tiles_positions;
+    int               width       = 0;
+    int               height      = 0;
     int               tile_width  = 0;
     int               tile_height = 0;
     std::vector<tile> tiles;
@@ -21,13 +20,6 @@ public:
         , tile_width(tile_width_)
         , tile_height(tile_height_)
     {
-        tiles_positions = new map_tile*[height];
-        for (int i = 0; i < height; i++)
-            tiles_positions[i] = new map_tile[width];
-
-        for (int i = 0; i < height; i++)
-            for (int j = 0; j < width; j++)
-                tiles_positions[i][j] = map_tile::null_tile;
     }
     void add_tile(texture* tile_texture, map_tile type) final
     {
@@ -80,31 +72,45 @@ public:
 
         if (it != tiles.end())
         {
-            for (int i = start_y; i < start_y + height_; i++)
-                for (int j = start_x; j < start_x + width_; j++)
+            for (int i = start_y - 1; i < start_y + height_ - 1; i++)
+                for (int j = start_x - 1; j < start_x + width_ - 1; j++)
                 {
-                    tiles_positions[i][j] = type;
-
-                    glm::vec3 position = { static_cast<float>(j) * tile_width *
-                                               2.f / window_width,
-                                           static_cast<float>(i) * tile_height *
-                                               2.f / window_height,
+                    glm::vec3 position = { static_cast<float>(j) * tile_width,
+                                           static_cast<float>(i) * tile_height,
                                            1.f };
+
+                    if (position.x <= window_width / 2)
+                        position.x = -1 * (window_width / 2 - position.x);
+                    else
+                        position.x = position.x - window_width / 2;
+                    if (position.y >= window_height / 2)
+                        position.y = -1 * (position.y - window_height / 2);
+                    else
+                        position.y = window_height / 2 - position.y;
+
+                    position.x = position.x * 2 / window_width;
+                    position.y = position.y * 2 / window_height;
 
                     glm::vec3 size = { tile_width * 2.f / window_width,
                                        tile_height * 2.f / window_height,
                                        1.f };
 
-                    vertex_2d v1 = { position.x, position.y, 0.f, 1.f };
-                    vertex_2d v2 = {
-                        position.x + size.x, position.y, 1.f, 1.f
-                    };
-                    vertex_2d v3 = {
-                        position.x + size.x, position.y - size.y, 1.f, 0.f
-                    };
-                    vertex_2d v4 = {
-                        position.x, position.y - size.y, 0.f, 0.f
-                    };
+                    vertex_2d v1 = { position.x - size.x / 2,
+                                     position.y + size.y / 2,
+                                     0.f,
+                                     1.f };
+                    vertex_2d v2 = { position.x + size.x / 2,
+                                     position.y + size.y / 2,
+                                     1.f,
+                                     1.f };
+                    vertex_2d v3 = { position.x + size.x / 2,
+                                     position.y - size.y / 2,
+                                     1.f,
+                                     0.f };
+                    vertex_2d v4 = { position.x - size.x / 2,
+                                     position.y - size.y / 2,
+                                     0.f,
+                                     0.f };
 
                     it->vertices.push_back(v1);
                     it->vertices.push_back(v2);

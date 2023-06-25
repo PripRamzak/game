@@ -35,6 +35,8 @@ target_link_libraries(engine PRIVATE SDL3::SDL3-shared)
 
 add_executable(game
         game.cxx
+        camera.cxx
+        camera.hxx
         map.cxx
         map.hxx
         sprite.cxx

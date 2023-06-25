@@ -361,8 +361,8 @@ public:
             static_cast<float>(texture->get_current_texture_number()));
         texture_program->set_uniform_1i("direction", direction);
         texture_program->set_uniform_1i("texture", 0);
-        texture_program->set_uniform_matrix3fv(
-            "Matrix", 1, GL_FALSE, matrix_first_value);
+        texture_program->set_uniform_matrix4fv(
+            "matrix", 1, GL_FALSE, matrix_first_value);
 
         texture->bind();
         texture->active(index);
@@ -434,7 +434,7 @@ public:
     }
     void clear() final
     {
-        glClearColor(1.f, 1.f, 1.f, 0.f);
+        glClearColor(0.2f, 0.2f, 0.2f, 0.f);
         gl_check();
         glClear(GL_COLOR_BUFFER_BIT);
         gl_check();

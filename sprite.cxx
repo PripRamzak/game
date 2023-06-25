@@ -22,6 +22,15 @@ public:
                 int   window_width,
                 int   window_height)
     {
+        if (pos_x <= window_width / 2)
+            pos_x = -1 * (window_width / 2 - pos_x);
+        else
+            pos_x = pos_x - window_width / 2;
+        if (pos_y >= window_height / 2)
+            pos_y = -1 * (pos_y - window_height / 2);
+        else
+            pos_y = window_height / 2 - pos_y;
+
         position = { pos_x * 2.f / window_width,
                      pos_y * 2.f / window_height,
                      1.f };
@@ -29,10 +38,18 @@ public:
                         height * 2.f / window_height,
                         1.f };
 
-        vertex_2d v1 = { position.x, position.y, 0.f, 1.f };
-        vertex_2d v2 = { position.x + size.x, position.y, 1.f, 1.f };
-        vertex_2d v3 = { position.x + size.x, position.y - size.y, 1.f, 0.f };
-        vertex_2d v4 = { position.x, position.y - size.y, 0.f, 0.f };
+        vertex_2d v1 = {
+            position.x - size.x / 2, position.y + size.y / 2, 0.f, 1.f
+        };
+        vertex_2d v2 = {
+            position.x + size.x / 2, position.y + size.y / 2, 1.f, 1.f
+        };
+        vertex_2d v3 = {
+            position.x + size.x / 2, position.y - size.y / 2, 1.f, 0.f
+        };
+        vertex_2d v4 = {
+            position.x - size.x / 2, position.y - size.y / 2, 0.f, 0.f
+        };
 
         vertices[0] = v1;
         vertices[1] = v2;
@@ -51,10 +68,10 @@ public:
         delta_pos_y += y;
         std::cout << delta_pos_x << " " << delta_pos_y << std::endl;
     }
-    float      get_position_x() final { return position.x; }
-    float      get_position_y() final { return position.y; }
-    float      get_current_pos_x() final { return delta_pos_x; }
-    float      get_current_pos_y() final { return delta_pos_y; }
+    float      get_delta_x() final { return delta_pos_x; }
+    float      get_delta_y() final { return delta_pos_y; }
+    float      get_current_pos_x() final { return position.x + delta_pos_x; }
+    float      get_current_pos_y() final { return position.y + delta_pos_y; }
     vertex_2d* get_vertices() final { return vertices; }
     texture*   get_sprite() final { return textures[current_texture]; }
 };

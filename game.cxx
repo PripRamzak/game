@@ -1,3 +1,4 @@
+#include "camera.hxx"
 #include "engine.hxx"
 #include "map.hxx"
 #include "sprite.hxx"
@@ -16,6 +17,8 @@ int main(int /*argc*/, char** /*argv*/)
     if (!engine->initialize())
         return EXIT_FAILURE;
 
+    camera* camera = create_camera();
+
     texture* warrior_idle_sprite_sheet = create_texture();
     warrior_idle_sprite_sheet->load("./img/warrior_idle.png", 6);
     texture* warrior_run_sprite_sheet = create_texture();
@@ -25,7 +28,13 @@ int main(int /*argc*/, char** /*argv*/)
     texture* warrior_run_n_attack_sprite_sheet = create_texture();
     warrior_run_n_attack_sprite_sheet->load("./img/warrior_run&attack.png", 4);
 
-    sprite* warrior_sprite = create_sprite(-120.f, 120.f, 192.f, 96.f);
+    sprite* warrior_sprite =
+        create_sprite(static_cast<float>(engine->get_window_width()) / 2.f,
+                      static_cast<float>(engine->get_window_height()) / 2.f,
+                      192.f,
+                      96.f,
+                      static_cast<float>(engine->get_window_width()),
+                      static_cast<float>(engine->get_window_height()));
     warrior_sprite->add_texture(warrior_idle_sprite_sheet);
     warrior_sprite->add_texture(warrior_run_sprite_sheet);
     warrior_sprite->add_texture(warrior_attack_sprite_sheet);
@@ -41,9 +50,15 @@ int main(int /*argc*/, char** /*argv*/)
     texture* floor = create_texture();
     floor->load("./img/floor.png");
 
-    map* dungeon_map = create_map(7, 7, 64, 64);
-    dungeon_map->fill_rectangle(3, 3, 2, 3, map_tile::floor);
+    map* dungeon_map = create_map(30, 30, 64, 64);
     dungeon_map->add_tile(floor, map_tile::floor);
+    dungeon_map->fill_rectangle(5,
+                                5,
+                                10,
+                                5,
+                                static_cast<float>(engine->get_window_width()),
+                                static_cast<float>(engine->get_window_height()),
+                                map_tile::floor);
 
     vertex_buffer* floor_vertex_buffer = create_vertex_buffer();
     dungeon_map->create_tile_vertex_buffer(floor_vertex_buffer,
@@ -60,12 +75,6 @@ int main(int /*argc*/, char** /*argv*/)
 
     int direction = 0;
 
-    glm::mat3 mat_to_ndc_coordinates{ 1.f };
-    mat_to_ndc_coordinates[0].x =
-        2.f / static_cast<float>(engine->get_window_width());
-    mat_to_ndc_coordinates[1].y =
-        2.f / static_cast<float>(engine->get_window_height());
-
     float last_time        = engine->get_time();
     bool  quit             = false;
     bool  show_menu_window = true;
@@ -77,7 +86,7 @@ int main(int /*argc*/, char** /*argv*/)
 
     while (!quit)
     {
-        glm::mat3 mat_move{ 1 };
+        glm::mat4 mat_move{ 1 };
         if (engine->read_input(event))
         {
             if (event == event::turn_off)
@@ -130,8 +139,13 @@ int main(int /*argc*/, char** /*argv*/)
             }
         }
 
-        mat_move[2].x = warrior_sprite->get_current_pos_x();
-        mat_move[2].y = warrior_sprite->get_current_pos_y();
+        mat_move[3].x = warrior_sprite->get_delta_x();
+        mat_move[3].y = warrior_sprite->get_delta_y();
+
+        // glm::mat4 mat_result = mat_move * mat_to_ndc_coordinates;
+
+        camera->look_at(warrior_sprite->get_current_pos_x(),
+                        warrior_sprite->get_current_pos_y());
 
         if (show_menu_window)
         {
@@ -140,7 +154,6 @@ int main(int /*argc*/, char** /*argv*/)
         }
         else
         {
-            glm::mat3 mat_result = mat_move * mat_to_ndc_coordinates;
             if (warrior_idle)
             {
                 if (warrior_attack)
@@ -156,19 +169,24 @@ int main(int /*argc*/, char** /*argv*/)
                     warrior_sprite->set_current_texture(1);
             }
 
+            /*glm::mat4 test = mat_move;
+            test[3].x *= -1.f;
+            test[3].y *= -1.f;*/
+            glm::mat4{ 1 };
+
             engine->render(floor_vertex_buffer,
                            floor_index_buffer,
                            dungeon_map->get_tile(map_tile::floor),
                            0,
-                           direction,
-                           &mat_to_ndc_coordinates[0][0]);
+                           0,
+                           camera->get_view());
 
             engine->render(warrior_vertex_buffer,
                            warrior_index_buffer,
                            warrior_sprite->get_sprite(),
                            0,
                            direction,
-                           &mat_result[0][0]);
+                           &mat_move[0][0]);
 
             if (engine->get_time() - last_time > 0.15f)
             {

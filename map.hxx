@@ -9,7 +9,6 @@
 
 enum class map_tile
 {
-    null_tile,
     floor
 };
 
