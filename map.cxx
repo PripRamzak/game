@@ -7,17 +7,13 @@
 
 class game_map final : public map
 {
-    int               width       = 0;
-    int               height      = 0;
-    int               tile_width  = 0;
-    int               tile_height = 0;
+    float             tile_width  = 0;
+    float             tile_height = 0;
     std::vector<tile> tiles;
 
 public:
-    game_map(int width_, int height_, int tile_width_, int tile_height_)
-        : width(width_)
-        , height(height_)
-        , tile_width(tile_width_)
+    game_map(float tile_width_, float tile_height_)
+        : tile_width(tile_width_)
         , tile_height(tile_height_)
     {
     }
@@ -57,13 +53,10 @@ public:
         else
             std::cout << "Such tile doesn't exists" << std::endl;
     }
-    void fill_rectangle(int      start_x,
-                        int      start_y,
-                        int      width_,
-                        int      height_,
-                        float    window_width,
-                        float    window_height,
-                        map_tile type) final
+    void draw_vertical_line(int      start_x,
+                            int      start_y,
+                            int      length,
+                            map_tile type) final
     {
         auto it =
             std::find_if(tiles.begin(),
@@ -71,44 +64,99 @@ public:
                          [&](const tile tile) { return tile.type == type; });
 
         if (it != tiles.end())
-        {
+            for (int i = start_y - 1; i < start_y + length - 1; i++)
+            {
+                vertex_2d v1 = { (static_cast<float>(start_x) - 1.f) *
+                                     tile_width,
+                                 static_cast<float>(i) * tile_height,
+                                 0.f,
+                                 1.f };
+                vertex_2d v2 = { static_cast<float>(start_x) * tile_width,
+                                 static_cast<float>(i) * tile_height,
+                                 1.f,
+                                 1.f };
+                vertex_2d v3 = { static_cast<float>(start_x) * tile_width,
+                                 (static_cast<float>(i) + 1.f) * tile_height,
+                                 1.f,
+                                 0.f };
+                vertex_2d v4 = { (static_cast<float>(start_x) - 1.f) *
+                                     tile_width,
+                                 (static_cast<float>(i) + 1.f) * tile_height,
+                                 0.f,
+                                 0.f };
+
+                it->vertices.push_back(v1);
+                it->vertices.push_back(v2);
+                it->vertices.push_back(v3);
+                it->vertices.push_back(v4);
+            }
+    }
+    void draw_horizontal_line(int      start_x,
+                              int      start_y,
+                              int      length,
+                              map_tile type) final
+    {
+        auto it =
+            std::find_if(tiles.begin(),
+                         tiles.end(),
+                         [&](const tile tile) { return tile.type == type; });
+
+        if (it != tiles.end())
+            for (int i = start_x - 1; i < start_x + length - 1; i++)
+            {
+                vertex_2d v1 = { static_cast<float>(i) * tile_width,
+                                 (static_cast<float>(start_y) - 1.f) *
+                                     tile_height,
+                                 0.f,
+                                 1.f };
+                vertex_2d v2 = { (static_cast<float>(i) + 1.f) * tile_width,
+                                 (static_cast<float>(start_y) - 1.f) *
+                                     tile_height,
+                                 1.f,
+                                 1.f };
+                vertex_2d v3 = { (static_cast<float>(i) + 1.f) * tile_width,
+                                 static_cast<float>(start_y) * tile_height,
+                                 1.f,
+                                 0.f };
+                vertex_2d v4 = { static_cast<float>(i) * tile_width,
+                                 static_cast<float>(start_y) * tile_height,
+                                 0.f,
+                                 0.f };
+
+                it->vertices.push_back(v1);
+                it->vertices.push_back(v2);
+                it->vertices.push_back(v3);
+                it->vertices.push_back(v4);
+            }
+    }
+    void fill_rectangle(
+        int start_x, int start_y, int width_, int height_, map_tile type) final
+    {
+        auto it =
+            std::find_if(tiles.begin(),
+                         tiles.end(),
+                         [&](const tile tile) { return tile.type == type; });
+
+        if (it != tiles.end())
             for (int i = start_y - 1; i < start_y + height_ - 1; i++)
                 for (int j = start_x - 1; j < start_x + width_ - 1; j++)
                 {
-                    glm::vec3 position = { static_cast<float>(j) * tile_width,
-                                           static_cast<float>(i) * tile_height,
-                                           1.f };
-
-                    if (position.x <= window_width / 2)
-                        position.x = -1 * (window_width / 2 - position.x);
-                    else
-                        position.x = position.x - window_width / 2;
-                    if (position.y >= window_height / 2)
-                        position.y = -1 * (position.y - window_height / 2);
-                    else
-                        position.y = window_height / 2 - position.y;
-
-                    position.x = position.x * 2 / window_width;
-                    position.y = position.y * 2 / window_height;
-
-                    glm::vec3 size = { tile_width * 2.f / window_width,
-                                       tile_height * 2.f / window_height,
-                                       1.f };
-
-                    vertex_2d v1 = { position.x - size.x / 2,
-                                     position.y + size.y / 2,
+                    vertex_2d v1 = { static_cast<float>(j) * tile_width,
+                                     static_cast<float>(i) * tile_height,
                                      0.f,
                                      1.f };
-                    vertex_2d v2 = { position.x + size.x / 2,
-                                     position.y + size.y / 2,
+                    vertex_2d v2 = { (static_cast<float>(j) + 1.f) * tile_width,
+                                     static_cast<float>(i) * tile_height,
                                      1.f,
                                      1.f };
-                    vertex_2d v3 = { position.x + size.x / 2,
-                                     position.y - size.y / 2,
+                    vertex_2d v3 = { (static_cast<float>(j) + 1.f) * tile_width,
+                                     (static_cast<float>(i) + 1.f) *
+                                         tile_height,
                                      1.f,
                                      0.f };
-                    vertex_2d v4 = { position.x - size.x / 2,
-                                     position.y - size.y / 2,
+                    vertex_2d v4 = { static_cast<float>(j) * tile_width,
+                                     (static_cast<float>(i) + 1.f) *
+                                         tile_height,
                                      0.f,
                                      0.f };
 
@@ -117,7 +165,6 @@ public:
                     it->vertices.push_back(v3);
                     it->vertices.push_back(v4);
                 }
-        }
         else
             std::cout << "Such tile doesn't exists" << std::endl;
     }
@@ -139,7 +186,14 @@ public:
 
 map::~map() = default;
 
-map* create_map(int width, int height, int tile_width, int tile_height)
+void generate_map(map* map)
 {
-    return new game_map(width, height, tile_width, tile_height);
+    map->fill_rectangle(5, 5, 10, 5, map_tile::floor);
+    map->draw_vertical_line(1, 2, 3, map_tile::floor);
+    map->draw_horizontal_line(1, 1, 4, map_tile::floor);
+}
+
+map* create_map(float tile_width, float tile_height)
+{
+    return new game_map(tile_width, tile_height);
 }

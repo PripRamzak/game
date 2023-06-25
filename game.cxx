@@ -46,9 +46,9 @@ int main(int /*argc*/, char** /*argv*/)
     texture* floor = create_texture();
     floor->load("./img/floor.png");
 
-    map* dungeon_map = create_map(64, 64);
+    map* dungeon_map = create_map(64.f, 64.f);
     dungeon_map->add_tile(floor, map_tile::floor);
-    dungeon_map->fill_rectangle(5, 5, 10, 5, map_tile::floor);
+    generate_map(dungeon_map);
 
     vertex_buffer* floor_vertex_buffer = create_vertex_buffer();
     dungeon_map->create_tile_vertex_buffer(floor_vertex_buffer,
