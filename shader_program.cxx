@@ -218,6 +218,5 @@ shader_program::~shader_program() = default;
 
 shader_program* create_shader_program()
 {
-    shader_program* program = new opengl_shader_program;
-    return program;
+    return new opengl_shader_program;
 }

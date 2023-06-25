@@ -83,7 +83,6 @@ sprite* create_sprite(float pos_x,
                       int   window_width,
                       int   window_height)
 {
-    sprite* sprite = new game_sprite(
+    return new game_sprite(
         pos_x, pos_y, width, height, window_width, window_height);
-    return sprite;
 }

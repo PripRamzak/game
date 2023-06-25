@@ -86,7 +86,6 @@ public:
 
 sound_buffer* create_sound_buffer(const char* file_path, void* audio_spec)
 {
-    sound_buffer* sound_buffer = new game_sound_buffer(
-        file_path, reinterpret_cast<SDL_AudioSpec*>(audio_spec));
-    return sound_buffer;
+    return new game_sound_buffer(file_path,
+                                 reinterpret_cast<SDL_AudioSpec*>(audio_spec));
 }

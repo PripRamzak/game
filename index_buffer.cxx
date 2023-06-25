@@ -59,6 +59,5 @@ index_buffer::~index_buffer() = default;
 
 index_buffer* create_index_buffer()
 {
-    index_buffer* index_buffer = new opengl_index_buffer;
-    return index_buffer;
+    return new opengl_index_buffer;
 }

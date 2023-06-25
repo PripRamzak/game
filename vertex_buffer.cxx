@@ -38,6 +38,5 @@ vertex_buffer::~vertex_buffer() = default;
 
 vertex_buffer* create_vertex_buffer()
 {
-    vertex_buffer* vertex_buffer = new opengl_vertex_buffer;
-    return vertex_buffer;
+    return new opengl_vertex_buffer;
 }

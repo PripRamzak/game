@@ -120,6 +120,5 @@ texture::~texture() = default;
 
 texture* create_texture()
 {
-    texture* texture = new opengl_texture;
-    return texture;
+    return new opengl_texture;
 }
