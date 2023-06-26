@@ -53,14 +53,13 @@ public:
                              0.f,
                              0.f };
 
-            vertex_2d vertices[4];
-            vertices[0] = v1;
-            vertices[1] = v2;
-            vertices[2] = v3;
-            vertices[3] = v4;
+            sprite_.vertices[0] = v1;
+            sprite_.vertices[1] = v2;
+            sprite_.vertices[2] = v3;
+            sprite_.vertices[3] = v4;
 
             sprite_.sprite_vertex_buffer = create_vertex_buffer();
-            sprite_.sprite_vertex_buffer->buffer_data(vertices,
+            sprite_.sprite_vertex_buffer->buffer_data(sprite_.vertices,
                                                       static_cast<size_t>(4));
 
             sprites.push_back(sprite_);
@@ -74,7 +73,12 @@ public:
     void  set_state(hero_state state_) final { state = state_; }
     float get_current_pos_x() final { return position.x + delta_position.x; }
     float get_current_pos_y() final { return position.y + delta_position.y; }
-    void  set_direction(int direction_) final { direction = direction_; }
+    void  get_delta_pos(float& x, float& y) final
+    {
+        x = delta_position.x;
+        y = delta_position.y;
+    }
+    void       set_direction(int direction_) final { direction = direction_; }
     hero_state get_state() final { return state; }
     int        get_direction() final { return direction; }
     sprite*    get_sprite() final
@@ -86,6 +90,21 @@ public:
 
         if (it != sprites.end())
             return it->hero_sprite;
+        else
+        {
+            std::cout << "Such sprite doesn't exists" << std::endl;
+            return nullptr;
+        }
+    }
+    vertex_2d* get_vertices() final
+    {
+        auto it = std::find_if(sprites.begin(),
+                               sprites.end(),
+                               [&](const hero_sprite_state sprite)
+                               { return sprite.state == state; });
+
+        if (it != sprites.end())
+            return it->vertices;
         else
         {
             std::cout << "Such sprite doesn't exists" << std::endl;

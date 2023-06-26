@@ -15,9 +15,10 @@ int main(int /*argc*/, char** /*argv*/)
     if (!engine->initialize())
         return EXIT_FAILURE;
 
-    camera* camera =
-        create_camera(static_cast<float>(engine->get_window_width()),
-                      static_cast<float>(engine->get_window_height()));
+    float window_width  = static_cast<float>(engine->get_window_width());
+    float window_height = static_cast<float>(engine->get_window_height());
+
+    camera* camera = create_camera(window_width, window_height);
 
     texture* warrior_idle_sprite_sheet = create_texture();
     warrior_idle_sprite_sheet->load("./img/warrior_idle.png");
@@ -37,9 +38,7 @@ int main(int /*argc*/, char** /*argv*/)
     sprite* warrior_run_n_attack =
         create_sprite(warrior_run_n_attack_sprite_sheet, 60.f, 48.f, 4, 24.f);
 
-    hero* warrior =
-        create_hero(static_cast<float>(engine->get_window_width()) / 2.f,
-                    static_cast<float>(engine->get_window_height()) / 2.f);
+    hero* warrior = create_hero(window_width / 2.f, window_height / 2.f);
     warrior->add_sprite(warrior_idle, hero_state::idle);
     warrior->add_sprite(warrior_run, hero_state::run);
     warrior->add_sprite(warrior_attack, hero_state::attack);
@@ -69,6 +68,8 @@ int main(int /*argc*/, char** /*argv*/)
     dungeon_map->add_tile(wall_right, map_tile::wall_right);
     dungeon_map->add_tile(wall_bottom, map_tile::wall_bottom);
     generate_map(dungeon_map);
+
+    // vertex and indexes to map
 
     vertex_buffer* floor_vertex_buffer = create_vertex_buffer();
     dungeon_map->create_tile_vertex_buffer(floor_vertex_buffer,
@@ -139,34 +140,42 @@ int main(int /*argc*/, char** /*argv*/)
                 {
                     warrior->set_state(hero_state::run);
                     warrior->move(0.f, -25.f);
-                    /*if (dungeon_map->check_collision(warrior_sprite,
-                                                     map_tile::wall_top))
-                        warrior->move(0.f, -25.f);*/
+                    if (dungeon_map->check_collision(warrior,
+                                                     map_tile::wall_top,
+                                                     window_width,
+                                                     window_height))
+                        warrior->move(0.f, 25.f);
                 }
                 else if (engine->check_action(action::down))
                 {
                     warrior->set_state(hero_state::run);
                     warrior->move(0.f, 25.f);
-                    /*if (dungeon_map->check_collision(warrior_sprite,
-                                                     map_tile::wall_bottom))*/
-                    // warrior->move(0.f, 25.f);
+                    if (dungeon_map->check_collision(warrior,
+                                                     map_tile::wall_bottom,
+                                                     window_width,
+                                                     window_height))
+                        warrior->move(0.f, -25.f);
                 }
                 else if (engine->check_action(action::left))
                 {
                     warrior->set_state(hero_state::run);
                     warrior->move(-25.f, 0.f);
-                    /*if (dungeon_map->check_collision(warrior_sprite,
-                                                     map_tile::wall_left))
-                        warrior->move(25.f, 0.f);*/
+                    if (dungeon_map->check_collision(warrior,
+                                                     map_tile::wall_left,
+                                                     window_width,
+                                                     window_height))
+                        warrior->move(25.f, 0.f);
                     warrior->set_direction(1);
                 }
                 else if (engine->check_action(action::right))
                 {
                     warrior->set_state(hero_state::run);
                     warrior->move(25.f, 0.f);
-                    /*if (dungeon_map->check_collision(warrior_sprite,
-                                                     map_tile::wall_right))
-                        warrior->move(-25.f, 0.f);*/
+                    if (dungeon_map->check_collision(warrior,
+                                                     map_tile::wall_right,
+                                                     window_width,
+                                                     window_height))
+                        warrior->move(-25.f, 0.f);
                     warrior->set_direction(0);
                 }
 
