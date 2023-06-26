@@ -68,7 +68,8 @@ public:
     }
     void move(float delta_x, float delta_y) final
     {
-        delta_position = { delta_x, delta_y };
+        delta_position.x += delta_x;
+        delta_position.y += delta_y;
     }
     void  set_state(hero_state state_) final { state = state_; }
     float get_current_pos_x() final { return position.x + delta_position.x; }

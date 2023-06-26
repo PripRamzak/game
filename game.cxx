@@ -15,7 +15,9 @@ int main(int /*argc*/, char** /*argv*/)
     if (!engine->initialize())
         return EXIT_FAILURE;
 
-    camera* camera = create_camera();
+    camera* camera =
+        create_camera(static_cast<float>(engine->get_window_width()),
+                      static_cast<float>(engine->get_window_height()));
 
     texture* warrior_idle_sprite_sheet = create_texture();
     warrior_idle_sprite_sheet->load("./img/warrior_idle.png");
@@ -136,7 +138,7 @@ int main(int /*argc*/, char** /*argv*/)
                 if (engine->check_action(action::up))
                 {
                     warrior->set_state(hero_state::run);
-                    warrior->move(0.f, 25.f);
+                    warrior->move(0.f, -25.f);
                     /*if (dungeon_map->check_collision(warrior_sprite,
                                                      map_tile::wall_top))
                         warrior->move(0.f, -25.f);*/
@@ -144,10 +146,10 @@ int main(int /*argc*/, char** /*argv*/)
                 else if (engine->check_action(action::down))
                 {
                     warrior->set_state(hero_state::run);
-                    warrior->move(0.f, -25.f);
+                    warrior->move(0.f, 25.f);
                     /*if (dungeon_map->check_collision(warrior_sprite,
                                                      map_tile::wall_bottom))*/
-                    warrior->move(0.f, 25.f);
+                    // warrior->move(0.f, 25.f);
                 }
                 else if (engine->check_action(action::left))
                 {
@@ -183,7 +185,8 @@ int main(int /*argc*/, char** /*argv*/)
                 warrior->set_state(hero_state::idle);
         }
 
-        camera->look_at(0.f, 0.f);
+        camera->look_at(warrior->get_current_pos_x(),
+                        warrior->get_current_pos_y());
 
         if (show_menu_window)
         {

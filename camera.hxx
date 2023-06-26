@@ -7,4 +7,4 @@ public:
     virtual float* get_view()                        = 0;
 };
 
-camera* create_camera();
+camera* create_camera(float width, float height);
