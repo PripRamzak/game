@@ -1,7 +1,7 @@
 #pragma once
 
+#include "game_object.hxx"
 #include "geometry.hxx"
-#include "hero.hxx"
 #include "texture.hxx"
 #include "vertex_buffer.hxx"
 
@@ -40,10 +40,10 @@ public:
                                       map_tile type)            = 0;
     virtual void fill_rectangle(
         int start_x, int start_y, int width_, int height_, map_tile type) = 0;
-    virtual bool     check_collision(hero*    hero,
-                                     map_tile type,
-                                     float    window_width,
-                                     float    window_height)                 = 0;
+    virtual bool     check_collision(game_object* hero,
+                                     map_tile     type,
+                                     float        window_width,
+                                     float        window_height)                 = 0;
     virtual texture* get_tile(map_tile type)                              = 0;
     ~map();
 };

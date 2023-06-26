@@ -40,6 +40,8 @@ add_executable(game
         game.cxx
         camera.cxx
         camera.hxx
+        game_object.cxx
+        game_object.hxx
         hero.cxx
         hero.hxx
         map.cxx

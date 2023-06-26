@@ -3,25 +3,19 @@
 #include <algorithm>
 #include <iostream>
 
-#include "glm/vec2.hpp"
-
-class warrior final : public hero
+hero::hero(int pos_x, int pos_y, float size, game_object_state state)
+    : game_object(pos_x, pos_y, size, state)
 {
-    std::vector<hero_sprite_state> sprites;
-    glm::vec2                      position{ 0.f, 0.f };
-    glm::vec2                      delta_position{ 0.f, 0.f };
-    float                          size      = 0;
-    int                            direction = 0;
-    hero_state                     state;
+}
 
+class warrior : public hero
+{
 public:
-    warrior(int pos_x, int pos_y, float size_, hero_state state_)
-        : size(size_)
-        , state(state_)
+    warrior(int pos_x, int pos_y, float size, game_object_state state)
+        : hero(pos_x, pos_y, size, state)
     {
-        position = { pos_x, pos_y };
     }
-    void add_sprite(sprite* hero_sprite_, hero_state state_) final
+    void add_sprite(sprite* hero_sprite_, game_object_state state_) final
     {
         float sprite_width  = hero_sprite_->get_width();
         float sprite_height = hero_sprite_->get_height();
@@ -39,23 +33,23 @@ public:
         else
         {
             hero_sprite_state sprite_;
-            sprite_.hero_sprite = hero_sprite_;
-            sprite_.state       = state_;
+            sprite_.game_object_sprite = hero_sprite_;
+            sprite_.state              = state_;
 
-            vertex_2d v1 = { position.x - sprite_width / 2.f,
-                             position.y - sprite_height / 2.f,
+            vertex_2d v1 = { position_x - sprite_width / 2.f,
+                             position_y - sprite_height / 2.f,
                              0.f,
                              1.f };
-            vertex_2d v2 = { position.x + sprite_width / 2.f,
-                             position.y - sprite_height / 2.f,
+            vertex_2d v2 = { position_x + sprite_width / 2.f,
+                             position_y - sprite_height / 2.f,
                              1.f,
                              1.f };
-            vertex_2d v3 = { position.x + sprite_width / 2.f,
-                             position.y + sprite_height / 2.f,
+            vertex_2d v3 = { position_x + sprite_width / 2.f,
+                             position_y + sprite_height / 2.f,
                              1.f,
                              0.f };
-            vertex_2d v4 = { position.x - sprite_width / 2.f,
-                             position.y + sprite_height / 2.f,
+            vertex_2d v4 = { position_x - sprite_width / 2.f,
+                             position_y + sprite_height / 2.f,
                              0.f,
                              0.f };
 
@@ -71,12 +65,12 @@ public:
             sprites.push_back(sprite_);
         }
     }
-    void move(float delta_x, float delta_y) final
+    void move(float delta_x_, float delta_y_) final
     {
-        delta_position.x += delta_x;
-        delta_position.y += delta_y;
+        delta_x += delta_x_;
+        delta_y += delta_y_;
     }
-    void set_state(hero_state state_) final
+    void set_state(game_object_state state_) final
     {
         if (state != state_)
         {
@@ -85,7 +79,7 @@ public:
                                          [&](const hero_sprite_state sprite)
                                          { return sprite.state == state; });
             if (it != sprites.end())
-                it->hero_sprite->reset();
+                it->game_object_sprite->reset();
             else
             {
                 std::cout << "Such sprite doesn't exists" << std::endl;
@@ -94,18 +88,18 @@ public:
         }
         state = state_;
     }
-    float get_current_pos_x() final { return position.x + delta_position.x; }
-    float get_current_pos_y() final { return position.y + delta_position.y; }
+    float get_current_pos_x() final { return position_x + delta_x; }
+    float get_current_pos_y() final { return position_y + delta_y; }
     void  get_delta_pos(float& x, float& y) final
     {
-        x = delta_position.x;
-        y = delta_position.y;
+        x = delta_x;
+        y = delta_y;
     }
-    float      get_size() final { return size; }
-    void       set_direction(int direction_) final { direction = direction_; }
-    hero_state get_state() final { return state; }
-    int        get_direction() final { return direction; }
-    sprite*    get_sprite() final
+    float get_size() final { return size; }
+    void  set_direction(int direction_) final { direction = direction_; }
+    game_object_state get_state() final { return state; }
+    int               get_direction() final { return direction; }
+    sprite*           get_sprite() final
     {
         auto it = std::find_if(sprites.begin(),
                                sprites.end(),
@@ -113,7 +107,7 @@ public:
                                { return sprite.state == state; });
 
         if (it != sprites.end())
-            return it->hero_sprite;
+            return it->game_object_sprite;
         else
         {
             std::cout << "Such sprite doesn't exists" << std::endl;
@@ -154,7 +148,7 @@ public:
 
 hero::~hero() = default;
 
-hero* create_hero(float pos_x, float pos_y, float size, hero_state state)
+hero* create_hero(float pos_x, float pos_y, float size, game_object_state state)
 {
     return new warrior(pos_x, pos_y, size, state);
 }

@@ -168,10 +168,10 @@ public:
         else
             std::cout << "Such tile doesn't exists" << std::endl;
     }
-    bool check_collision(hero*    hero,
-                         map_tile type,
-                         float    window_width,
-                         float    window_height) final
+    bool check_collision(game_object* hero,
+                         map_tile     type,
+                         float        window_width,
+                         float        window_height) final
     {
 
         auto it =
