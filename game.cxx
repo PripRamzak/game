@@ -1,4 +1,5 @@
 #include "camera.hxx"
+#include "enemy.hxx"
 #include "engine.hxx"
 #include "hero.hxx"
 #include "map.hxx"
@@ -42,7 +43,7 @@ int main(int /*argc*/, char** /*argv*/)
     sprite* warrior_run_n_attack =
         create_sprite(warrior_run_n_attack_sprite_sheet, 64.f, 48.f, 4, 16.f);
 
-    game_object* warrior = create_hero(
+    hero* warrior = create_hero(
         window_width / 2.f, window_height / 2.f, 2.f, game_object_state::idle);
     warrior->add_sprite(warrior_idle, game_object_state::idle);
     warrior->add_sprite(warrior_run, game_object_state::run);
@@ -59,13 +60,21 @@ int main(int /*argc*/, char** /*argv*/)
 
     texture* skeleton_run_sprite_sheet = create_texture();
     skeleton_run_sprite_sheet->load("./img/skeleton_run.png");
+    texture* skeleton_attack_sprite_sheet = create_texture();
+    skeleton_attack_sprite_sheet->load("./img/skeleton_attack.png");
 
     sprite* skeleton_run =
         create_sprite(skeleton_run_sprite_sheet, 74.f, 64.f, 8, 32.f);
+    sprite* skeleton_attack =
+        create_sprite(skeleton_attack_sprite_sheet, 96.f, 64.f, 4, 16.f);
 
-    game_object* skeleton = create_hero(
-        window_width, window_height / 2.f, 1.8f, game_object_state::run);
+    enemy* skeleton = create_enemy(window_width / 2.f + 200.f,
+                                   window_height / 2.f,
+                                   1.8f,
+                                   game_object_state::run);
     skeleton->add_sprite(skeleton_run, game_object_state::run);
+    skeleton->add_sprite(skeleton_attack, game_object_state::attack);
+    skeleton->set_state(game_object_state::attack);
     skeleton->set_direction(0);
 
     index_buffer* skeleton_index_buffer = create_index_buffer();
@@ -98,7 +107,7 @@ int main(int /*argc*/, char** /*argv*/)
     dungeon_map->add_tile(wall_bottom, map_tile::wall_bottom);
     generate_map(dungeon_map);
 
-    // vertex and indexes to map
+    // @TODO vertex and indexes to map
 
     vertex_buffer* floor_vertex_buffer = create_vertex_buffer();
     dungeon_map->create_tile_vertex_buffer(floor_vertex_buffer,
@@ -223,12 +232,6 @@ int main(int /*argc*/, char** /*argv*/)
                 warrior->set_state(game_object_state::idle);
         }
 
-        camera->look_at(warrior->get_current_pos_x(),
-                        warrior->get_current_pos_y());
-
-        float*    mat_view_first_value = camera->get_view();
-        glm::mat4 mat_view             = glm::make_mat4x4(mat_view_first_value);
-
         if (show_menu_window)
         {
             if (engine->render_menu(show_menu_window))
@@ -236,35 +239,63 @@ int main(int /*argc*/, char** /*argv*/)
         }
         else
         {
+            camera->look_at(warrior->get_current_pos_x(),
+                            warrior->get_current_pos_y());
+
+            glm::mat4 mat_view = glm::make_mat4x4(camera->get_view());
+
+            skeleton->move(warrior->get_current_pos_x(),
+                           warrior->get_current_pos_y());
+
+            float skeleton_delta_x = 0.f;
+            float skeleton_delta_y = 0.f;
+            skeleton->get_delta_pos(skeleton_delta_x, skeleton_delta_y);
+            vertex_2d skeleton_vertex_delta(skeleton_delta_x + window_width / 2,
+                                            skeleton_delta_y +
+                                                window_height / 2,
+                                            0.0,
+                                            0.0);
+
+            glm::mat4 skeleton_mat_move{ 1 };
+            skeleton_mat_move[3].x = skeleton_vertex_delta.x;
+            skeleton_mat_move[3].y = skeleton_vertex_delta.y;
+
+            glm::mat4 skeleton_mat_result =
+                skeleton_mat_move * skeleton_mat_size * mat_view;
+
+            // Map render
+
             engine->render(floor_vertex_buffer,
                            floor_index_buffer,
                            dungeon_map->get_tile(map_tile::floor),
-                           camera->get_view());
+                           &mat_view[0][0]);
 
             engine->render(wall_vertex_buffer,
                            wall_index_buffer,
                            dungeon_map->get_tile(map_tile::wall),
-                           camera->get_view());
+                           &mat_view[0][0]);
 
             engine->render(wall_top_vertex_buffer,
                            wall_top_index_buffer,
                            dungeon_map->get_tile(map_tile::wall_top),
-                           camera->get_view());
+                           &mat_view[0][0]);
 
             engine->render(wall_bottom_vertex_buffer,
                            wall_bottom_index_buffer,
                            dungeon_map->get_tile(map_tile::wall_bottom),
-                           camera->get_view());
+                           &mat_view[0][0]);
 
             engine->render(wall_left_vertex_buffer,
                            wall_left_index_buffer,
                            dungeon_map->get_tile(map_tile::wall_left),
-                           camera->get_view());
+                           &mat_view[0][0]);
 
             engine->render(wall_right_vertex_buffer,
                            wall_right_index_buffer,
                            dungeon_map->get_tile(map_tile::wall_right),
-                           camera->get_view());
+                           &mat_view[0][0]);
+
+            // Objects render
 
             engine->render(warrior->get_vertex_buffer(),
                            warrior_index_buffer,
@@ -276,7 +307,7 @@ int main(int /*argc*/, char** /*argv*/)
                            skeleton_index_buffer,
                            skeleton->get_sprite(),
                            skeleton->get_direction(),
-                           &(mat_view * skeleton_mat_size)[0][0]);
+                           &skeleton_mat_result[0][0]);
 
             if (engine->get_time() - last_time > 0.15f)
             {

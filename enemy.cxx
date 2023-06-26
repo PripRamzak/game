@@ -1,18 +1,18 @@
-#include "hero.hxx"
+#include "enemy.hxx"
 
 #include <algorithm>
 #include <iostream>
 
-hero::hero(int pos_x, int pos_y, float size, game_object_state state)
+enemy::enemy(int pos_x, int pos_y, float size, game_object_state state)
     : game_object(pos_x, pos_y, size, state)
 {
 }
 
-class warrior : public hero
+class skeleton : public enemy
 {
 public:
-    warrior(int pos_x, int pos_y, float size, game_object_state state)
-        : hero(pos_x, pos_y, size, state)
+    skeleton(int pos_x, int pos_y, float size, game_object_state state)
+        : enemy(pos_x, pos_y, size, state)
     {
     }
     void add_sprite(sprite* game_object_sprite_, game_object_state state_) final
@@ -32,6 +32,7 @@ public:
         }
         else
         {
+            vertex_2d         vert_pox = { position_x, position_y, 0.0, 0.0 };
             hero_sprite_state sprite_;
             sprite_.game_object_sprite = game_object_sprite_;
             sprite_.state              = state_;
@@ -65,10 +66,17 @@ public:
             sprites.push_back(sprite_);
         }
     }
-    void move(float delta_x_, float delta_y_) final
+    void move(float hero_pos_x, float hero_pos_y) final
     {
-        delta_x += delta_x_;
-        delta_y += delta_y_;
+        if (hero_pos_x < position_x + delta_x)
+        {
+            delta_x -= 10.f;
+            direction = 1;
+        }
+        if (hero_pos_y < position_y + delta_y)
+        {
+            delta_y -= 10.f;
+        }
     }
     void set_state(game_object_state state_) final
     {
@@ -146,9 +154,12 @@ public:
     }
 };
 
-hero::~hero() = default;
+enemy::~enemy() = default;
 
-hero* create_hero(float pos_x, float pos_y, float size, game_object_state state)
+enemy* create_enemy(float             pos_x,
+                    float             pos_y,
+                    float             size,
+                    game_object_state state)
 {
-    return new warrior(pos_x, pos_y, size, state);
+    return new skeleton(pos_x, pos_y, size, state);
 }
