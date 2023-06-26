@@ -7,6 +7,8 @@
 #include <cstdlib>
 #include <memory>
 
+#include <glm/matrix.hpp>
+
 int main(int /*argc*/, char** /*argv*/)
 {
     std::unique_ptr<engine, void (*)(engine*)> engine(create_engine(),
@@ -38,7 +40,7 @@ int main(int /*argc*/, char** /*argv*/)
     sprite* warrior_run_n_attack =
         create_sprite(warrior_run_n_attack_sprite_sheet, 60.f, 48.f, 4, 24.f);
 
-    hero* warrior = create_hero(window_width / 2.f, window_height / 2.f);
+    hero* warrior = create_hero(window_width / 2.f, window_height / 2.f, 2.f);
     warrior->add_sprite(warrior_idle, hero_state::idle);
     warrior->add_sprite(warrior_run, hero_state::run);
     warrior->add_sprite(warrior_attack, hero_state::attack);
@@ -118,6 +120,9 @@ int main(int /*argc*/, char** /*argv*/)
     music->play(audio_properties::looped);
     sound_buffer* sound_attack =
         engine->create_sound_buffer("./sound/attack.wav");
+
+    glm::mat4 mat_size{ 1 };
+    mat_size[0].x = mat_size[1].y = warrior->get_size();
 
     float last_time        = engine->get_time();
     bool  quit             = false;
@@ -238,7 +243,8 @@ int main(int /*argc*/, char** /*argv*/)
             engine->render(warrior->get_vertex_buffer(),
                            warrior_index_buffer,
                            warrior->get_sprite(),
-                           warrior->get_direction());
+                           warrior->get_direction(),
+                           &mat_size[0][0]);
 
             if (engine->get_time() - last_time > 0.15f)
             {

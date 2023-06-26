@@ -32,6 +32,7 @@ public:
     virtual float      get_current_pos_x()                                = 0;
     virtual float      get_current_pos_y()                                = 0;
     virtual void       get_delta_pos(float& x, float& y)                  = 0;
+    virtual float      get_size()                                         = 0;
     virtual hero_state get_state()                                        = 0;
     virtual int        get_direction()                                    = 0;
     virtual sprite*    get_sprite()                                       = 0;
@@ -40,4 +41,4 @@ public:
     virtual ~hero();
 };
 
-hero* create_hero(float pos_x, float pos_y);
+hero* create_hero(float pos_x, float pos_y, float size);

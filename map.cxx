@@ -182,6 +182,7 @@ public:
         if (it != tiles.end())
         {
             const vertex_2d* sprite_vertices = hero->get_vertices();
+            float            size            = hero->get_size();
             vertex_2d*       map_vertices    = it->vertices.data();
             int              num_vertices    = it->vertices.size();
 
@@ -196,14 +197,14 @@ public:
 
             for (int i = 0; i < num_vertices / 4; i++, map_vertices += 4)
             {
-                bool collision_x = sprite_vertices[2].x * 2 >=
+                bool collision_x = sprite_vertices[2].x * size >=
                                        map_vertices->x - vertex_delta.x &&
                                    (map_vertices + 2)->x - vertex_delta.x >=
-                                       sprite_vertices[0].x * 2;
-                bool collision_y = sprite_vertices[2].y * 2 <=
+                                       sprite_vertices[0].x * size;
+                bool collision_y = sprite_vertices[2].y * size <=
                                        map_vertices->y - vertex_delta.y &&
                                    (map_vertices + 2)->y - vertex_delta.y <=
-                                       sprite_vertices[0].y * 2;
+                                       sprite_vertices[0].y * size;
 
                 if (collision_x && collision_y)
                     return true;

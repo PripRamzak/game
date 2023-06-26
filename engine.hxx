@@ -21,7 +21,8 @@ public:
     virtual void render(vertex_buffer* vertex_buffer,
                         index_buffer*  index_buffer,
                         sprite*       sprite,
-                        int direction)   = 0;
+                        int direction,
+                        float* matrix_first_value)   = 0;
     virtual void render(vertex_buffer* vertex_buffer,
                         index_buffer*  index_buffer,
                         texture*       texture,

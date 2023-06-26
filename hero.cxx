@@ -10,11 +10,16 @@ class warrior final : public hero
     std::vector<hero_sprite_state> sprites;
     glm::vec2                      position{ 0.f, 0.f };
     glm::vec2                      delta_position{ 0.f, 0.f };
+    float                          size      = 0;
     int                            direction = 0;
     hero_state                     state     = hero_state::idle;
 
 public:
-    warrior(int pos_x, int pos_y) { position = { pos_x, pos_y }; }
+    warrior(int pos_x, int pos_y, float size_)
+        : size(size_)
+    {
+        position = { pos_x, pos_y };
+    }
     void add_sprite(sprite* hero_sprite_, hero_state state_) final
     {
         float sprite_width  = hero_sprite_->get_width();
@@ -78,6 +83,7 @@ public:
         x = delta_position.x;
         y = delta_position.y;
     }
+    float      get_size() final { return size; }
     void       set_direction(int direction_) final { direction = direction_; }
     hero_state get_state() final { return state; }
     int        get_direction() final { return direction; }
@@ -130,7 +136,7 @@ public:
 
 hero::~hero() = default;
 
-hero* create_hero(float pos_x, float pos_y)
+hero* create_hero(float pos_x, float pos_y, float size)
 {
-    return new warrior(pos_x, pos_y);
+    return new warrior(pos_x, pos_y, size);
 }

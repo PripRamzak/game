@@ -387,7 +387,8 @@ public:
     void render(vertex_buffer* vertex_buffer,
                 index_buffer*  index_buffer,
                 sprite*        sprite,
-                int            direction) final
+                int            direction,
+                float*         matrix_first_value) final
     {
         hero_program->use();
         hero_program->set_uniform_1f(
@@ -402,6 +403,8 @@ public:
                 static_cast<float>(sprite->get_texture()->get_width()));
         hero_program->set_uniform_1i("direction", direction);
         hero_program->set_uniform_1i("texture", 0);
+        hero_program->set_uniform_matrix4fv(
+            "matrix", 1, GL_FALSE, matrix_first_value);
 
         sprite->get_texture()->bind();
         sprite->get_texture()->active(0);
