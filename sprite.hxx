@@ -7,6 +7,7 @@ class sprite
 {
 public:
     virtual void     next_sprite()        = 0;
+    virtual void     reset()              = 0;
     virtual float    get_width()          = 0;
     virtual float    get_height()         = 0;
     virtual int      get_quantity()       = 0;

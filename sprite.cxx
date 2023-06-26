@@ -34,6 +34,7 @@ public:
         if (current_number == quantity)
             current_number = 0;
     }
+    void     reset() final { current_number = 0; }
     float    get_width() final { return width; }
     float    get_height() final { return height; }
     int      get_quantity() final { return quantity; }

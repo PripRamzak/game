@@ -38,7 +38,7 @@ int main(int /*argc*/, char** /*argv*/)
     sprite* warrior_attack =
         create_sprite(warrior_attack_sprite_sheet, 86.f, 48.f, 4, 6.f);
     sprite* warrior_run_n_attack =
-        create_sprite(warrior_run_n_attack_sprite_sheet, 60.f, 48.f, 4, 24.f);
+        create_sprite(warrior_run_n_attack_sprite_sheet, 64.f, 48.f, 4, 16.f);
 
     hero* warrior = create_hero(window_width / 2.f, window_height / 2.f, 2.f);
     warrior->add_sprite(warrior_idle, hero_state::idle);
@@ -144,43 +144,43 @@ int main(int /*argc*/, char** /*argv*/)
                 if (engine->check_action(action::up))
                 {
                     warrior->set_state(hero_state::run);
-                    warrior->move(0.f, -25.f);
+                    warrior->move(0.f, -20.f);
                     if (dungeon_map->check_collision(warrior,
                                                      map_tile::wall_top,
                                                      window_width,
                                                      window_height))
-                        warrior->move(0.f, 25.f);
+                        warrior->move(0.f, 20.f);
                 }
                 else if (engine->check_action(action::down))
                 {
                     warrior->set_state(hero_state::run);
-                    warrior->move(0.f, 25.f);
+                    warrior->move(0.f, 20.f);
                     if (dungeon_map->check_collision(warrior,
                                                      map_tile::wall_bottom,
                                                      window_width,
                                                      window_height))
-                        warrior->move(0.f, -25.f);
+                        warrior->move(0.f, -20.f);
                 }
                 else if (engine->check_action(action::left))
                 {
                     warrior->set_state(hero_state::run);
-                    warrior->move(-25.f, 0.f);
+                    warrior->move(-20.f, 0.f);
                     if (dungeon_map->check_collision(warrior,
                                                      map_tile::wall_left,
                                                      window_width,
                                                      window_height))
-                        warrior->move(25.f, 0.f);
+                        warrior->move(20.f, 0.f);
                     warrior->set_direction(1);
                 }
                 else if (engine->check_action(action::right))
                 {
                     warrior->set_state(hero_state::run);
-                    warrior->move(25.f, 0.f);
+                    warrior->move(20.f, 0.f);
                     if (dungeon_map->check_collision(warrior,
                                                      map_tile::wall_right,
                                                      window_width,
                                                      window_height))
-                        warrior->move(-25.f, 0.f);
+                        warrior->move(-20.f, 0.f);
                     warrior->set_direction(0);
                 }
 
@@ -191,7 +191,7 @@ int main(int /*argc*/, char** /*argv*/)
                     else
                         warrior->set_state(hero_state::attack);
 
-                    if (!sound_attack->get_playing_status())
+                    if (warrior->get_sprite()->get_current_number() == 2)
                         sound_attack->play(audio_properties::once);
                 }
             }
@@ -246,7 +246,7 @@ int main(int /*argc*/, char** /*argv*/)
                            warrior->get_direction(),
                            &mat_size[0][0]);
 
-            if (engine->get_time() - last_time > 0.15f)
+            if (engine->get_time() - last_time > 0.2f)
             {
                 warrior->get_sprite()->next_sprite();
                 last_time = engine->get_time();

@@ -75,7 +75,24 @@ public:
         delta_position.x += delta_x;
         delta_position.y += delta_y;
     }
-    void  set_state(hero_state state_) final { state = state_; }
+    void set_state(hero_state state_) final
+    {
+        if (state != state_)
+        {
+            const auto it = std::find_if(sprites.begin(),
+                                         sprites.end(),
+                                         [&](const hero_sprite_state sprite)
+                                         { return sprite.state == state; });
+            if (it != sprites.end())
+                it->hero_sprite->reset();
+            else
+            {
+                std::cout << "Such sprite doesn't exists" << std::endl;
+                return;
+            }
+        }
+        state = state_;
+    }
     float get_current_pos_x() final { return position.x + delta_position.x; }
     float get_current_pos_y() final { return position.y + delta_position.y; }
     void  get_delta_pos(float& x, float& y) final
