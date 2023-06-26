@@ -41,4 +41,4 @@ public:
     virtual ~hero();
 };
 
-hero* create_hero(float pos_x, float pos_y, float size);
+hero* create_hero(float pos_x, float pos_y, float size, hero_state state);

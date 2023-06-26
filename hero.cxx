@@ -12,11 +12,12 @@ class warrior final : public hero
     glm::vec2                      delta_position{ 0.f, 0.f };
     float                          size      = 0;
     int                            direction = 0;
-    hero_state                     state     = hero_state::idle;
+    hero_state                     state;
 
 public:
-    warrior(int pos_x, int pos_y, float size_)
+    warrior(int pos_x, int pos_y, float size_, hero_state state_)
         : size(size_)
+        , state(state_)
     {
         position = { pos_x, pos_y };
     }
@@ -153,7 +154,7 @@ public:
 
 hero::~hero() = default;
 
-hero* create_hero(float pos_x, float pos_y, float size)
+hero* create_hero(float pos_x, float pos_y, float size, hero_state state)
 {
-    return new warrior(pos_x, pos_y, size);
+    return new warrior(pos_x, pos_y, size, state);
 }

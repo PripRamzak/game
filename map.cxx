@@ -233,12 +233,29 @@ map::~map() = default;
 
 void generate_map(map* map)
 {
+    // first room
     map->fill_rectangle(4, 4, 10, 5, map_tile::floor);
     map->draw_horizontal_line(4, 3, 10, map_tile::wall);
     map->draw_horizontal_line(4, 2, 10, map_tile::wall_top);
     map->draw_horizontal_line(4, 9, 10, map_tile::wall_bottom);
     map->draw_vertical_line(3, 3, 6, map_tile::wall_left);
-    map->draw_vertical_line(14, 3, 6, map_tile::wall_right);
+    map->draw_vertical_line(14, 3, 1, map_tile::wall_right);
+    map->draw_vertical_line(14, 8, 1, map_tile::wall_right);
+
+    // corridor from fist room to second
+    map->fill_rectangle(14, 5, 6, 3, map_tile::floor);
+    map->draw_horizontal_line(14, 4, 6, map_tile::wall);
+    map->draw_horizontal_line(14, 3, 6, map_tile::wall_top);
+    map->draw_horizontal_line(14, 8, 6, map_tile::wall_bottom);
+
+    // second room
+    map->fill_rectangle(20, 3, 15, 9, map_tile::floor);
+    map->draw_horizontal_line(20, 2, 15, map_tile::wall);
+    map->draw_horizontal_line(20, 1, 15, map_tile::wall_top);
+    map->draw_horizontal_line(20, 12, 15, map_tile::wall_bottom);
+    map->draw_vertical_line(19, 2, 2, map_tile::wall_left);
+    map->draw_vertical_line(19, 8, 4, map_tile::wall_left);
+    map->draw_vertical_line(35, 2, 10, map_tile::wall_right);
 }
 
 map* create_map(float tile_width, float tile_height)

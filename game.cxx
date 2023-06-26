@@ -22,6 +22,8 @@ int main(int /*argc*/, char** /*argv*/)
 
     camera* camera = create_camera(window_width, window_height);
 
+    // Warrior creating
+
     texture* warrior_idle_sprite_sheet = create_texture();
     warrior_idle_sprite_sheet->load("./img/warrior_idle.png");
     texture* warrior_run_sprite_sheet = create_texture();
@@ -40,7 +42,8 @@ int main(int /*argc*/, char** /*argv*/)
     sprite* warrior_run_n_attack =
         create_sprite(warrior_run_n_attack_sprite_sheet, 64.f, 48.f, 4, 16.f);
 
-    hero* warrior = create_hero(window_width / 2.f, window_height / 2.f, 2.f);
+    hero* warrior = create_hero(
+        window_width / 2.f, window_height / 2.f, 2.f, hero_state::idle);
     warrior->add_sprite(warrior_idle, hero_state::idle);
     warrior->add_sprite(warrior_run, hero_state::run);
     warrior->add_sprite(warrior_attack, hero_state::attack);
@@ -48,6 +51,30 @@ int main(int /*argc*/, char** /*argv*/)
 
     index_buffer* warrior_index_buffer = create_index_buffer();
     warrior_index_buffer->add_indexes(4);
+
+    glm::mat4 warrior_mat_size{ 1 };
+    warrior_mat_size[0].x = warrior_mat_size[1].y = warrior->get_size();
+
+    // Skeleton creating
+
+    texture* skeleton_run_sprite_sheet = create_texture();
+    skeleton_run_sprite_sheet->load("./img/skeleton_run.png");
+
+    sprite* skeleton_run =
+        create_sprite(skeleton_run_sprite_sheet, 74.f, 64.f, 8, 32.f);
+
+    hero* skeleton = create_hero(
+        window_width / 2.f + 100.f, window_height / 2.f, 1.8f, hero_state::run);
+    skeleton->add_sprite(skeleton_run, hero_state::run);
+    skeleton->set_direction(0);
+
+    index_buffer* skeleton_index_buffer = create_index_buffer();
+    skeleton_index_buffer->add_indexes(4);
+
+    glm::mat4 skeleton_mat_size{ 1 };
+    skeleton_mat_size[0].x = skeleton_mat_size[1].y = skeleton->get_size();
+
+    // Map creating
 
     texture* floor = create_texture();
     floor->load("./img/floor.png");
@@ -120,9 +147,6 @@ int main(int /*argc*/, char** /*argv*/)
     music->play(audio_properties::looped);
     sound_buffer* sound_attack =
         engine->create_sound_buffer("./sound/attack.wav");
-
-    glm::mat4 mat_size{ 1 };
-    mat_size[0].x = mat_size[1].y = warrior->get_size();
 
     float last_time        = engine->get_time();
     bool  quit             = false;
@@ -244,11 +268,18 @@ int main(int /*argc*/, char** /*argv*/)
                            warrior_index_buffer,
                            warrior->get_sprite(),
                            warrior->get_direction(),
-                           &mat_size[0][0]);
+                           &warrior_mat_size[0][0]);
 
-            if (engine->get_time() - last_time > 0.2f)
+            engine->render(skeleton->get_vertex_buffer(),
+                           skeleton_index_buffer,
+                           skeleton->get_sprite(),
+                           skeleton->get_direction(),
+                           &skeleton_mat_size[0][0]);
+
+            if (engine->get_time() - last_time > 0.15f)
             {
                 warrior->get_sprite()->next_sprite();
+                skeleton->get_sprite()->next_sprite();
                 last_time = engine->get_time();
             }
         }
