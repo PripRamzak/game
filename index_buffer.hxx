@@ -7,10 +7,10 @@
 class index_buffer
 {
 public:
-    virtual void   add_indexes(int objects_num) = 0;
-    virtual void   buffer_data()                = 0;
-    virtual void   bind()                       = 0;
-    virtual size_t get_size()                   = 0;
+    virtual void   add_indexes(size_t objects_num) = 0;
+    virtual void   buffer_data()                   = 0;
+    virtual void   bind()                          = 0;
+    virtual size_t get_size()                      = 0;
     ~index_buffer();
 };
 

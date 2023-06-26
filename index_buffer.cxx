@@ -18,7 +18,7 @@ public:
         glGenBuffers(1, &EBO);
         gl_check();
     }
-    void add_indexes(int vertices_num) final
+    void add_indexes(size_t vertices_num) final
     {
         uint16_t old_vertices_num = static_cast<uint16_t>(size) / 6 * 4;
         for (int i = old_vertices_num; i < old_vertices_num + vertices_num;
