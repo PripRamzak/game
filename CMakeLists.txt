@@ -17,6 +17,8 @@ add_library(engine SHARED
         shader_program.hxx
         sound_buffer.cxx
         sound_buffer.hxx
+        sprite.cxx
+        sprite.hxx
         texture.cxx
         texture.hxx
         vertex_buffer.cxx
@@ -38,9 +40,9 @@ add_executable(game
         game.cxx
         camera.cxx
         camera.hxx
+        hero.cxx
+        hero.hxx
         map.cxx
-        map.hxx
-        sprite.cxx
-        sprite.hxx)
+        map.hxx)
 target_compile_features(game PUBLIC cxx_std_20)
 target_link_libraries(game PRIVATE engine)

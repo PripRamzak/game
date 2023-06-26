@@ -386,20 +386,25 @@ public:
     }
     void render(vertex_buffer* vertex_buffer,
                 index_buffer*  index_buffer,
-                texture*       texture,
+                sprite*        sprite,
                 int            direction) final
     {
         hero_program->use();
         hero_program->set_uniform_1f(
-            "quantity", static_cast<float>(texture->get_quantity()));
+            "quantity", static_cast<float>(sprite->get_quantity()));
         hero_program->set_uniform_1f(
-            "number",
-            static_cast<float>(texture->get_current_texture_number()));
+            "number", static_cast<float>(sprite->get_current_number()));
+        hero_program->set_uniform_1f("start_position",
+                                     sprite->get_start_position());
+        hero_program->set_uniform_1f(
+            "width",
+            sprite->get_width() /
+                static_cast<float>(sprite->get_texture()->get_width()));
         hero_program->set_uniform_1i("direction", direction);
         hero_program->set_uniform_1i("texture", 0);
 
-        texture->bind();
-        texture->active(0);
+        sprite->get_texture()->bind();
+        sprite->get_texture()->active(0);
 
         vertex_buffer->bind();
         index_buffer->bind();

@@ -170,7 +170,7 @@ public:
     }
     bool check_collision(sprite* sprite, map_tile type) final
     {
-        vertex_2d* sprite_vertices = sprite->get_vertices();
+        /*vertex_2d* sprite_vertices = sprite->get_vertices();
 
         auto it =
             std::find_if(tiles.begin(),
@@ -184,52 +184,52 @@ public:
 
             float delta_x = 0;
             float delta_y = 0;
-            sprite->get_delta(delta_x, delta_y);
+            sprite->get_delta(delta_x, delta_y);*/
 
-            // Yes it's wrong collision detection, but it's used for my
-            // sprite_sheet hero with transparent pixels
-            if (type == map_tile::wall_left)
-                for (int i = 0; i < num_vertices / 4; i++, map_vertices += 4)
-                {
-                    bool collision_x =
-                        sprite_vertices[2].x >= map_vertices->x - delta_x &&
-                        (map_vertices + 3)->x - delta_x >= sprite_vertices[0].x;
-                    bool collision_y =
-                        sprite_vertices[2].y <= map_vertices->y - delta_y &&
-                        (map_vertices + 3)->y - delta_y <= sprite_vertices[0].y;
+        // Yes it's wrong collision detection, but it's used for my
+        // sprite_sheet hero with transparent pixels
+        /*if (type == map_tile::wall_left)
+            for (int i = 0; i < num_vertices / 4; i++, map_vertices += 4)
+            {
+                bool collision_x =
+                    sprite_vertices[2].x >= map_vertices->x - delta_x &&
+                    (map_vertices + 3)->x - delta_x >= sprite_vertices[0].x;
+                bool collision_y =
+                    sprite_vertices[2].y <= map_vertices->y - delta_y &&
+                    (map_vertices + 3)->y - delta_y <= sprite_vertices[0].y;
 
-                    if (collision_x && collision_y)
-                        return true;
-                }
-            else if (type == map_tile::wall_right)
-                for (int i = 0; i < num_vertices / 4; i++, map_vertices += 4)
-                {
-                    bool collision_x =
-                        sprite_vertices[2].x >=
-                            (map_vertices + 1)->x - delta_x &&
-                        (map_vertices + 2)->x - delta_x >= sprite_vertices[0].x;
-                    bool collision_y =
-                        sprite_vertices[2].y <=
-                            (map_vertices + 1)->y - delta_y &&
-                        (map_vertices + 2)->y - delta_y <= sprite_vertices[0].y;
+                if (collision_x && collision_y)
+                    return true;
+            }
+        else if (type == map_tile::wall_right)
+            for (int i = 0; i < num_vertices / 4; i++, map_vertices += 4)
+            {
+                bool collision_x =
+                    sprite_vertices[2].x >=
+                        (map_vertices + 1)->x - delta_x &&
+                    (map_vertices + 2)->x - delta_x >= sprite_vertices[0].x;
+                bool collision_y =
+                    sprite_vertices[2].y <=
+                        (map_vertices + 1)->y - delta_y &&
+                    (map_vertices + 2)->y - delta_y <= sprite_vertices[0].y;
 
-                    if (collision_x && collision_y)
-                        return true;
-                }
-            else
-                for (int i = 0; i < num_vertices / 4; i++, map_vertices += 4)
-                {
-                    bool collision_x =
-                        sprite_vertices[2].x >= map_vertices->x - delta_x &&
-                        (map_vertices + 2)->x - delta_x >= sprite_vertices[0].x;
-                    bool collision_y =
-                        sprite_vertices[2].y <= map_vertices->y - delta_y &&
-                        (map_vertices + 2)->y - delta_y <= sprite_vertices[0].y;
+                if (collision_x && collision_y)
+                    return true;
+            }
+        else*/
+        /*for (int i = 0; i < num_vertices / 4; i++, map_vertices += 4)
+        {
+            bool collision_x =
+                sprite_vertices[2].x >= map_vertices->x - delta_x &&
+                (map_vertices + 2)->x - delta_x >= sprite_vertices[0].x;
+            bool collision_y =
+                sprite_vertices[2].y <= map_vertices->y - delta_y &&
+                (map_vertices + 2)->y - delta_y <= sprite_vertices[0].y;
 
-                    if (collision_x && collision_y)
-                        return true;
-                }
+            if (collision_x && collision_y)
+                return true;
         }
+    }*/
 
         return false;
     }

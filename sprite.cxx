@@ -7,55 +7,48 @@
 
 class game_sprite final : public sprite
 {
-    std::vector<texture*> textures;
-    vertex_2d             vertices[4];
-    glm::vec3             position;
-    int                   current_texture = 0;
-    float                 delta_pos_x     = 0.f;
-    float                 delta_pos_y     = 0.f;
+    texture* textures;
+    int      width          = 0;
+    int      height         = 0;
+    int      quantity       = 0;
+    int      current_number = 0;
+    float    start_position = 0.f;
 
 public:
-    game_sprite(float pos_x, float pos_y, float width, float height)
+    game_sprite(texture* textures_,
+                float    width_,
+                float    height_,
+                int      quantity_,
+                float    start_position_)
+        : textures(textures_)
+        , width(width_)
+        , height(height_)
+        , quantity(quantity_)
     {
-
-        vertex_2d v1 = { pos_x - width / 2.f, pos_y - height / 2.f, 0.f, 1.f };
-        vertex_2d v2 = { pos_x + width / 2.f, pos_y - height / 2.f, 1.f, 1.f };
-        vertex_2d v3 = { pos_x + width / 2.f, pos_y + height / 2.f, 1.f, 0.f };
-        vertex_2d v4 = { pos_x - width / 2.f, pos_y + height / 2.f, 0.f, 0.f };
-
-        vertices[0] = v1;
-        vertices[1] = v2;
-        vertices[2] = v3;
-        vertices[3] = v4;
-
-        position = { (v1.x + v3.x) / 2.f, (v1.y + v3.y) / 2.f, 1.f };
+        start_position =
+            start_position_ / static_cast<float>(textures->get_width());
     }
-    void add_texture(texture* texture) final { textures.push_back(texture); }
-    void set_current_texture(int current_texture_) final
+    void next_sprite() final
     {
-        this->current_texture = current_texture_;
+        current_number++;
+        if (current_number == quantity)
+            current_number = 0;
     }
-    void next_sprite() final { textures[current_texture]->next_texture(); }
-    void move(float x, float y) final
-    {
-        delta_pos_x += x;
-        delta_pos_y += y;
-        std::cout << delta_pos_x << " " << delta_pos_y << std::endl;
-    }
-    void get_delta(float& delta_x_, float& delta_y_) final
-    {
-        delta_x_ = delta_pos_x;
-        delta_y_ = delta_pos_y;
-    }
-    float      get_current_pos_x() final { return position.x + delta_pos_x; }
-    float      get_current_pos_y() final { return position.y + delta_pos_y; }
-    vertex_2d* get_vertices() final { return vertices; }
-    texture*   get_sprite() final { return textures[current_texture]; }
+    float    get_width() final { return width; }
+    float    get_height() final { return height; }
+    int      get_quantity() final { return quantity; }
+    int      get_current_number() final { return current_number; }
+    float    get_start_position() final { return start_position; }
+    texture* get_texture() final { return textures; }
 };
 
 sprite::~sprite() = default;
 
-sprite* create_sprite(float pos_x, float pos_y, float width, float height)
+sprite* create_sprite(texture* textures,
+                      float    width,
+                      float    height,
+                      int      quantity,
+                      float    start_position)
 {
-    return new game_sprite(pos_x, pos_y, width, height);
+    return new game_sprite(textures, width, height, quantity, start_position);
 }

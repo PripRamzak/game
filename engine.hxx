@@ -3,6 +3,7 @@
 #include "event.hxx"
 #include "index_buffer.hxx"
 #include "sound_buffer.hxx"
+#include "sprite.hxx"
 #include "texture.hxx"
 #include "vertex_buffer.hxx"
 
@@ -19,7 +20,7 @@ public:
     // clang-format off
     virtual void render(vertex_buffer* vertex_buffer,
                         index_buffer*  index_buffer,
-                        texture*       texture,
+                        sprite*       sprite,
                         int direction)   = 0;
     virtual void render(vertex_buffer* vertex_buffer,
                         index_buffer*  index_buffer,
