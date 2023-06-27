@@ -66,17 +66,70 @@ public:
             sprites.push_back(sprite_);
         }
     }
-    void move(float hero_pos_x, float hero_pos_y) final
+    void move(hero* hero, float window_width, float window_height) final
     {
-        if (hero_pos_x < position_x + delta_x)
+        if (!check_hero_x_collision(hero, window_width, window_height))
         {
-            delta_x -= 10.f;
-            direction = 1;
+            if (hero->get_current_pos_x() < position_x + delta_x)
+            {
+                delta_x -= 10.f;
+                direction = 1;
+            }
+            else if (hero->get_current_pos_x() > position_x + delta_x)
+            {
+                delta_x   = 10.f;
+                direction = 0;
+            }
         }
-        if (hero_pos_y < position_y + delta_y)
+
+        /*if (hero_pos_y < position_y + delta_y)
         {
             delta_y -= 10.f;
+        }*/
+    }
+    bool check_hero_x_collision(hero* hero,
+                                float window_width,
+                                float window_height) final
+    {
+        auto it = std::find_if(sprites.begin(),
+                               sprites.end(),
+                               [&](const hero_sprite_state sprite)
+                               { return sprite.state == state; });
+
+        if (it != sprites.end())
+        {
+            const vertex_2d* sprite_vertices = hero->get_vertices();
+            float            hero_size       = hero->get_size();
+            vertex_2d*       vertices_       = it->vertices;
+
+            float hero_delta_x = 0;
+            float hero_delta_y = 0;
+            hero->get_delta_pos(hero_delta_x, hero_delta_y);
+
+            vertex_2d hero_vertex_delta  = { hero_delta_x + window_width / 2,
+                                             hero_delta_y + window_height / 2,
+                                             0.f,
+                                             0.f };
+            vertex_2d enemy_vertex_delta = { delta_x + window_width / 2,
+                                             delta_y + window_height / 2,
+                                             0.f,
+                                             0.f };
+
+            float delta_x_ = enemy_vertex_delta.x - hero_vertex_delta.x;
+
+            bool collision_x = sprite_vertices[2].x * hero_size >=
+                                   vertices_[0].x * size + delta_x_ &&
+                               vertices_[2].x * size + delta_x_ >=
+                                   sprite_vertices[0].x * hero_size;
+
+            if (collision_x)
+            {
+                std::cout << "collsion nice" << std::endl;
+                return true;
+            }
         }
+
+        return false;
     }
     void set_state(game_object_state state_) final
     {
