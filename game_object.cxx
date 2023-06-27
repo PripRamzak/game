@@ -1,11 +1,15 @@
 #include "game_object.hxx"
 
-game_object::game_object(int               pos_x,
-                         int               pos_y,
+game_object::game_object(float             local_pos_x_,
+                         float             local_pos_y_,
+                         float             global_pos_x_,
+                         float             global_pos_y_,
                          float             size_,
                          game_object_state state_)
-    : position_x(pos_x)
-    , position_y(pos_y)
+    : local_pos_x(local_pos_x_)
+    , local_pos_y(local_pos_y_)
+    , global_pos_x(global_pos_x_)
+    , global_pos_y(global_pos_y_)
     , size(size_)
     , state(state_)
 {

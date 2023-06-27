@@ -3,16 +3,28 @@
 #include <algorithm>
 #include <iostream>
 
-hero::hero(int pos_x, int pos_y, float size, game_object_state state)
-    : game_object(pos_x, pos_y, size, state)
+hero::hero(float             local_pos_x,
+           float             local_pos_y,
+           float             global_pos_x,
+           float             global_pos_y,
+           float             size,
+           game_object_state state)
+    : game_object(
+          local_pos_x, local_pos_y, global_pos_x, global_pos_y, size, state)
 {
 }
 
 class warrior : public hero
 {
 public:
-    warrior(int pos_x, int pos_y, float size, game_object_state state)
-        : hero(pos_x, pos_y, size, state)
+    warrior(float             local_pos_x,
+            float             local_pos_y,
+            float             global_pos_x,
+            float             global_pos_y,
+            float             size,
+            game_object_state state)
+        : hero(
+              local_pos_x, local_pos_y, global_pos_x, global_pos_y, size, state)
     {
     }
     void add_sprite(sprite* game_object_sprite_, game_object_state state_) final
@@ -36,20 +48,20 @@ public:
             sprite_.game_object_sprite = game_object_sprite_;
             sprite_.state              = state_;
 
-            vertex_2d v1 = { position_x - sprite_width / 2.f,
-                             position_y - sprite_height / 2.f,
+            vertex_2d v1 = { local_pos_x - sprite_width / 2.f,
+                             local_pos_y - sprite_height / 2.f,
                              0.f,
                              1.f };
-            vertex_2d v2 = { position_x + sprite_width / 2.f,
-                             position_y - sprite_height / 2.f,
+            vertex_2d v2 = { local_pos_x + sprite_width / 2.f,
+                             local_pos_y - sprite_height / 2.f,
                              1.f,
                              1.f };
-            vertex_2d v3 = { position_x + sprite_width / 2.f,
-                             position_y + sprite_height / 2.f,
+            vertex_2d v3 = { local_pos_x + sprite_width / 2.f,
+                             local_pos_y + sprite_height / 2.f,
                              1.f,
                              0.f };
-            vertex_2d v4 = { position_x - sprite_width / 2.f,
-                             position_y + sprite_height / 2.f,
+            vertex_2d v4 = { local_pos_x - sprite_width / 2.f,
+                             local_pos_y + sprite_height / 2.f,
                              0.f,
                              0.f };
 
@@ -88,8 +100,8 @@ public:
         }
         state = state_;
     }
-    float get_current_pos_x() final { return position_x + delta_x; }
-    float get_current_pos_y() final { return position_y + delta_y; }
+    float get_current_pos_x() final { return global_pos_x + delta_x; }
+    float get_current_pos_y() final { return global_pos_y + delta_y; }
     void  get_delta_pos(float& x, float& y) final
     {
         x = delta_x;
@@ -148,7 +160,13 @@ public:
 
 hero::~hero() = default;
 
-hero* create_hero(float pos_x, float pos_y, float size, game_object_state state)
+hero* create_hero(float             local_pos_x,
+                  float             local_pos_y,
+                  float             global_pos_x,
+                  float             global_pos_y,
+                  float             size,
+                  game_object_state state)
 {
-    return new warrior(pos_x, pos_y, size, state);
+    return new warrior(
+        local_pos_x, local_pos_y, global_pos_x, global_pos_y, size, state);
 }

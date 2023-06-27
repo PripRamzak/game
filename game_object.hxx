@@ -26,16 +26,23 @@ class game_object
 {
 protected:
     std::vector<hero_sprite_state> sprites;
-    float                          position_x = 0.f;
-    float                          position_y = 0.f;
-    float                          delta_x    = 0.f;
-    float                          delta_y    = 0.f;
-    float                          size       = 0;
-    int                            direction  = 0;
-    game_object_state              state      = game_object_state::idle;
+    float                          local_pos_x  = 0.f;
+    float                          local_pos_y  = 0.f;
+    float                          global_pos_x = 0.f;
+    float                          global_pos_y = 0.f;
+    float                          delta_x      = 0.f;
+    float                          delta_y      = 0.f;
+    float                          size         = 0;
+    int                            direction    = 0;
+    game_object_state              state        = game_object_state::idle;
 
 public:
-    game_object(int pos_x, int pos_y, float size_, game_object_state state_);
+    game_object(float             local_pos_x_,
+                float             local_pos_y_,
+                float             global_pos_x,
+                float             global_pos_y,
+                float             size_,
+                game_object_state state_);
     virtual void              add_sprite(sprite*           game_object_sprite_,
                                          game_object_state state) = 0;
     virtual void              set_state(game_object_state state_) = 0;

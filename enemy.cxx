@@ -3,16 +3,28 @@
 #include <algorithm>
 #include <iostream>
 
-enemy::enemy(int pos_x, int pos_y, float size, game_object_state state)
-    : game_object(pos_x, pos_y, size, state)
+enemy::enemy(float             local_pos_x,
+             float             local_pos_y,
+             float             global_pos_x,
+             float             global_pos_y,
+             float             size,
+             game_object_state state)
+    : game_object(
+          local_pos_x, local_pos_y, global_pos_x, global_pos_y, size, state)
 {
 }
 
 class skeleton : public enemy
 {
 public:
-    skeleton(int pos_x, int pos_y, float size, game_object_state state)
-        : enemy(pos_x, pos_y, size, state)
+    skeleton(float             local_pos_x,
+             float             local_pos_y,
+             float             global_pos_x,
+             float             global_pos_y,
+             float             size,
+             game_object_state state)
+        : enemy(
+              local_pos_x, local_pos_y, global_pos_x, global_pos_y, size, state)
     {
     }
     void add_sprite(sprite* game_object_sprite_, game_object_state state_) final
@@ -32,25 +44,24 @@ public:
         }
         else
         {
-            vertex_2d         vert_pox = { position_x, position_y, 0.0, 0.0 };
             hero_sprite_state sprite_;
             sprite_.game_object_sprite = game_object_sprite_;
             sprite_.state              = state_;
 
-            vertex_2d v1 = { position_x - sprite_width / 2.f,
-                             position_y - sprite_height / 2.f,
+            vertex_2d v1 = { local_pos_x - sprite_width / 2.f,
+                             local_pos_y - sprite_height / 2.f,
                              0.f,
                              1.f };
-            vertex_2d v2 = { position_x + sprite_width / 2.f,
-                             position_y - sprite_height / 2.f,
+            vertex_2d v2 = { local_pos_x + sprite_width / 2.f,
+                             local_pos_y - sprite_height / 2.f,
                              1.f,
                              1.f };
-            vertex_2d v3 = { position_x + sprite_width / 2.f,
-                             position_y + sprite_height / 2.f,
+            vertex_2d v3 = { local_pos_x + sprite_width / 2.f,
+                             local_pos_y + sprite_height / 2.f,
                              1.f,
                              0.f };
-            vertex_2d v4 = { position_x - sprite_width / 2.f,
-                             position_y + sprite_height / 2.f,
+            vertex_2d v4 = { local_pos_x - sprite_width / 2.f,
+                             local_pos_y + sprite_height / 2.f,
                              0.f,
                              0.f };
 
@@ -66,16 +77,18 @@ public:
             sprites.push_back(sprite_);
         }
     }
-    void move(hero* hero, float window_width, float window_height) final
+    float test1() { return global_pos_x - local_pos_x + delta_x; }
+    float test2() { return global_pos_y - local_pos_y + delta_y; }
+    void  move(hero* hero, float window_width, float window_height) final
     {
         if (!check_hero_x_collision(hero, window_width, window_height))
         {
-            if (hero->get_current_pos_x() < position_x + delta_x)
+            if (hero->get_current_pos_x() < global_pos_x + delta_x)
             {
                 delta_x -= 10.f;
                 direction = 1;
             }
-            else if (hero->get_current_pos_x() > position_x + delta_x)
+            else if (hero->get_current_pos_x() > global_pos_x + delta_x)
             {
                 delta_x   = 10.f;
                 direction = 0;
@@ -110,10 +123,12 @@ public:
                                              hero_delta_y + window_height / 2,
                                              0.f,
                                              0.f };
-            vertex_2d enemy_vertex_delta = { delta_x + window_width / 2,
-                                             delta_y + window_height / 2,
-                                             0.f,
-                                             0.f };
+            vertex_2d enemy_vertex_delta = {
+                global_pos_x - local_pos_x + delta_x + window_width / 2,
+                global_pos_y - local_pos_y + delta_y + window_height / 2,
+                0.f,
+                0.f
+            };
 
             float delta_x_ = enemy_vertex_delta.x - hero_vertex_delta.x;
 
@@ -149,8 +164,8 @@ public:
         }
         state = state_;
     }
-    float get_current_pos_x() final { return position_x + delta_x; }
-    float get_current_pos_y() final { return position_y + delta_y; }
+    float get_current_pos_x() final { return global_pos_x + delta_x; }
+    float get_current_pos_y() final { return global_pos_y + delta_y; }
     void  get_delta_pos(float& x, float& y) final
     {
         x = delta_x;
@@ -209,10 +224,13 @@ public:
 
 enemy::~enemy() = default;
 
-enemy* create_enemy(float             pos_x,
-                    float             pos_y,
+enemy* create_enemy(float             local_pos_x,
+                    float             local_pos_y,
+                    float             global_pos_x,
+                    float             global_pos_y,
                     float             size,
                     game_object_state state)
 {
-    return new skeleton(pos_x, pos_y, size, state);
+    return new skeleton(
+        local_pos_x, local_pos_y, global_pos_x, global_pos_y, size, state);
 }

@@ -23,6 +23,8 @@ int main(int /*argc*/, char** /*argv*/)
 
     camera* camera = create_camera(window_width, window_height);
 
+    glm::mat4 to_ndc_coordinates{ 1 };
+
     // Warrior creating
 
     texture* warrior_idle_sprite_sheet = create_texture();
@@ -43,8 +45,12 @@ int main(int /*argc*/, char** /*argv*/)
     sprite* warrior_run_n_attack =
         create_sprite(warrior_run_n_attack_sprite_sheet, 64.f, 48.f, 4, 16.f);
 
-    hero* warrior = create_hero(
-        window_width / 2.f, window_height / 2.f, 2.f, game_object_state::idle);
+    hero* warrior = create_hero(window_width / 2.f,
+                                window_height / 2.f,
+                                window_width / 2.f,
+                                window_height / 2.f,
+                                2.f,
+                                game_object_state::idle);
     warrior->add_sprite(warrior_idle, game_object_state::idle);
     warrior->add_sprite(warrior_run, game_object_state::run);
     warrior->add_sprite(warrior_attack, game_object_state::attack);
@@ -68,14 +74,15 @@ int main(int /*argc*/, char** /*argv*/)
     sprite* skeleton_attack =
         create_sprite(skeleton_attack_sprite_sheet, 96.f, 64.f, 4, 16.f);
 
-    enemy* skeleton = create_enemy(window_width / 2.f + 200.f,
+    enemy* skeleton = create_enemy(window_width / 2.f,
+                                   window_height / 2.f,
+                                   window_width / 2.f + 200.f,
                                    window_height / 2.f,
                                    1.8f,
                                    game_object_state::run);
     skeleton->add_sprite(skeleton_run, game_object_state::run);
     skeleton->add_sprite(skeleton_attack, game_object_state::attack);
-    skeleton->set_state(game_object_state::attack);
-    skeleton->set_direction(0);
+    skeleton->set_direction(1);
 
     index_buffer* skeleton_index_buffer = create_index_buffer();
     skeleton_index_buffer->add_indexes(4);
@@ -244,24 +251,28 @@ int main(int /*argc*/, char** /*argv*/)
 
             glm::mat4 mat_view = glm::make_mat4x4(camera->get_view());
 
-            skeleton->move(warrior->get_current_pos_x(),
-                           warrior->get_current_pos_y());
+            skeleton->move(warrior, window_width, window_height);
 
-            float skeleton_delta_x = 0.f;
-            float skeleton_delta_y = 0.f;
-            skeleton->get_delta_pos(skeleton_delta_x, skeleton_delta_y);
-            vertex_2d skeleton_vertex_delta(skeleton_delta_x + window_width / 2,
-                                            skeleton_delta_y +
-                                                window_height / 2,
-                                            0.0,
-                                            0.0);
+            float     skeleton_delta_x = 0.f;
+            float     skeleton_delta_y = 0.f;
+            vertex_2d skeleton_vertex_delta(
+                skeleton->test1() + window_width / 2,
+                skeleton->test2() + window_height / 2,
+                0.0,
+                0.0);
 
             glm::mat4 skeleton_mat_move{ 1 };
             skeleton_mat_move[3].x = skeleton_vertex_delta.x;
             skeleton_mat_move[3].y = skeleton_vertex_delta.y;
 
+            skeleton->check_hero_x_collision(
+                warrior, window_width, window_height);
+
+            // glm::mat4 model =
+            /*skeleton_mat_move */ /* back * skeleton_mat_size * to_center;*/
+
             glm::mat4 skeleton_mat_result =
-                skeleton_mat_move * skeleton_mat_size * mat_view;
+                mat_view * skeleton_mat_move * skeleton_mat_size;
 
             // Map render
 

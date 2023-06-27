@@ -6,9 +6,16 @@
 class enemy : public game_object
 {
 public:
-    enemy(int pos_x, int pos_y, float size, game_object_state state);
+    enemy(float             local_pos_x,
+          float             local_pos_y,
+          float             global_pos_x,
+          float             global_pos_y,
+          float             size,
+          game_object_state state);
     virtual void  add_sprite(sprite*           game_object_sprite_,
                              game_object_state state)                       = 0;
+    virtual float test1()                                                   = 0;
+    virtual float test2()                                                   = 0;
     virtual void  move(hero* hero, float window_width, float window_height) = 0;
     virtual bool  check_hero_x_collision(hero* hero,
                                          float window_width,
@@ -27,7 +34,9 @@ public:
     virtual ~enemy();
 };
 
-enemy* create_enemy(float             pos_x,
-                    float             pos_y,
+enemy* create_enemy(float             local_pos_x,
+                    float             local_pos_y,
+                    float             global_pos_x,
+                    float             global_pos_y,
                     float             size,
                     game_object_state state);
