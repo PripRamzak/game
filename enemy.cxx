@@ -113,33 +113,26 @@ public:
         {
             const vertex_2d* sprite_vertices = hero->get_vertices();
             float            hero_size       = hero->get_size();
+            float            hero_width      = hero->get_sprite()->get_width();
             vertex_2d*       vertices_       = it->vertices;
+            float            width = it->game_object_sprite->get_width();
 
             float hero_delta_x = 0;
             float hero_delta_y = 0;
             hero->get_delta_pos(hero_delta_x, hero_delta_y);
 
-            vertex_2d hero_vertex_delta  = { hero_delta_x + window_width / 2,
-                                             hero_delta_y + window_height / 2,
-                                             0.f,
-                                             0.f };
-            vertex_2d enemy_vertex_delta = {
-                global_pos_x - local_pos_x + delta_x + window_width / 2,
-                global_pos_y - local_pos_y + delta_y + window_height / 2,
-                0.f,
-                0.f
-            };
+            float delta_x_ =
+                global_pos_x - local_pos_x + delta_x - hero_delta_x;
 
-            float delta_x_ = enemy_vertex_delta.x - hero_vertex_delta.x;
-
-            bool collision_x = sprite_vertices[2].x * hero_size >=
-                                   vertices_[0].x * size + delta_x_ &&
-                               vertices_[2].x * size + delta_x_ >=
-                                   sprite_vertices[0].x * hero_size;
+            bool collision_x =
+                sprite_vertices[2].x + hero_width / 2 * (hero_size - 1) >=
+                    vertices_[0].x - width / 2 * (size - 1) + delta_x_ &&
+                vertices_[2].x + width / 2 * (size - 1) + delta_x_ >=
+                    sprite_vertices[0].x - hero_width / 2 * (hero_size - 1);
 
             if (collision_x)
             {
-                std::cout << "collsion nice" << std::endl;
+                std::cout << "collision nice" << std::endl;
                 return true;
             }
         }

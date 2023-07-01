@@ -168,10 +168,7 @@ public:
         else
             std::cout << "Such tile doesn't exists" << std::endl;
     }
-    bool check_collision(game_object* hero,
-                         map_tile     type,
-                         float        window_width,
-                         float        window_height) final
+    bool check_collision(game_object* hero, map_tile type) final
     {
 
         auto it =
@@ -182,6 +179,8 @@ public:
         if (it != tiles.end())
         {
             const vertex_2d* sprite_vertices = hero->get_vertices();
+            float            sprite_width    = hero->get_sprite()->get_width();
+            float            sprite_height   = hero->get_sprite()->get_height();
             float            size            = hero->get_size();
             vertex_2d*       map_vertices    = it->vertices.data();
             int              num_vertices    = it->vertices.size();
@@ -190,21 +189,19 @@ public:
             float delta_y = 0;
             hero->get_delta_pos(delta_x, delta_y);
 
-            vertex_2d vertex_delta = { delta_x + window_width / 2,
-                                       delta_y + window_height / 2,
-                                       0.f,
-                                       0.f };
-
             for (int i = 0; i < num_vertices / 4; i++, map_vertices += 4)
             {
-                bool collision_x = sprite_vertices[2].x * size >=
-                                       map_vertices->x - vertex_delta.x &&
-                                   (map_vertices + 2)->x - vertex_delta.x >=
-                                       sprite_vertices[0].x * size;
-                bool collision_y = sprite_vertices[2].y * size <=
-                                       map_vertices->y - vertex_delta.y &&
-                                   (map_vertices + 2)->y - vertex_delta.y <=
-                                       sprite_vertices[0].y * size;
+                bool collision_x =
+                    sprite_vertices[2].x + sprite_width / 2.f * (size - 1) >=
+                        map_vertices->x - delta_x &&
+                    (map_vertices + 2)->x - delta_x >=
+                        sprite_vertices[0].x - sprite_width / 2.f * (size - 1);
+                bool collision_y =
+                    sprite_vertices[2].y + sprite_height / 2.f * (size - 1) >=
+                        map_vertices->y - delta_y &&
+                    (map_vertices + 2)->y - delta_y >=
+                        sprite_vertices[0].y -
+                            +sprite_height / 2.f * (size - 1);
 
                 if (collision_x && collision_y)
                     return true;
@@ -237,6 +234,7 @@ void generate_map(map* map)
     map->fill_rectangle(4, 4, 10, 5, map_tile::floor);
     map->draw_horizontal_line(4, 3, 10, map_tile::wall);
     map->draw_horizontal_line(4, 2, 10, map_tile::wall_top);
+    map->draw_horizontal_line(4, 9, 10, map_tile::wall);
     map->draw_horizontal_line(4, 9, 10, map_tile::wall_bottom);
     map->draw_vertical_line(3, 3, 6, map_tile::wall_left);
     map->draw_vertical_line(14, 3, 1, map_tile::wall_right);

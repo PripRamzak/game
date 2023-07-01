@@ -79,6 +79,7 @@ public:
     }
     void move(float delta_x_, float delta_y_) final
     {
+        state = game_object_state::run;
         delta_x += delta_x_;
         delta_y += delta_y_;
     }

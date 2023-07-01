@@ -20,8 +20,6 @@
 bool check_pressing_key(SDL_Event sdl_event, event& event);
 bool is_key_down(action action);
 
-void set_window_size_for_ndc(int width_, int height_);
-
 void gl_check();
 
 bool mouse_button_pressed = false;
@@ -126,8 +124,6 @@ public:
             SDL_Quit();
             return false;
         }
-
-        set_window_size_for_ndc(window_width, window_height);
 
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG);
 

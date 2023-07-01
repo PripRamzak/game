@@ -24,6 +24,14 @@ int main(int /*argc*/, char** /*argv*/)
     camera* camera = create_camera(window_width, window_height);
 
     glm::mat4 to_ndc_coordinates{ 1 };
+    to_ndc_coordinates[0].x = 2.f / window_width;
+    to_ndc_coordinates[1].y = -2.f / window_height;
+    to_ndc_coordinates[3].x = -1.f;
+    to_ndc_coordinates[3].y = 1.f;
+
+    glm::mat4 to_ndc_translation{ 1 };
+    to_ndc_translation[0].x = 2.f / window_width;
+    to_ndc_translation[1].y = -2.f / window_height;
 
     // Warrior creating
 
@@ -76,7 +84,7 @@ int main(int /*argc*/, char** /*argv*/)
 
     enemy* skeleton = create_enemy(window_width / 2.f,
                                    window_height / 2.f,
-                                   window_width / 2.f + 200.f,
+                                   window_width / 2.f + 400.f,
                                    window_height / 2.f,
                                    1.8f,
                                    game_object_state::run);
@@ -183,43 +191,31 @@ int main(int /*argc*/, char** /*argv*/)
             {
                 if (engine->check_action(action::up))
                 {
-                    warrior->set_state(game_object_state::run);
                     warrior->move(0.f, -20.f);
                     if (dungeon_map->check_collision(warrior,
-                                                     map_tile::wall_top,
-                                                     window_width,
-                                                     window_height))
+                                                     map_tile::wall_top))
                         warrior->move(0.f, 20.f);
                 }
                 else if (engine->check_action(action::down))
                 {
-                    warrior->set_state(game_object_state::run);
                     warrior->move(0.f, 20.f);
                     if (dungeon_map->check_collision(warrior,
-                                                     map_tile::wall_bottom,
-                                                     window_width,
-                                                     window_height))
+                                                     map_tile::wall_bottom))
                         warrior->move(0.f, -20.f);
                 }
                 else if (engine->check_action(action::left))
                 {
-                    warrior->set_state(game_object_state::run);
                     warrior->move(-20.f, 0.f);
                     if (dungeon_map->check_collision(warrior,
-                                                     map_tile::wall_left,
-                                                     window_width,
-                                                     window_height))
+                                                     map_tile::wall_left))
                         warrior->move(20.f, 0.f);
                     warrior->set_direction(1);
                 }
                 else if (engine->check_action(action::right))
                 {
-                    warrior->set_state(game_object_state::run);
                     warrior->move(20.f, 0.f);
                     if (dungeon_map->check_collision(warrior,
-                                                     map_tile::wall_right,
-                                                     window_width,
-                                                     window_height))
+                                                     map_tile::wall_right))
                         warrior->move(-20.f, 0.f);
                     warrior->set_direction(0);
                 }
@@ -253,66 +249,58 @@ int main(int /*argc*/, char** /*argv*/)
 
             skeleton->move(warrior, window_width, window_height);
 
-            float     skeleton_delta_x = 0.f;
-            float     skeleton_delta_y = 0.f;
-            vertex_2d skeleton_vertex_delta(
-                skeleton->test1() + window_width / 2,
-                skeleton->test2() + window_height / 2,
-                0.0,
-                0.0);
-
             glm::mat4 skeleton_mat_move{ 1 };
-            skeleton_mat_move[3].x = skeleton_vertex_delta.x;
-            skeleton_mat_move[3].y = skeleton_vertex_delta.y;
+            skeleton_mat_move[3].x = skeleton->test1() / window_width * 2;
+            skeleton_mat_move[3].y = skeleton->test2() / window_height * 2;
 
-            skeleton->check_hero_x_collision(
-                warrior, window_width, window_height);
-
-            // glm::mat4 model =
-            /*skeleton_mat_move */ /* back * skeleton_mat_size * to_center;*/
-
-            glm::mat4 skeleton_mat_result =
-                mat_view * skeleton_mat_move * skeleton_mat_size;
+            glm::mat4 skeleton_mat_result = mat_view * skeleton_mat_move *
+                                            skeleton_mat_size *
+                                            to_ndc_coordinates;
 
             // Map render
+
+            glm::mat4 map_mat_result = mat_view * to_ndc_coordinates;
 
             engine->render(floor_vertex_buffer,
                            floor_index_buffer,
                            dungeon_map->get_tile(map_tile::floor),
-                           &mat_view[0][0]);
+                           &map_mat_result[0][0]);
 
             engine->render(wall_vertex_buffer,
                            wall_index_buffer,
                            dungeon_map->get_tile(map_tile::wall),
-                           &mat_view[0][0]);
+                           &map_mat_result[0][0]);
 
             engine->render(wall_top_vertex_buffer,
                            wall_top_index_buffer,
                            dungeon_map->get_tile(map_tile::wall_top),
-                           &mat_view[0][0]);
+                           &map_mat_result[0][0]);
 
             engine->render(wall_bottom_vertex_buffer,
                            wall_bottom_index_buffer,
                            dungeon_map->get_tile(map_tile::wall_bottom),
-                           &mat_view[0][0]);
+                           &map_mat_result[0][0]);
 
             engine->render(wall_left_vertex_buffer,
                            wall_left_index_buffer,
                            dungeon_map->get_tile(map_tile::wall_left),
-                           &mat_view[0][0]);
+                           &map_mat_result[0][0]);
 
             engine->render(wall_right_vertex_buffer,
                            wall_right_index_buffer,
                            dungeon_map->get_tile(map_tile::wall_right),
-                           &mat_view[0][0]);
+                           &map_mat_result[0][0]);
 
             // Objects render
+
+            glm::mat4 warrior_mat_result =
+                warrior_mat_size * to_ndc_coordinates;
 
             engine->render(warrior->get_vertex_buffer(),
                            warrior_index_buffer,
                            warrior->get_sprite(),
                            warrior->get_direction(),
-                           &warrior_mat_size[0][0]);
+                           &warrior_mat_result[0][0]);
 
             engine->render(skeleton->get_vertex_buffer(),
                            skeleton_index_buffer,
@@ -335,8 +323,8 @@ int main(int /*argc*/, char** /*argv*/)
         }
     }
 
-    warrior_idle_sprite_sheet->delete_texture();
-    delete warrior_idle_sprite_sheet;
+    /*warrior_idle_sprite_sheet->delete_texture();
+    delete warrior_idle_sprite_sheet;*/
     engine->uninitialize();
 
     return EXIT_SUCCESS;
