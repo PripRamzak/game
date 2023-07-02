@@ -49,7 +49,8 @@ public:
     virtual void              set_direction(int direction_)       = 0;
     virtual float             get_current_pos_x()                 = 0;
     virtual float             get_current_pos_y()                 = 0;
-    virtual void              get_delta_pos(float& x, float& y)   = 0;
+    virtual float             get_delta_x()                       = 0;
+    virtual float             get_delta_y()                       = 0;
     virtual float             get_size()                          = 0;
     virtual game_object_state get_state()                         = 0;
     virtual int               get_direction()                     = 0;

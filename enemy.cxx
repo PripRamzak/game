@@ -77,32 +77,34 @@ public:
             sprites.push_back(sprite_);
         }
     }
-    float test1() { return global_pos_x - local_pos_x + delta_x; }
-    float test2() { return global_pos_y - local_pos_y + delta_y; }
-    void  move(hero* hero, float window_width, float window_height) final
+    float get_move_x() { return global_pos_x - local_pos_x + delta_x; }
+    float get_move_y() { return global_pos_y - local_pos_y + delta_y; }
+    void  move(hero* hero) final
     {
-        if (!check_hero_x_collision(hero, window_width, window_height))
+        if (!check_hero_collision_x(hero))
         {
             if (hero->get_current_pos_x() < global_pos_x + delta_x)
             {
-                delta_x -= 10.f;
+                delta_x -= 5.f;
                 direction = 1;
             }
             else if (hero->get_current_pos_x() > global_pos_x + delta_x)
             {
-                delta_x   = 10.f;
+                delta_x += 5.f;
                 direction = 0;
             }
         }
-
-        /*if (hero_pos_y < position_y + delta_y)
+        else if (!check_hero_collision_y(hero))
         {
-            delta_y -= 10.f;
-        }*/
+            if (hero->get_current_pos_y() > global_pos_y + delta_y)
+                delta_y += 5.f;
+            else if (hero->get_current_pos_y() < global_pos_y + delta_y)
+                delta_y -= 5.f;
+        }
+        else
+            state = game_object_state::attack;
     }
-    bool check_hero_x_collision(hero* hero,
-                                float window_width,
-                                float window_height) final
+    bool check_hero_collision_x(hero* hero) final
     {
         auto it = std::find_if(sprites.begin(),
                                sprites.end(),
@@ -117,10 +119,7 @@ public:
             vertex_2d*       vertices_       = it->vertices;
             float            width = it->game_object_sprite->get_width();
 
-            float hero_delta_x = 0;
-            float hero_delta_y = 0;
-            hero->get_delta_pos(hero_delta_x, hero_delta_y);
-
+            float hero_delta_x = hero->get_delta_x();
             float delta_x_ =
                 global_pos_x - local_pos_x + delta_x - hero_delta_x;
 
@@ -131,10 +130,38 @@ public:
                     sprite_vertices[0].x - hero_width / 2 * (hero_size - 1);
 
             if (collision_x)
-            {
-                std::cout << "collision nice" << std::endl;
                 return true;
-            }
+        }
+
+        return false;
+    }
+    bool check_hero_collision_y(hero* hero) final
+    {
+        auto it = std::find_if(sprites.begin(),
+                               sprites.end(),
+                               [&](const hero_sprite_state sprite)
+                               { return sprite.state == state; });
+
+        if (it != sprites.end())
+        {
+            const vertex_2d* sprite_vertices = hero->get_vertices();
+            float            hero_size       = hero->get_size();
+            float            hero_height     = hero->get_sprite()->get_height();
+            vertex_2d*       vertices_       = it->vertices;
+            float            height = it->game_object_sprite->get_height();
+            float            hero_delta_y = hero->get_delta_y();
+
+            float delta_y_ =
+                global_pos_y - local_pos_y + delta_y - hero_delta_y;
+
+            bool collision_y =
+                sprite_vertices[2].y + hero_height / 2 * (hero_size - 1) >=
+                    vertices_[0].y - height / 2 * (size - 1) + delta_y_ &&
+                vertices_[2].y + height / 2 * (size - 1) + delta_y_ >=
+                    sprite_vertices[0].y - hero_height / 2 * (hero_size - 1);
+
+            if (collision_y)
+                return true;
         }
 
         return false;
@@ -159,11 +186,8 @@ public:
     }
     float get_current_pos_x() final { return global_pos_x + delta_x; }
     float get_current_pos_y() final { return global_pos_y + delta_y; }
-    void  get_delta_pos(float& x, float& y) final
-    {
-        x = delta_x;
-        y = delta_y;
-    }
+    float get_delta_x() final { return delta_x; }
+    float get_delta_y() final { return delta_y; }
     float get_size() final { return size; }
     void  set_direction(int direction_) final { direction = direction_; }
     game_object_state get_state() final { return state; }

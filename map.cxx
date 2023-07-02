@@ -185,9 +185,8 @@ public:
             vertex_2d*       map_vertices    = it->vertices.data();
             int              num_vertices    = it->vertices.size();
 
-            float delta_x = 0;
-            float delta_y = 0;
-            hero->get_delta_pos(delta_x, delta_y);
+            float delta_x = hero->get_delta_x();
+            float delta_y = hero->get_delta_y();
 
             for (int i = 0; i < num_vertices / 4; i++, map_vertices += 4)
             {
@@ -200,8 +199,7 @@ public:
                     sprite_vertices[2].y + sprite_height / 2.f * (size - 1) >=
                         map_vertices->y - delta_y &&
                     (map_vertices + 2)->y - delta_y >=
-                        sprite_vertices[0].y -
-                            +sprite_height / 2.f * (size - 1);
+                        sprite_vertices[0].y - sprite_height / 2.f * (size - 1);
 
                 if (collision_x && collision_y)
                     return true;

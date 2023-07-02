@@ -103,11 +103,8 @@ public:
     }
     float get_current_pos_x() final { return global_pos_x + delta_x; }
     float get_current_pos_y() final { return global_pos_y + delta_y; }
-    void  get_delta_pos(float& x, float& y) final
-    {
-        x = delta_x;
-        y = delta_y;
-    }
+    float get_delta_x() final { return delta_x; }
+    float get_delta_y() final { return delta_y; }
     float get_size() final { return size; }
     void  set_direction(int direction_) final { direction = direction_; }
     game_object_state get_state() final { return state; }

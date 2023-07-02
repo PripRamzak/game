@@ -29,10 +29,6 @@ int main(int /*argc*/, char** /*argv*/)
     to_ndc_coordinates[3].x = -1.f;
     to_ndc_coordinates[3].y = 1.f;
 
-    glm::mat4 to_ndc_translation{ 1 };
-    to_ndc_translation[0].x = 2.f / window_width;
-    to_ndc_translation[1].y = -2.f / window_height;
-
     // Warrior creating
 
     texture* warrior_idle_sprite_sheet = create_texture();
@@ -247,16 +243,6 @@ int main(int /*argc*/, char** /*argv*/)
 
             glm::mat4 mat_view = glm::make_mat4x4(camera->get_view());
 
-            skeleton->move(warrior, window_width, window_height);
-
-            glm::mat4 skeleton_mat_move{ 1 };
-            skeleton_mat_move[3].x = skeleton->test1() / window_width * 2;
-            skeleton_mat_move[3].y = skeleton->test2() / window_height * 2;
-
-            glm::mat4 skeleton_mat_result = mat_view * skeleton_mat_move *
-                                            skeleton_mat_size *
-                                            to_ndc_coordinates;
-
             // Map render
 
             glm::mat4 map_mat_result = mat_view * to_ndc_coordinates;
@@ -302,6 +288,18 @@ int main(int /*argc*/, char** /*argv*/)
                            warrior->get_direction(),
                            &warrior_mat_result[0][0]);
 
+            skeleton->move(warrior);
+
+            glm::mat4 skeleton_mat_move{ 1 };
+            skeleton_mat_move[3].x =
+                skeleton->get_move_x() / window_width * 2.f;
+            skeleton_mat_move[3].y =
+                skeleton->get_move_y() / window_height * -2.f;
+
+            glm::mat4 skeleton_mat_result = mat_view * skeleton_mat_move *
+                                            skeleton_mat_size *
+                                            to_ndc_coordinates;
+
             engine->render(skeleton->get_vertex_buffer(),
                            skeleton_index_buffer,
                            skeleton->get_sprite(),
@@ -323,8 +321,8 @@ int main(int /*argc*/, char** /*argv*/)
         }
     }
 
-    /*warrior_idle_sprite_sheet->delete_texture();
-    delete warrior_idle_sprite_sheet;*/
+    warrior_idle_sprite_sheet->delete_texture();
+    delete warrior_idle_sprite_sheet;
     engine->uninitialize();
 
     return EXIT_SUCCESS;
