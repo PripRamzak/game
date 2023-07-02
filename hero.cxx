@@ -94,10 +94,7 @@ public:
     {
         if (state != state_)
         {
-            const auto it = std::find_if(sprites.begin(),
-                                         sprites.end(),
-                                         [&](const hero_sprite_state sprite)
-                                         { return sprite.state == state; });
+            const auto it = find_sprite(state);
             if (it != sprites.end())
                 it->game_object_sprite->reset();
             else
