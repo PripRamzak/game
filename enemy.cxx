@@ -89,12 +89,22 @@ public:
     float get_move_y() { return global_pos_y - local_pos_y + delta_y; }
     void  move(hero* hero) final
     {
+        if (state == game_object_state::attack)
+        {
+            auto it = find_sprite(state);
+            if (it->game_object_sprite->get_current_number() !=
+                it->game_object_sprite->get_quantity() - 1)
+                return;
+        }
+
         if (!check_hero_collision_y(hero))
         {
             if (hero->get_current_pos_y() > global_pos_y + delta_y)
                 delta_y += 5.f;
             else if (hero->get_current_pos_y() < global_pos_y + delta_y)
                 delta_y -= 5.f;
+
+            state = game_object_state::run;
         }
         else if (hero->get_current_pos_y() - 2.5f > global_pos_y + delta_y ||
                  hero->get_current_pos_y() + 2.5f < global_pos_y + delta_y)
@@ -133,7 +143,11 @@ public:
                 delta_x += 5.f;
                 direction = 0;
             }
+
+            state = game_object_state::run;
         }
+        else
+            set_state(game_object_state::idle);
     }
     bool check_hero_collision_x(hero* hero) final
     {

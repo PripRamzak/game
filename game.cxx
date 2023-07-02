@@ -68,11 +68,15 @@ int main(int /*argc*/, char** /*argv*/)
 
     // Skeleton creating
 
+    texture* skeleton_idle_sprite_sheet = create_texture();
+    skeleton_idle_sprite_sheet->load("./img/skeleton_idle.png");
     texture* skeleton_run_sprite_sheet = create_texture();
     skeleton_run_sprite_sheet->load("./img/skeleton_run.png");
     texture* skeleton_attack_sprite_sheet = create_texture();
     skeleton_attack_sprite_sheet->load("./img/skeleton_attack.png");
 
+    sprite* skeleton_idle =
+        create_sprite(skeleton_idle_sprite_sheet, 64.f, 64.f, 7, 32.f);
     sprite* skeleton_run =
         create_sprite(skeleton_run_sprite_sheet, 74.f, 64.f, 8, 32.f);
     sprite* skeleton_attack =
@@ -80,10 +84,11 @@ int main(int /*argc*/, char** /*argv*/)
 
     enemy* skeleton = create_enemy(window_width / 2.f,
                                    window_height / 2.f,
-                                   window_width / 2.f,
-                                   window_height / 2.f + 100.f,
+                                   window_width / 2.f + 300.f,
+                                   window_height / 2.f,
                                    1.8f,
                                    game_object_state::run);
+    skeleton->add_sprite(skeleton_idle, game_object_state::idle);
     skeleton->add_sprite(skeleton_run, game_object_state::run);
     skeleton->add_sprite(skeleton_attack, game_object_state::attack);
     skeleton->set_direction(1);
@@ -168,7 +173,9 @@ int main(int /*argc*/, char** /*argv*/)
     sound_buffer* sound_attack =
         engine->create_sound_buffer("./sound/attack.wav");
 
-    float last_time        = engine->get_time();
+    float warrior_update_time  = engine->get_time();
+    float skeleton_update_time = engine->get_time();
+    float skeleton_idle_time;
     bool  quit             = false;
     bool  show_menu_window = true;
     event event;
@@ -306,11 +313,20 @@ int main(int /*argc*/, char** /*argv*/)
                            skeleton->get_direction(),
                            &skeleton_mat_result[0][0]);
 
-            if (engine->get_time() - last_time > 0.15f)
+            // Update sprites
+
+            if (engine->get_time() - warrior_update_time > 0.15f)
             {
                 warrior->get_sprite()->next_sprite();
+                warrior_update_time = engine->get_time();
+            }
+            if (engine->get_time() - skeleton_update_time > 0.3f)
+            {
                 skeleton->get_sprite()->next_sprite();
-                last_time = engine->get_time();
+                skeleton_update_time = engine->get_time();
+                if (skeleton->get_state() == game_object_state::idle &&
+                    skeleton->get_sprite()->get_current_number() == 3)
+                    skeleton->set_state(game_object_state::attack);
             }
         }
 
