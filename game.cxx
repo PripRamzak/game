@@ -80,8 +80,8 @@ int main(int /*argc*/, char** /*argv*/)
 
     enemy* skeleton = create_enemy(window_width / 2.f,
                                    window_height / 2.f,
-                                   window_width / 2.f + 400.f,
-                                   window_height / 2.f,
+                                   window_width / 2.f,
+                                   window_height / 2.f + 100.f,
                                    1.8f,
                                    game_object_state::run);
     skeleton->add_sprite(skeleton_run, game_object_state::run);
@@ -202,18 +202,18 @@ int main(int /*argc*/, char** /*argv*/)
                 else if (engine->check_action(action::left))
                 {
                     warrior->move(-20.f, 0.f);
+                    warrior->set_direction(1);
                     if (dungeon_map->check_collision(warrior,
                                                      map_tile::wall_left))
                         warrior->move(20.f, 0.f);
-                    warrior->set_direction(1);
                 }
                 else if (engine->check_action(action::right))
                 {
                     warrior->move(20.f, 0.f);
+                    warrior->set_direction(0);
                     if (dungeon_map->check_collision(warrior,
                                                      map_tile::wall_right))
                         warrior->move(-20.f, 0.f);
-                    warrior->set_direction(0);
                 }
 
                 if (engine->check_action(action::attack))
