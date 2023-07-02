@@ -11,6 +11,13 @@ class game_map final : public map
     float             tile_height = 0;
     std::vector<tile> tiles;
 
+    auto find_tile(map_tile type)
+    {
+        return std::find_if(tiles.begin(),
+                            tiles.end(),
+                            [&](const tile tile) { return tile.type == type; });
+    }
+
 public:
     game_map(float tile_width_, float tile_height_)
         : tile_width(tile_width_)
@@ -19,10 +26,7 @@ public:
     }
     void add_tile(texture* tile_texture, map_tile type) final
     {
-        auto it =
-            std::find_if(tiles.begin(),
-                         tiles.end(),
-                         [&](const tile tile) { return tile.type == type; });
+        auto it = find_tile(type);
 
         if (it != tiles.end())
         {
@@ -40,10 +44,7 @@ public:
     void create_tile_vertex_buffer(vertex_buffer* tile_vertex_buffer,
                                    map_tile       type) final
     {
-        auto it =
-            std::find_if(tiles.begin(),
-                         tiles.end(),
-                         [&](const tile tile) { return tile.type == type; });
+        auto it = find_tile(type);
 
         if (it != tiles.end())
         {
@@ -58,10 +59,7 @@ public:
                             int      length,
                             map_tile type) final
     {
-        auto it =
-            std::find_if(tiles.begin(),
-                         tiles.end(),
-                         [&](const tile tile) { return tile.type == type; });
+        auto it = find_tile(type);
 
         if (it != tiles.end())
             for (int i = start_y - 1; i < start_y + length - 1; i++)
@@ -96,10 +94,7 @@ public:
                               int      length,
                               map_tile type) final
     {
-        auto it =
-            std::find_if(tiles.begin(),
-                         tiles.end(),
-                         [&](const tile tile) { return tile.type == type; });
+        auto it = find_tile(type);
 
         if (it != tiles.end())
             for (int i = start_x - 1; i < start_x + length - 1; i++)
@@ -132,10 +127,7 @@ public:
     void fill_rectangle(
         int start_x, int start_y, int width_, int height_, map_tile type) final
     {
-        auto it =
-            std::find_if(tiles.begin(),
-                         tiles.end(),
-                         [&](const tile tile) { return tile.type == type; });
+        auto it = find_tile(type);
 
         if (it != tiles.end())
             for (int i = start_y - 1; i < start_y + height_ - 1; i++)
@@ -171,10 +163,7 @@ public:
     bool check_collision(game_object* hero, map_tile type) final
     {
 
-        auto it =
-            std::find_if(tiles.begin(),
-                         tiles.end(),
-                         [&](const tile tile) { return tile.type == type; });
+        auto it = find_tile(type);
 
         if (it != tiles.end())
         {
@@ -210,10 +199,7 @@ public:
     }
     texture* get_tile(map_tile type) final
     {
-        auto it =
-            std::find_if(tiles.begin(),
-                         tiles.end(),
-                         [&](const tile tile) { return tile.type == type; });
+        auto it = find_tile(type);
 
         if (it != tiles.end())
             return it->tile_texture;

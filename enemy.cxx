@@ -16,6 +16,16 @@ enemy::enemy(float             local_pos_x,
 
 class skeleton : public enemy
 {
+    auto find_sprite(game_object_state state_)
+    {
+        auto it = std::find_if(sprites.begin(),
+                               sprites.end(),
+                               [&](const hero_sprite_state sprite)
+                               { return sprite.state == state_; });
+
+        return it;
+    }
+
 public:
     skeleton(float             local_pos_x,
              float             local_pos_y,
@@ -29,13 +39,8 @@ public:
     }
     void add_sprite(sprite* game_object_sprite_, game_object_state state_) final
     {
-        float sprite_width  = game_object_sprite_->get_width();
-        float sprite_height = game_object_sprite_->get_height();
 
-        auto it = std::find_if(sprites.begin(),
-                               sprites.end(),
-                               [&](const hero_sprite_state sprite)
-                               { return sprite.state == state_; });
+        auto it = find_sprite(state_);
 
         if (it != sprites.end())
         {
@@ -47,6 +52,9 @@ public:
             hero_sprite_state sprite_;
             sprite_.game_object_sprite = game_object_sprite_;
             sprite_.state              = state_;
+
+            float sprite_width  = game_object_sprite_->get_width();
+            float sprite_height = game_object_sprite_->get_height();
 
             vertex_2d v1 = { local_pos_x - sprite_width / 2.f,
                              local_pos_y - sprite_height / 2.f,
@@ -106,10 +114,7 @@ public:
     }
     bool check_hero_collision_x(hero* hero) final
     {
-        auto it = std::find_if(sprites.begin(),
-                               sprites.end(),
-                               [&](const hero_sprite_state sprite)
-                               { return sprite.state == state; });
+        auto it = find_sprite(state);
 
         if (it != sprites.end())
         {
@@ -137,10 +142,7 @@ public:
     }
     bool check_hero_collision_y(hero* hero) final
     {
-        auto it = std::find_if(sprites.begin(),
-                               sprites.end(),
-                               [&](const hero_sprite_state sprite)
-                               { return sprite.state == state; });
+        auto it = find_sprite(state);
 
         if (it != sprites.end())
         {
@@ -170,10 +172,7 @@ public:
     {
         if (state != state_)
         {
-            const auto it = std::find_if(sprites.begin(),
-                                         sprites.end(),
-                                         [&](const hero_sprite_state sprite)
-                                         { return sprite.state == state; });
+            const auto it = find_sprite(state);
             if (it != sprites.end())
                 it->game_object_sprite->reset();
             else
@@ -194,10 +193,7 @@ public:
     int               get_direction() final { return direction; }
     sprite*           get_sprite() final
     {
-        auto it = std::find_if(sprites.begin(),
-                               sprites.end(),
-                               [&](const hero_sprite_state sprite)
-                               { return sprite.state == state; });
+        auto it = find_sprite(state);
 
         if (it != sprites.end())
             return it->game_object_sprite;
@@ -209,10 +205,7 @@ public:
     }
     vertex_2d* get_vertices() final
     {
-        auto it = std::find_if(sprites.begin(),
-                               sprites.end(),
-                               [&](const hero_sprite_state sprite)
-                               { return sprite.state == state; });
+        auto it = find_sprite(state);
 
         if (it != sprites.end())
             return it->vertices;
@@ -224,10 +217,7 @@ public:
     }
     vertex_buffer* get_vertex_buffer() final
     {
-        auto it = std::find_if(sprites.begin(),
-                               sprites.end(),
-                               [&](const hero_sprite_state sprite)
-                               { return sprite.state == state; });
+        auto it = find_sprite(state);
 
         if (it != sprites.end())
             return it->sprite_vertex_buffer;
