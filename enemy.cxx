@@ -16,6 +16,8 @@ enemy::enemy(float             local_pos_x,
 
 class skeleton : public enemy
 {
+    bool attacked = false;
+
     auto find_sprite(game_object_state state_)
     {
         auto it = std::find_if(sprites.begin(),
@@ -89,14 +91,6 @@ public:
     float get_move_y() { return global_pos_y - local_pos_y + delta_y; }
     void  move(hero* hero) final
     {
-        if (state == game_object_state::attack)
-        {
-            auto it = find_sprite(state);
-            if (it->game_object_sprite->get_current_number() !=
-                it->game_object_sprite->get_quantity() - 1)
-                return;
-        }
-
         if (!check_hero_collision_y(hero))
         {
             if (hero->get_current_pos_y() > global_pos_y + delta_y)
@@ -104,7 +98,7 @@ public:
             else if (hero->get_current_pos_y() < global_pos_y + delta_y)
                 delta_y -= 5.f;
 
-            state = game_object_state::run;
+            set_state(game_object_state::run);
         }
         else if (hero->get_current_pos_y() - 2.5f > global_pos_y + delta_y ||
                  hero->get_current_pos_y() + 2.5f < global_pos_y + delta_y)
@@ -112,15 +106,9 @@ public:
             if (check_hero_collision_x(hero))
             {
                 if (hero->get_current_pos_x() <= global_pos_x + delta_x)
-                {
                     delta_x += 5.f;
-                    direction = 0;
-                }
                 else if (hero->get_current_pos_x() > global_pos_x + delta_x)
-                {
                     delta_x -= 5.f;
-                    direction = 1;
-                }
             }
             else
             {
@@ -130,6 +118,7 @@ public:
                          global_pos_y + delta_y)
                     delta_y -= 5.f;
             }
+            set_state(game_object_state::run);
         }
         else if (!check_hero_collision_x(hero))
         {
@@ -144,10 +133,31 @@ public:
                 direction = 0;
             }
 
-            state = game_object_state::run;
+            set_state(game_object_state::run);
         }
         else
             set_state(game_object_state::idle);
+    }
+    void attack() final
+    {
+        auto it = find_sprite(state);
+        int  sprite_current_number =
+            it->game_object_sprite->get_current_number(direction);
+        int sprite_quantity = it->game_object_sprite->get_quantity();
+        if (((sprite_current_number == 0 && direction == 0) ||
+             (sprite_current_number == sprite_quantity - 1 &&
+              direction == 1)) &&
+            attacked)
+        {
+            set_state(game_object_state::idle);
+            attacked = false;
+            return;
+        }
+        if ((sprite_current_number == sprite_quantity - 1 && direction == 0) ||
+            (sprite_current_number == 0 && direction == 1))
+        {
+            attacked = true;
+        }
     }
     bool check_hero_collision_x(hero* hero) final
     {

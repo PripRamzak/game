@@ -1,9 +1,6 @@
 #include "sprite.hxx"
 
-#include <iostream>
 #include <vector>
-
-#include <glm/matrix.hpp>
 
 class game_sprite final : public sprite
 {
@@ -34,11 +31,16 @@ public:
         if (current_number == quantity)
             current_number = 0;
     }
-    void     reset() final { current_number = 0; }
-    float    get_width() final { return width; }
-    float    get_height() final { return height; }
-    int      get_quantity() final { return quantity; }
-    int      get_current_number() final { return current_number; }
+    void  reset() final { current_number = 0; }
+    float get_width() final { return width; }
+    float get_height() final { return height; }
+    int   get_quantity() final { return quantity; }
+    int   get_current_number(int direction) final
+    {
+        if (direction == 1)
+            return quantity - current_number - 1;
+        return current_number;
+    }
     float    get_start_position() final { return start_position; }
     texture* get_texture() final { return textures; }
 };

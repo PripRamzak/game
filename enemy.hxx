@@ -17,6 +17,7 @@ public:
     virtual float             get_move_x()                        = 0;
     virtual float             get_move_y()                        = 0;
     virtual void              move(hero* hero)                    = 0;
+    virtual void              attack()                            = 0;
     virtual bool              check_hero_collision_x(hero* hero)  = 0;
     virtual bool              check_hero_collision_y(hero* hero)  = 0;
     virtual void              set_state(game_object_state state_) = 0;

@@ -123,7 +123,7 @@ int main(int /*argc*/, char** /*argv*/)
     dungeon_map->add_tile(wall_bottom, map_tile::wall_bottom);
     generate_map(dungeon_map);
 
-    // @TODO vertex and indexes to map
+    // TODO vertex and indexes to map
 
     vertex_buffer* floor_vertex_buffer = create_vertex_buffer();
     dungeon_map->create_tile_vertex_buffer(floor_vertex_buffer,
@@ -175,9 +175,8 @@ int main(int /*argc*/, char** /*argv*/)
 
     float warrior_update_time  = engine->get_time();
     float skeleton_update_time = engine->get_time();
-    float skeleton_idle_time;
-    bool  quit             = false;
-    bool  show_menu_window = true;
+    bool  quit                 = false;
+    bool  show_menu_window     = true;
     event event;
 
     while (!quit)
@@ -230,7 +229,8 @@ int main(int /*argc*/, char** /*argv*/)
                     else
                         warrior->set_state(game_object_state::attack);
 
-                    if (warrior->get_sprite()->get_current_number() == 2)
+                    if (warrior->get_sprite()->get_current_number(
+                            warrior->get_direction()) == 2)
                         sound_attack->play(audio_properties::once);
                 }
             }
@@ -295,7 +295,10 @@ int main(int /*argc*/, char** /*argv*/)
                            warrior->get_direction(),
                            &warrior_mat_result[0][0]);
 
-            skeleton->move(warrior);
+            if (skeleton->get_state() != game_object_state::attack)
+                skeleton->move(warrior);
+            else
+                skeleton->attack();
 
             glm::mat4 skeleton_mat_move{ 1 };
             skeleton_mat_move[3].x =
@@ -320,13 +323,17 @@ int main(int /*argc*/, char** /*argv*/)
                 warrior->get_sprite()->next_sprite();
                 warrior_update_time = engine->get_time();
             }
-            if (engine->get_time() - skeleton_update_time > 0.3f)
+            if (skeleton->get_state() != game_object_state::idle &&
+                engine->get_time() - skeleton_update_time > 0.3f)
             {
                 skeleton->get_sprite()->next_sprite();
                 skeleton_update_time = engine->get_time();
-                if (skeleton->get_state() == game_object_state::idle &&
-                    skeleton->get_sprite()->get_current_number() == 3)
-                    skeleton->set_state(game_object_state::attack);
+            }
+            else if (skeleton->get_state() == game_object_state::idle &&
+                     engine->get_time() - skeleton_update_time > 1.f)
+            {
+                skeleton->set_state(game_object_state::attack);
+                skeleton_update_time = engine->get_time();
             }
         }
 

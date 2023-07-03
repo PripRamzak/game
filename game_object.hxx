@@ -26,13 +26,15 @@ class game_object
 {
 protected:
     std::vector<hero_sprite_state> sprites;
+    bool                           alive        = true;
+    int                            health       = 0;
     float                          local_pos_x  = 0.f;
     float                          local_pos_y  = 0.f;
     float                          global_pos_x = 0.f;
     float                          global_pos_y = 0.f;
     float                          delta_x      = 0.f;
     float                          delta_y      = 0.f;
-    float                          size         = 0;
+    float                          size         = 0.f;
     int                            direction    = 0;
     game_object_state              state        = game_object_state::idle;
 

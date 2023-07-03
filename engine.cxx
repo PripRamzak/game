@@ -390,7 +390,8 @@ public:
         hero_program->set_uniform_1f(
             "quantity", static_cast<float>(sprite->get_quantity()));
         hero_program->set_uniform_1f(
-            "number", static_cast<float>(sprite->get_current_number()));
+            "number",
+            static_cast<float>(sprite->get_current_number(direction)));
         hero_program->set_uniform_1f("start_position",
                                      sprite->get_start_position());
         hero_program->set_uniform_1f(
