@@ -3,14 +3,20 @@
 #include <algorithm>
 #include <iostream>
 
-enemy::enemy(float             local_pos_x,
+enemy::enemy(int               health,
+             float             local_pos_x,
              float             local_pos_y,
              float             global_pos_x,
              float             global_pos_y,
              float             size,
              game_object_state state)
-    : game_object(
-          local_pos_x, local_pos_y, global_pos_x, global_pos_y, size, state)
+    : game_object(health,
+                  local_pos_x,
+                  local_pos_y,
+                  global_pos_x,
+                  global_pos_y,
+                  size,
+                  state)
 {
 }
 
@@ -29,14 +35,20 @@ class skeleton : public enemy
     }
 
 public:
-    skeleton(float             local_pos_x,
+    skeleton(int               health,
+             float             local_pos_x,
              float             local_pos_y,
              float             global_pos_x,
              float             global_pos_y,
              float             size,
              game_object_state state)
-        : enemy(
-              local_pos_x, local_pos_y, global_pos_x, global_pos_y, size, state)
+        : enemy(health,
+                local_pos_x,
+                local_pos_y,
+                global_pos_x,
+                global_pos_y,
+                size,
+                state)
     {
     }
     void add_sprite(sprite* game_object_sprite_, game_object_state state_) final
@@ -87,9 +99,14 @@ public:
             sprites.push_back(sprite_);
         }
     }
-    float get_move_x() { return global_pos_x - local_pos_x + delta_x; }
-    float get_move_y() { return global_pos_y - local_pos_y + delta_y; }
-    void  move(hero* hero) final
+    bool is_alive() { return alive; }
+    void hurt() final
+    {
+        health--;
+        if (health == 0)
+            alive = false;
+    }
+    void move(hero* hero) final
     {
         if (!check_hero_collision_y(hero))
         {
@@ -138,12 +155,15 @@ public:
         else
             set_state(game_object_state::idle);
     }
-    void attack() final
+    void attack(hero* hero) final
     {
         auto it = find_sprite(state);
         int  sprite_current_number =
             it->game_object_sprite->get_current_number(direction);
         int sprite_quantity = it->game_object_sprite->get_quantity();
+
+        // End of attack
+
         if (((sprite_current_number == 0 && direction == 0) ||
              (sprite_current_number == sprite_quantity - 1 &&
               direction == 1)) &&
@@ -153,10 +173,15 @@ public:
             attacked = false;
             return;
         }
+
+        // Hit moment
+
         if ((sprite_current_number == sprite_quantity - 1 && direction == 0) ||
-            (sprite_current_number == 0 && direction == 1))
+            (sprite_current_number == 0 && direction == 1) && !attacked)
         {
             attacked = true;
+            if (check_hero_collision_x(hero) && check_hero_collision_y(hero))
+                hero->hurt();
         }
     }
     bool check_hero_collision_x(hero* hero) final
@@ -215,7 +240,9 @@ public:
 
         return false;
     }
-    void set_state(game_object_state state_) final
+    float get_move_x() { return global_pos_x - local_pos_x + delta_x; }
+    float get_move_y() { return global_pos_y - local_pos_y + delta_y; }
+    void  set_state(game_object_state state_) final
     {
         if (state != state_)
         {
@@ -278,13 +305,19 @@ public:
 
 enemy::~enemy() = default;
 
-enemy* create_enemy(float             local_pos_x,
+enemy* create_enemy(int               health,
+                    float             local_pos_x,
                     float             local_pos_y,
                     float             global_pos_x,
                     float             global_pos_y,
                     float             size,
                     game_object_state state)
 {
-    return new skeleton(
-        local_pos_x, local_pos_y, global_pos_x, global_pos_y, size, state);
+    return new skeleton(health,
+                        local_pos_x,
+                        local_pos_y,
+                        global_pos_x,
+                        global_pos_y,
+                        size,
+                        state);
 }

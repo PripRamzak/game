@@ -39,7 +39,8 @@ protected:
     game_object_state              state        = game_object_state::idle;
 
 public:
-    game_object(float             local_pos_x_,
+    game_object(int               health_,
+                float             local_pos_x_,
                 float             local_pos_y_,
                 float             global_pos_x,
                 float             global_pos_y,
@@ -47,6 +48,8 @@ public:
                 game_object_state state_);
     virtual void              add_sprite(sprite*           game_object_sprite_,
                                          game_object_state state) = 0;
+    virtual bool              is_alive()                          = 0;
+    virtual void              hurt()                              = 0;
     virtual void              set_state(game_object_state state_) = 0;
     virtual void              set_direction(int direction_)       = 0;
     virtual float             get_current_pos_x()                 = 0;

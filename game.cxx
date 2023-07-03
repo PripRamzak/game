@@ -49,7 +49,8 @@ int main(int /*argc*/, char** /*argv*/)
     sprite* warrior_run_n_attack =
         create_sprite(warrior_run_n_attack_sprite_sheet, 64.f, 48.f, 4, 16.f);
 
-    hero* warrior = create_hero(window_width / 2.f,
+    hero* warrior = create_hero(4,
+                                window_width / 2.f,
                                 window_height / 2.f,
                                 window_width / 2.f,
                                 window_height / 2.f,
@@ -82,7 +83,8 @@ int main(int /*argc*/, char** /*argv*/)
     sprite* skeleton_attack =
         create_sprite(skeleton_attack_sprite_sheet, 96.f, 64.f, 4, 16.f);
 
-    enemy* skeleton = create_enemy(window_width / 2.f,
+    enemy* skeleton = create_enemy(2,
+                                   window_width / 2.f,
                                    window_height / 2.f,
                                    window_width / 2.f + 300.f,
                                    window_height / 2.f,
@@ -179,7 +181,7 @@ int main(int /*argc*/, char** /*argv*/)
     bool  show_menu_window     = true;
     event event;
 
-    while (!quit)
+    while (!quit && warrior->is_alive())
     {
         if (engine->read_input(event))
         {
@@ -298,7 +300,7 @@ int main(int /*argc*/, char** /*argv*/)
             if (skeleton->get_state() != game_object_state::attack)
                 skeleton->move(warrior);
             else
-                skeleton->attack();
+                skeleton->attack(warrior);
 
             glm::mat4 skeleton_mat_move{ 1 };
             skeleton_mat_move[3].x =

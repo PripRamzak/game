@@ -3,14 +3,20 @@
 #include <algorithm>
 #include <iostream>
 
-hero::hero(float             local_pos_x,
+hero::hero(int               health,
+           float             local_pos_x,
            float             local_pos_y,
            float             global_pos_x,
            float             global_pos_y,
            float             size,
            game_object_state state)
-    : game_object(
-          local_pos_x, local_pos_y, global_pos_x, global_pos_y, size, state)
+    : game_object(health,
+                  local_pos_x,
+                  local_pos_y,
+                  global_pos_x,
+                  global_pos_y,
+                  size,
+                  state)
 {
 }
 
@@ -27,14 +33,20 @@ class warrior : public hero
     }
 
 public:
-    warrior(float             local_pos_x,
+    warrior(int               health,
+            float             local_pos_x,
             float             local_pos_y,
             float             global_pos_x,
             float             global_pos_y,
             float             size,
             game_object_state state)
-        : hero(
-              local_pos_x, local_pos_y, global_pos_x, global_pos_y, size, state)
+        : hero(health,
+               local_pos_x,
+               local_pos_y,
+               global_pos_x,
+               global_pos_y,
+               size,
+               state)
     {
     }
     void add_sprite(sprite* game_object_sprite_, game_object_state state_) final
@@ -89,6 +101,14 @@ public:
         state = game_object_state::run;
         delta_x += delta_x_;
         delta_y += delta_y_;
+    }
+    bool is_alive() { return alive; }
+    void hurt() final
+    {
+        health--;
+        std::cout << health << std::endl;
+        if (health == 0)
+            alive = false;
     }
     void set_state(game_object_state state_) final
     {
@@ -153,13 +173,19 @@ public:
 
 hero::~hero() = default;
 
-hero* create_hero(float             local_pos_x,
+hero* create_hero(int               health,
+                  float             local_pos_x,
                   float             local_pos_y,
                   float             global_pos_x,
                   float             global_pos_y,
                   float             size,
                   game_object_state state)
 {
-    return new warrior(
-        local_pos_x, local_pos_y, global_pos_x, global_pos_y, size, state);
+    return new warrior(health,
+                       local_pos_x,
+                       local_pos_y,
+                       global_pos_x,
+                       global_pos_y,
+                       size,
+                       state);
 }

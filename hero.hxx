@@ -5,7 +5,8 @@
 class hero : public game_object
 {
 public:
-    hero(float             local_pos_x,
+    hero(int               health,
+         float             local_pos_x,
          float             local_pos_y,
          float             global_pos_x,
          float             global_pos_y,
@@ -13,6 +14,8 @@ public:
          game_object_state state);
     virtual void              add_sprite(sprite*           game_object_sprite_,
                                          game_object_state state)  = 0;
+    virtual bool              is_alive()                           = 0;
+    virtual void              hurt()                               = 0;
     virtual void              move(float delta_x_, float delta_y_) = 0;
     virtual void              set_state(game_object_state state_)  = 0;
     virtual void              set_direction(int direction_)        = 0;
@@ -29,7 +32,8 @@ public:
     virtual ~hero();
 };
 
-hero* create_hero(float             local_pos_x,
+hero* create_hero(int               health,
+                  float             local_pos_x,
                   float             local_pos_y,
                   float             global_pos_x,
                   float             global_pos_y,
