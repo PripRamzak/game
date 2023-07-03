@@ -15,17 +15,14 @@ class opengl_texture final : public texture
     int    height  = 0;
 
 public:
-    bool load(const char* file_path) final
+    opengl_texture(const char* file_path)
     {
         int channels;
         stbi_set_flip_vertically_on_load(true);
         unsigned char* image =
             stbi_load(file_path, &width, &height, &channels, 0);
         if (image == nullptr)
-        {
-            std::cerr << "Failed to load image" << std::endl;
-            return false;
-        }
+            throw std::runtime_error("Failed to load image");
 
         glActiveTexture(GL_TEXTURE0);
         gl_check();
@@ -51,14 +48,11 @@ public:
         gl_check();
 
         stbi_image_free(image);
-
-        return true;
     }
-    bool load(unsigned char* pixels, int width_, int height_) final
+    opengl_texture(unsigned char* pixels, int width_, int height_)
+        : width(width_)
+        , height(height_)
     {
-        width  = width_;
-        height = height_;
-
         glActiveTexture(GL_TEXTURE0);
         gl_check();
         glGenTextures(1, &texture);
@@ -81,8 +75,6 @@ public:
         gl_check();
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
         gl_check();
-
-        return true;
     }
     void bind() final
     {
@@ -105,7 +97,11 @@ public:
 
 texture::~texture() = default;
 
-texture* create_texture()
+texture* create_texture(const char* file_path)
 {
-    return new opengl_texture;
+    return new opengl_texture(file_path);
+}
+texture* create_texture(unsigned char* pixels, int width, int height)
+{
+    return new opengl_texture(pixels, width, height);
 }
