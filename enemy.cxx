@@ -3,6 +3,13 @@
 #include <algorithm>
 #include <iostream>
 
+static texture* skeleton_idle_sprite_sheet   = nullptr;
+static texture* skeleton_run_sprite_sheet    = nullptr;
+static texture* skeleton_attack_sprite_sheet = nullptr;
+sprite*         skeleton_idle                = nullptr;
+sprite*         skeleton_run                 = nullptr;
+sprite*         skeleton_attack              = nullptr;
+
 enemy::enemy(int               health,
              float             local_pos_x,
              float             local_pos_y,
@@ -20,6 +27,19 @@ enemy::enemy(int               health,
 {
 }
 
+void enemy::initialize()
+{
+    skeleton_idle_sprite_sheet   = create_texture("./img/skeleton_idle.png");
+    skeleton_run_sprite_sheet    = create_texture("./img/skeleton_run.png");
+    skeleton_attack_sprite_sheet = create_texture("./img/skeleton_attack.png");
+    skeleton_idle =
+        create_sprite(skeleton_idle_sprite_sheet, 64.f, 64.f, 7, 32.f);
+    skeleton_run =
+        create_sprite(skeleton_run_sprite_sheet, 74.f, 64.f, 8, 32.f);
+    skeleton_attack =
+        create_sprite(skeleton_attack_sprite_sheet, 96.f, 64.f, 4, 16.f);
+}
+
 class skeleton : public enemy
 {
     bool attacked = false;
@@ -33,27 +53,8 @@ class skeleton : public enemy
 
         return it;
     }
-
-public:
-    skeleton(int               health,
-             float             local_pos_x,
-             float             local_pos_y,
-             float             global_pos_x,
-             float             global_pos_y,
-             float             size,
-             game_object_state state)
-        : enemy(health,
-                local_pos_x,
-                local_pos_y,
-                global_pos_x,
-                global_pos_y,
-                size,
-                state)
-    {
-    }
     void add_sprite(sprite* game_object_sprite_, game_object_state state_) final
     {
-
         auto it = find_sprite(state_);
 
         if (it != sprites.end())
@@ -98,6 +99,28 @@ public:
 
             sprites.push_back(sprite_);
         }
+    }
+
+public:
+    skeleton(int               health,
+             float             local_pos_x,
+             float             local_pos_y,
+             float             global_pos_x,
+             float             global_pos_y,
+             float             size,
+             game_object_state state)
+        : enemy(health,
+                local_pos_x,
+                local_pos_y,
+                global_pos_x,
+                global_pos_y,
+                size,
+                state)
+    {
+        alive = true;
+        add_sprite(skeleton_idle, game_object_state::idle);
+        add_sprite(skeleton_run, game_object_state::run);
+        add_sprite(skeleton_attack, game_object_state::attack);
     }
     bool is_alive() { return alive; }
     void hurt() final

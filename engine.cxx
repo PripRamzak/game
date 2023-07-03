@@ -725,9 +725,8 @@ void ImGui_ImplGameEngine_CreateDeviceObject()
 
     io.Fonts->GetTexDataAsRGBA32(&pixels, &width, &height);
 
-    texture* texture = create_texture();
     io.Fonts->Flags |= ImFontAtlasFlags_NoBakedLines;
-    texture->load(pixels, width, height);
+    texture* texture = create_texture(pixels, width, height);
     io.Fonts->SetTexID((void*)texture);
 }
 

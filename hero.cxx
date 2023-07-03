@@ -3,6 +3,15 @@
 #include <algorithm>
 #include <iostream>
 
+static texture* warrior_idle_sprite_sheet         = nullptr;
+static texture* warrior_run_sprite_sheet          = nullptr;
+static texture* warrior_attack_sprite_sheet       = nullptr;
+static texture* warrior_run_n_attack_sprite_sheet = nullptr;
+static sprite*  warrior_idle                      = nullptr;
+static sprite*  warrior_run                       = nullptr;
+static sprite*  warrior_attack                    = nullptr;
+static sprite*  warrior_run_n_attack              = nullptr;
+
 hero::hero(int               health,
            float             local_pos_x,
            float             local_pos_y,
@@ -20,6 +29,22 @@ hero::hero(int               health,
 {
 }
 
+void hero::initialize()
+{
+    warrior_idle_sprite_sheet   = create_texture("./img/warrior_idle.png");
+    warrior_run_sprite_sheet    = create_texture("./img/warrior_run.png");
+    warrior_attack_sprite_sheet = create_texture("./img/warrior_attack.png");
+    warrior_run_n_attack_sprite_sheet =
+        create_texture("./img/warrior_run&attack.png");
+    warrior_idle =
+        create_sprite(warrior_idle_sprite_sheet, 48.f, 48.f, 6, 24.f);
+    warrior_run = create_sprite(warrior_run_sprite_sheet, 48.f, 48.f, 6, 24.f);
+    warrior_attack =
+        create_sprite(warrior_attack_sprite_sheet, 86.f, 48.f, 4, 6.f);
+    warrior_run_n_attack =
+        create_sprite(warrior_run_n_attack_sprite_sheet, 64.f, 48.f, 4, 16.f);
+}
+
 class warrior : public hero
 {
     auto find_sprite(game_object_state state_)
@@ -30,24 +55,6 @@ class warrior : public hero
                                { return sprite.state == state_; });
 
         return it;
-    }
-
-public:
-    warrior(int               health,
-            float             local_pos_x,
-            float             local_pos_y,
-            float             global_pos_x,
-            float             global_pos_y,
-            float             size,
-            game_object_state state)
-        : hero(health,
-               local_pos_x,
-               local_pos_y,
-               global_pos_x,
-               global_pos_y,
-               size,
-               state)
-    {
     }
     void add_sprite(sprite* game_object_sprite_, game_object_state state_) final
     {
@@ -95,6 +102,29 @@ public:
 
             sprites.push_back(sprite_);
         }
+    }
+
+public:
+    warrior(int               health,
+            float             local_pos_x,
+            float             local_pos_y,
+            float             global_pos_x,
+            float             global_pos_y,
+            float             size,
+            game_object_state state)
+        : hero(health,
+               local_pos_x,
+               local_pos_y,
+               global_pos_x,
+               global_pos_y,
+               size,
+               state)
+    {
+        alive = true;
+        add_sprite(warrior_idle, game_object_state::idle);
+        add_sprite(warrior_run, game_object_state::run);
+        add_sprite(warrior_attack, game_object_state::attack);
+        add_sprite(warrior_run_n_attack, game_object_state::run_n_attack);
     }
     void move(float delta_x_, float delta_y_) final
     {

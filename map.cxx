@@ -1,9 +1,27 @@
 #include "map.hxx"
+#include "enemy.hxx"
 
 #include <algorithm>
 #include <iostream>
 
 #include <glm/matrix.hpp>
+
+static texture* floor_      = nullptr;
+static texture* wall        = nullptr;
+static texture* wall_top    = nullptr;
+static texture* wall_left   = nullptr;
+static texture* wall_right  = nullptr;
+static texture* wall_bottom = nullptr;
+
+void map::initialize()
+{
+    floor_      = create_texture("./img/floor.png");
+    wall        = create_texture("./img/wall.png");
+    wall_top    = create_texture("./img/wall_top.png");
+    wall_left   = create_texture("./img/wall_left.png");
+    wall_right  = create_texture("./img/wall_right.png");
+    wall_bottom = create_texture("./img/wall_bottom.png");
+}
 
 class game_map final : public map
 {
@@ -16,13 +34,6 @@ class game_map final : public map
         return std::find_if(tiles.begin(),
                             tiles.end(),
                             [&](const tile tile) { return tile.type == type; });
-    }
-
-public:
-    game_map(float tile_width_, float tile_height_)
-        : tile_width(tile_width_)
-        , tile_height(tile_height_)
-    {
     }
     void add_tile(texture* tile_texture, map_tile type) final
     {
@@ -40,6 +51,19 @@ public:
             tile.tile_texture = tile_texture;
             tiles.push_back(tile);
         }
+    }
+
+public:
+    game_map(float tile_width_, float tile_height_)
+        : tile_width(tile_width_)
+        , tile_height(tile_height_)
+    {
+        add_tile(floor_, map_tile::floor);
+        add_tile(wall, map_tile::wall);
+        add_tile(wall_top, map_tile::wall_top);
+        add_tile(wall_left, map_tile::wall_left);
+        add_tile(wall_right, map_tile::wall_right);
+        add_tile(wall_bottom, map_tile::wall_bottom);
     }
     void create_tile_vertex_buffer(vertex_buffer* tile_vertex_buffer,
                                    map_tile       type) final
@@ -160,9 +184,8 @@ public:
         else
             std::cout << "Such tile doesn't exists" << std::endl;
     }
-    bool check_hero_collision(game_object* hero, map_tile type) final
+    bool check_hero_collision(hero* hero, map_tile type) final
     {
-
         auto it = find_tile(type);
 
         if (it != tiles.end())
@@ -212,7 +235,14 @@ public:
 
 map::~map() = default;
 
-void generate_map(map* map)
+map* create_map(float tile_width, float tile_height)
+{
+    return new game_map(tile_width, tile_height);
+}
+
+static enemy* skeleton_1 = nullptr;
+
+void generate_level_1(map* map)
 {
     // first room
     map->fill_rectangle(4, 4, 10, 5, map_tile::floor);
@@ -240,7 +270,8 @@ void generate_map(map* map)
     map->draw_vertical_line(35, 2, 10, map_tile::wall_right);
 }
 
-map* create_map(float tile_width, float tile_height)
+void gameplay_level_1(hero* hero)
 {
-    return new game_map(tile_width, tile_height);
+    /*if (hero->get_current_pos_x() > 1000.f)
+        skeleton_1 = create_enemy()*/
 }

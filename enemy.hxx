@@ -5,6 +5,9 @@
 
 class enemy : public game_object
 {
+    virtual void add_sprite(sprite*           game_object_sprite_,
+                            game_object_state state) = 0;
+
 public:
     enemy(int               health,
           float             local_pos_x,
@@ -13,8 +16,7 @@ public:
           float             global_pos_y,
           float             size,
           game_object_state state);
-    virtual void              add_sprite(sprite*           game_object_sprite_,
-                                         game_object_state state) = 0;
+    static void               initialize();
     virtual bool              is_alive()                          = 0;
     virtual void              hurt()                              = 0;
     virtual void              move(hero* hero)                    = 0;

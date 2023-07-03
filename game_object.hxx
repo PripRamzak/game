@@ -26,7 +26,7 @@ class game_object
 {
 protected:
     std::vector<hero_sprite_state> sprites;
-    bool                           alive        = true;
+    bool                           alive        = false;
     int                            health       = 0;
     float                          local_pos_x  = 0.f;
     float                          local_pos_y  = 0.f;

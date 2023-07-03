@@ -4,6 +4,9 @@
 
 class hero : public game_object
 {
+    virtual void add_sprite(sprite*           game_object_sprite_,
+                            game_object_state state) = 0;
+
 public:
     hero(int               health,
          float             local_pos_x,
@@ -12,8 +15,7 @@ public:
          float             global_pos_y,
          float             size,
          game_object_state state);
-    virtual void              add_sprite(sprite*           game_object_sprite_,
-                                         game_object_state state)  = 0;
+    static void               initialize();
     virtual bool              is_alive()                           = 0;
     virtual void              hurt()                               = 0;
     virtual void              move(float delta_x_, float delta_y_) = 0;
