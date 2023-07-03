@@ -1,5 +1,6 @@
 #pragma once
 
+#include "enemy.hxx"
 #include "geometry.hxx"
 #include "hero.hxx"
 #include "texture.hxx"
@@ -49,5 +50,8 @@ public:
 
 map* create_map(float tile_width, float tile_height);
 
-void generate_level_1(map* map);
-void gameplay_level_1(hero* hero);
+void generate_level_1(map*                 map,
+                      std::vector<enemy*>& enemies,
+                      float                window_width,
+                      float                window_height);
+void game_logic_level_1(hero* hero, std::vector<enemy*>& enemies);

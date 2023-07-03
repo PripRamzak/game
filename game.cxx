@@ -21,13 +21,16 @@ int main(int /*argc*/, char** /*argv*/)
     float window_width  = static_cast<float>(engine->get_window_width());
     float window_height = static_cast<float>(engine->get_window_height());
 
-    camera* camera = create_camera(window_width, window_height);
-
     glm::mat4 to_ndc_coordinates{ 1 };
     to_ndc_coordinates[0].x = 2.f / window_width;
     to_ndc_coordinates[1].y = -2.f / window_height;
     to_ndc_coordinates[3].x = -1.f;
     to_ndc_coordinates[3].y = 1.f;
+
+    camera* camera = create_camera(window_width, window_height);
+
+    index_buffer* game_objects_index_buffer = create_index_buffer();
+    game_objects_index_buffer->add_indexes(static_cast<size_t>(4));
 
     // Warrior creating
 
@@ -40,34 +43,19 @@ int main(int /*argc*/, char** /*argv*/)
                                 2.f,
                                 game_object_state::idle);
 
-    index_buffer* warrior_index_buffer = create_index_buffer();
-    warrior_index_buffer->add_indexes(4);
-
     glm::mat4 warrior_mat_size{ 1 };
     warrior_mat_size[0].x = warrior_mat_size[1].y = warrior->get_size();
 
     // Skeleton creating
 
     enemy::initialize();
-    enemy* skeleton = create_enemy(2,
-                                   window_width / 2.f,
-                                   window_height / 2.f,
-                                   window_width / 2.f + 300.f,
-                                   window_height / 2.f,
-                                   1.8f,
-                                   game_object_state::run);
-
-    index_buffer* skeleton_index_buffer = create_index_buffer();
-    skeleton_index_buffer->add_indexes(4);
-
-    glm::mat4 skeleton_mat_size{ 1 };
-    skeleton_mat_size[0].x = skeleton_mat_size[1].y = skeleton->get_size();
+    std::vector<enemy*> enemies;
 
     // Map creating
 
     map::initialize();
     map* dungeon_map = create_map(64.f, 64.f);
-    generate_level_1(dungeon_map);
+    generate_level_1(dungeon_map, enemies, window_width, window_height);
 
     // TODO vertex and indexes to map
 
@@ -135,7 +123,7 @@ int main(int /*argc*/, char** /*argv*/)
                 break;
             }
 
-            if (event == event::pressed)
+            if (event == event::pressed && !show_menu_window)
             {
                 if (engine->check_action(action::up))
                 {
@@ -232,58 +220,64 @@ int main(int /*argc*/, char** /*argv*/)
 
             // Objects render
 
-            if (skeleton->is_alive())
-            {
-                if (skeleton->get_state() != game_object_state::attack)
-                    skeleton->move(warrior);
-                else
-                    skeleton->attack(warrior);
+            for (auto enemy : enemies)
+                if (enemy->is_alive())
+                {
+                    if (enemy->get_state() != game_object_state::attack)
+                        enemy->move(warrior);
+                    else
+                        enemy->attack(warrior);
 
-                glm::mat4 skeleton_mat_move{ 1 };
-                skeleton_mat_move[3].x =
-                    skeleton->get_move_x() / window_width * 2.f;
-                skeleton_mat_move[3].y =
-                    skeleton->get_move_y() / window_height * -2.f;
+                    glm::mat4 skeleton_mat_size{ 1 };
+                    skeleton_mat_size[0].x = skeleton_mat_size[1].y =
+                        enemy->get_size();
 
-                glm::mat4 skeleton_mat_result = mat_view * skeleton_mat_move *
-                                                skeleton_mat_size *
-                                                to_ndc_coordinates;
+                    glm::mat4 skeleton_mat_move{ 1 };
+                    skeleton_mat_move[3].x =
+                        enemy->get_move_x() / window_width * 2.f;
+                    skeleton_mat_move[3].y =
+                        enemy->get_move_y() / window_height * -2.f;
 
-                engine->render(skeleton->get_vertex_buffer(),
-                               skeleton_index_buffer,
-                               skeleton->get_sprite(),
-                               skeleton->get_direction(),
-                               &skeleton_mat_result[0][0]);
-            }
+                    glm::mat4 skeleton_mat_result =
+                        mat_view * skeleton_mat_move * skeleton_mat_size *
+                        to_ndc_coordinates;
+
+                    engine->render(enemy->get_vertex_buffer(),
+                                   game_objects_index_buffer,
+                                   enemy->get_sprite(),
+                                   enemy->get_direction(),
+                                   &skeleton_mat_result[0][0]);
+
+                    if (enemy->get_state() != game_object_state::idle &&
+                        engine->get_time() - skeleton_update_time > 0.3f)
+                    {
+                        enemy->get_sprite()->next_sprite();
+                        skeleton_update_time = engine->get_time();
+                    }
+                    else if (enemy->get_state() == game_object_state::idle &&
+                             engine->get_time() - skeleton_update_time > 1.f)
+                    {
+                        enemy->set_state(game_object_state::attack);
+                        skeleton_update_time = engine->get_time();
+                    }
+                }
 
             glm::mat4 warrior_mat_result =
                 warrior_mat_size * to_ndc_coordinates;
 
             engine->render(warrior->get_vertex_buffer(),
-                           warrior_index_buffer,
+                           game_objects_index_buffer,
                            warrior->get_sprite(),
                            warrior->get_direction(),
                            &warrior_mat_result[0][0]);
-
-            // Update sprites
 
             if (engine->get_time() - warrior_update_time > 0.15f)
             {
                 warrior->get_sprite()->next_sprite();
                 warrior_update_time = engine->get_time();
             }
-            if (skeleton->get_state() != game_object_state::idle &&
-                engine->get_time() - skeleton_update_time > 0.3f)
-            {
-                skeleton->get_sprite()->next_sprite();
-                skeleton_update_time = engine->get_time();
-            }
-            else if (skeleton->get_state() == game_object_state::idle &&
-                     engine->get_time() - skeleton_update_time > 1.f)
-            {
-                skeleton->set_state(game_object_state::attack);
-                skeleton_update_time = engine->get_time();
-            }
+
+            game_logic_level_1(warrior, enemies);
         }
 
         if (!engine->swap_buffers())

@@ -240,9 +240,10 @@ map* create_map(float tile_width, float tile_height)
     return new game_map(tile_width, tile_height);
 }
 
-static enemy* skeleton_1 = nullptr;
-
-void generate_level_1(map* map)
+void generate_level_1(map*                 map,
+                      std::vector<enemy*>& enemies,
+                      float                window_width,
+                      float                window_height)
 {
     // first room
     map->fill_rectangle(4, 4, 10, 5, map_tile::floor);
@@ -254,7 +255,7 @@ void generate_level_1(map* map)
     map->draw_vertical_line(14, 3, 1, map_tile::wall_right);
     map->draw_vertical_line(14, 8, 1, map_tile::wall_right);
 
-    // corridor from fist room to second
+    // corridor from first room to second
     map->fill_rectangle(14, 5, 6, 3, map_tile::floor);
     map->draw_horizontal_line(14, 4, 6, map_tile::wall);
     map->draw_horizontal_line(14, 3, 6, map_tile::wall_top);
@@ -268,10 +269,19 @@ void generate_level_1(map* map)
     map->draw_vertical_line(19, 2, 2, map_tile::wall_left);
     map->draw_vertical_line(19, 8, 4, map_tile::wall_left);
     map->draw_vertical_line(35, 2, 10, map_tile::wall_right);
+
+    enemy* skeleton_1 = create_enemy(2,
+                                     window_width / 2.f,
+                                     window_height / 2.f,
+                                     2100.f,
+                                     300.f,
+                                     1.75f,
+                                     game_object_state::run);
+    enemies.push_back(skeleton_1);
 }
 
-void gameplay_level_1(hero* hero)
+void game_logic_level_1(hero* hero, std::vector<enemy*>& enemies)
 {
-    /*if (hero->get_current_pos_x() > 1000.f)
-        skeleton_1 = create_enemy()*/
+    if (hero->get_current_pos_x() > 1300.f && !enemies[0]->is_alive())
+        enemies[0]->spawn();
 }

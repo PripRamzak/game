@@ -17,6 +17,7 @@ public:
           float             size,
           game_object_state state);
     static void               initialize();
+    virtual void              spawn()                             = 0;
     virtual bool              is_alive()                          = 0;
     virtual void              hurt()                              = 0;
     virtual void              move(hero* hero)                    = 0;

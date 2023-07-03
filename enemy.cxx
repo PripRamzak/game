@@ -40,7 +40,7 @@ void enemy::initialize()
         create_sprite(skeleton_attack_sprite_sheet, 96.f, 64.f, 4, 16.f);
 }
 
-class skeleton : public enemy
+class skeleton final : public enemy
 {
     bool attacked = false;
 
@@ -117,11 +117,11 @@ public:
                 size,
                 state)
     {
-        alive = true;
         add_sprite(skeleton_idle, game_object_state::idle);
         add_sprite(skeleton_run, game_object_state::run);
         add_sprite(skeleton_attack, game_object_state::attack);
     }
+    void spawn() final { alive = true; }
     bool is_alive() { return alive; }
     void hurt() final
     {
@@ -187,9 +187,8 @@ public:
 
         // End of attack
 
-        if (((sprite_current_number == 0 && direction == 0) ||
-             (sprite_current_number == sprite_quantity - 1 &&
-              direction == 1)) &&
+        if ((sprite_current_number == 0 && direction == 0 ||
+             sprite_current_number == sprite_quantity - 1 && direction == 1) &&
             attacked)
         {
             set_state(game_object_state::idle);
@@ -199,8 +198,9 @@ public:
 
         // Hit moment
 
-        if ((sprite_current_number == sprite_quantity - 1 && direction == 0) ||
-            (sprite_current_number == 0 && direction == 1) && !attacked)
+        if ((sprite_current_number == sprite_quantity - 1 && direction == 0 ||
+             sprite_current_number == 0 && direction == 1) &&
+            !attacked)
         {
             attacked = true;
             if (check_hero_collision_x(hero) && check_hero_collision_y(hero))
