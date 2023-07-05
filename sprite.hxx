@@ -14,7 +14,7 @@ public:
     virtual int      get_current_number(int direction) = 0;
     virtual float    get_start_position()              = 0;
     virtual texture* get_texture()                     = 0;
-    ~sprite();
+    virtual ~sprite();
 };
 
 sprite* create_sprite(texture* textures,

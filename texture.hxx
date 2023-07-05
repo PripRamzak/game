@@ -7,8 +7,7 @@ public:
     virtual void active(int index) = 0;
     virtual int  get_width()       = 0;
     virtual int  get_height()      = 0;
-    virtual void delete_texture()  = 0;
-    ~texture();
+    virtual ~texture();
 };
 
 texture* create_texture(const char* file_path);

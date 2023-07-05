@@ -84,6 +84,8 @@ public:
     bool     get_loop_property() final { return is_looped; }
 };
 
+sound_buffer::~sound_buffer() = default;
+
 sound_buffer* create_sound_buffer(const char* file_path, void* audio_spec)
 {
     return new game_sound_buffer(file_path,

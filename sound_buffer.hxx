@@ -23,6 +23,7 @@ public:
     virtual size_t   get_current_index()               = 0;
     virtual bool     get_playing_status()              = 0;
     virtual bool     get_loop_property()               = 0;
+    virtual ~sound_buffer();
 };
 
 sound_buffer* create_sound_buffer(const char* file_path, void* audio_spec);

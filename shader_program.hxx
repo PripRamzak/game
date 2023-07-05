@@ -24,7 +24,7 @@ public:
     virtual void bind(const char* attribute_name, int index)            = 0;
     virtual void use()                                                  = 0;
     virtual unsigned int get()                                          = 0;
-    ~shader_program();
+    virtual ~shader_program();
 };
 
 shader_program* create_shader_program();

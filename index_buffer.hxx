@@ -11,7 +11,7 @@ public:
     virtual void   buffer_data()                   = 0;
     virtual void   bind()                          = 0;
     virtual size_t get_size()                      = 0;
-    ~index_buffer();
+    virtual ~index_buffer();
 };
 
 index_buffer* create_index_buffer();

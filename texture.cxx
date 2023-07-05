@@ -88,7 +88,7 @@ public:
     }
     int  get_width() final { return width; }
     int  get_height() final { return height; }
-    void delete_texture() final
+    ~opengl_texture()
     {
         glDeleteTextures(1, &texture);
         gl_check();
