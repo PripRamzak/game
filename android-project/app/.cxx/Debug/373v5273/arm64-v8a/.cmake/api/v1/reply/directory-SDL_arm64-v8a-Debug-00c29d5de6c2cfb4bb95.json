@@ -1,0 +1,14 @@
+{
+	"backtraceGraph" : 
+	{
+		"commands" : [],
+		"files" : [],
+		"nodes" : []
+	},
+	"installers" : [],
+	"paths" : 
+	{
+		"build" : "SDL_arm64-v8a",
+		"source" : "/home/germansuh/LestaCources/SDL"
+	}
+}

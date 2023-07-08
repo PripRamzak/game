@@ -8,7 +8,12 @@
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_syswm.h>
 
+#ifdef __ANDROID__
+#include <GLES2/gl2.h>
+#include <android/log.h>
+#else
 #include "glad/glad.h"
+#endif
 
 #include <glm/matrix.hpp>
 
@@ -35,13 +40,42 @@ static void ImGui_ImplGameEngine_UpdateMouseData(SDL_Window* window);
 static void ImGui_ImplGameEngine_SetClipboardText(void*, const char* text);
 static const char* ImGui_ImplGameEngine_GetClipboardText(void*);
 
-class game_sound_buffer;
+class android_redirected_buf : public std::streambuf
+{
+    std::string message;
+
+    int overflow(int c) override
+    {
+        if (c == EOF)
+            return !EOF;
+        else
+        {
+            if (c == '\n')
+            {
+#ifdef __ANDROID__
+                __android_log_print(
+                    ANDROID_LOG_ERROR, "prip", "%s", message.c_str());
+#endif
+                message.clear();
+            }
+            else
+                message.push_back(static_cast<char>(c));
+        }
+        return c;
+    }
+    int sync() override { return 0; }
+
+public:
+    android_redirected_buf() = default;
+};
 
 class game_engine final : public engine
 {
     SDL_Window* window;
-    int         window_width  = 0;
-    int         window_height = 0;
+    int         window_width         = 0;
+    int         window_height        = 0;
+    int         window_width_pixels  = 0;
+    int         window_height_pixels = 0;
 
     SDL_GLContext   context;
     shader_program* hero_program;
@@ -50,6 +84,9 @@ class game_engine final : public engine
     SDL_AudioDeviceID          audio_device;
     SDL_AudioSpec              device_audio_spec;
     std::vector<sound_buffer*> sounds;
+
+    std::basic_streambuf<char>* cout_buf = nullptr;
+    std::basic_streambuf<char>* cerr_buf = nullptr;
 
     static void audio_callback(void* ptr, uint8_t* stream, int stream_size)
     {
@@ -107,6 +144,16 @@ public:
     }
     bool initialize() final
     {
+        android_redirected_buf logcat;
+
+        cout_buf = std::cout.rdbuf();
+        cerr_buf = std::cerr.rdbuf();
+
+#ifdef __ANDROID__
+        std::cout.rdbuf(&logcat);
+        std::cerr.rdbuf(&logcat);
+#endif
+
         if (SDL_Init(SDL_INIT_EVERYTHING) != 0)
         {
             std::cerr << "Init error : " << SDL_GetError() << std::endl;
@@ -115,6 +162,21 @@ public:
 
         window_width  = 1280;
         window_height = 720;
+
+#ifdef __ANDROID__
+        const SDL_DisplayMode* display_mode = SDL_GetCurrentDisplayMode(1);
+        if (!display_mode)
+        {
+            std::cerr << "Can't get current display mode: " << SDL_GetError()
+                      << std::endl;
+            SDL_Quit();
+            return false;
+        }
+        window_width  = display_mode->screen_w;
+        window_height = display_mode->screen_h;
+
+        std::cout << window_width << " " << window_height << std::endl;
+#endif
 
         window = SDL_CreateWindow(
             "Game", window_width, window_height, SDL_WINDOW_OPENGL);
@@ -213,6 +275,7 @@ public:
                   << std::endl;
         SDL_ShowWindow(window);
 
+#ifndef __ANDROID__
         // load OpenGL functions
         auto gl_function_loader = [](const char* function_name)
         {
@@ -229,10 +292,10 @@ public:
             SDL_Quit();
             return false;
         }
+#endif
 
         hero_program = create_shader_program();
-
-        if (!hero_program->create_shader("./vertex_hero_shader.glsl",
+        if (!hero_program->create_shader("shaders/vertex_hero_shader.glsl",
                                          shader_type::vertex))
         {
             SDL_GL_DeleteContext(context);
@@ -240,7 +303,7 @@ public:
             SDL_Quit();
             return false;
         }
-        if (!hero_program->create_shader("./fragment_hero_shader.glsl",
+        if (!hero_program->create_shader("shaders/fragment_hero_shader.glsl",
                                          shader_type::fragment))
         {
             SDL_GL_DeleteContext(context);
@@ -262,7 +325,7 @@ public:
 
         map_program = create_shader_program();
 
-        if (!map_program->create_shader("./vertex_map_shader.glsl",
+        if (!map_program->create_shader("shaders/vertex_map_shader.glsl",
                                         shader_type::vertex))
         {
             SDL_GL_DeleteContext(context);
@@ -270,7 +333,7 @@ public:
             SDL_Quit();
             return false;
         }
-        if (!map_program->create_shader("./fragment_map_shader.glsl",
+        if (!map_program->create_shader("shaders/fragment_map_shader.glsl",
                                         shader_type::fragment))
         {
             SDL_GL_DeleteContext(context);
@@ -302,6 +365,12 @@ public:
         gl_check();
         glEnable(GL_SCISSOR_TEST);
         gl_check();
+
+        SDL_GetWindowSizeInPixels(
+            window, &window_width_pixels, &window_height_pixels);
+        std::cout << window_width_pixels << " " << window_height_pixels
+                  << std::endl;
+        glViewport(0, 0, window_width_pixels, window_height_pixels);
 
         ImGui_ImplGameEngine_Init(window);
 
@@ -512,7 +581,7 @@ public:
     }
     void clear() final
     {
-        glClearColor(0.1f, 0.1f, 0.1f, 0.f);
+        glClearColor(1.f, 1.f, 1.f, 0.f);
         gl_check();
         glClear(GL_COLOR_BUFFER_BIT);
         gl_check();
@@ -524,6 +593,8 @@ public:
     }
     int  get_window_width() final { return window_width; }
     int  get_window_height() final { return window_height; }
+    int  get_window_width_pixels() final { return window_width_pixels; }
+    int  get_window_height_pixels() final { return window_height_pixels; }
     bool swap_buffers() final
     {
         if (SDL_GL_SwapWindow(window) != 0)
@@ -536,8 +607,12 @@ public:
     }
     void uninitialize() final
     {
-        ImGui_ImplGameEngine_Shutdown();
+        std::cout.rdbuf(cout_buf);
+        std::cerr.rdbuf(cerr_buf);
+
+        // ImGui_ImplGameEngine_Shutdown();
         delete hero_program;
+
         SDL_GL_DeleteContext(context);
         SDL_DestroyWindow(window);
         SDL_Quit();
@@ -698,12 +773,12 @@ void ImGui_ImplGameEngine_CreateDeviceObject()
 {
     imgui_shader_program = create_shader_program();
 
-    if (!imgui_shader_program->create_shader("./vertex_shader_imgui.glsl",
+    if (!imgui_shader_program->create_shader("shaders/vertex_shader_imgui.glsl",
                                              shader_type::vertex))
         return;
 
-    if (!imgui_shader_program->create_shader("./fragment_shader_imgui.glsl",
-                                             shader_type::fragment))
+    if (!imgui_shader_program->create_shader(
+            "shaders/fragment_shader_imgui.glsl", shader_type::fragment))
         return;
 
     if (!imgui_shader_program->link())
@@ -870,7 +945,7 @@ void ImGui_ImplGameEngine_Shutdown()
 
     ImGui_ImplGameEngine_DestroyDeviceObject();
     texture* imgui_texture = (texture*)io.Fonts->TexID;
-    imgui_texture->delete_texture();
+    delete imgui_texture;
     io.Fonts->SetTexID(0);
 
     io.BackendPlatformName = nullptr;

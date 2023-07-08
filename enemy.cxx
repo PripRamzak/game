@@ -29,9 +29,9 @@ enemy::enemy(int               health,
 
 void enemy::initialize()
 {
-    skeleton_idle_sprite_sheet   = create_texture("./img/skeleton_idle.png");
-    skeleton_run_sprite_sheet    = create_texture("./img/skeleton_run.png");
-    skeleton_attack_sprite_sheet = create_texture("./img/skeleton_attack.png");
+    skeleton_idle_sprite_sheet   = create_texture("img/skeleton_idle.png");
+    skeleton_run_sprite_sheet    = create_texture("img/skeleton_run.png");
+    skeleton_attack_sprite_sheet = create_texture("img/skeleton_attack.png");
     skeleton_idle =
         create_sprite(skeleton_idle_sprite_sheet, 64.f, 64.f, 7, 32.f);
     skeleton_run =

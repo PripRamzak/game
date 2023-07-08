@@ -34,6 +34,8 @@ public:
     virtual float get_time()                         = 0;
     virtual int   get_window_width()                 = 0;
     virtual int   get_window_height()                = 0;
+    virtual int   get_window_width_pixels()          = 0;
+    virtual int   get_window_height_pixels()         = 0;
     virtual void  uninitialize()                     = 0;
     virtual ~engine();
 };

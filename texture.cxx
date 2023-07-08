@@ -1,8 +1,13 @@
 #include "texture.hxx"
+#include "memory_buf.hxx"
 
 #include <iostream>
 
+#ifdef __ANDROID__
+#include <GLES2/gl2.h>
+#else
 #include "glad/glad.h"
+#endif
 
 #include "stb_image.h"
 
@@ -17,10 +22,17 @@ class opengl_texture final : public texture
 public:
     opengl_texture(const char* file_path)
     {
-        int channels;
+        int        channels;
+        memory_buf buf = load_file(file_path);
+
         stbi_set_flip_vertically_on_load(true);
         unsigned char* image =
-            stbi_load(file_path, &width, &height, &channels, 0);
+            stbi_load_from_memory(reinterpret_cast<unsigned char*>(buf.begin()),
+                                  buf.size(),
+                                  &width,
+                                  &height,
+                                  &channels,
+                                  0);
         if (image == nullptr)
             throw std::runtime_error("Failed to load image");
 
@@ -86,8 +98,8 @@ public:
         glActiveTexture(GL_TEXTURE0 + index);
         gl_check();
     }
-    int  get_width() final { return width; }
-    int  get_height() final { return height; }
+    int get_width() final { return width; }
+    int get_height() final { return height; }
     ~opengl_texture()
     {
         glDeleteTextures(1, &texture);

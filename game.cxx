@@ -8,6 +8,10 @@
 #include <cstdlib>
 #include <memory>
 
+#ifdef __ANDROID__
+#include <SDL3/SDL_main.h>
+#endif
+
 #include <glm/gtc/type_ptr.hpp>
 
 int main(int /*argc*/, char** /*argv*/)

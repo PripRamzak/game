@@ -5,8 +5,8 @@
 class game_sprite final : public sprite
 {
     texture* textures;
-    int      width          = 0;
-    int      height         = 0;
+    float      width          = 0.f;
+    float      height         = 0.f;
     int      quantity       = 0;
     int      current_number = 0;
     float    start_position = 0.f;

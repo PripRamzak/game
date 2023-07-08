@@ -1,0 +1,21 @@
+                        -H/home/germansuh/DungeonAdventure
+-DCMAKE_SYSTEM_NAME=Android
+-DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+-DCMAKE_SYSTEM_VERSION=19
+-DANDROID_PLATFORM=android-19
+-DANDROID_ABI=x86_64
+-DCMAKE_ANDROID_ARCH_ABI=x86_64
+-DANDROID_NDK=/home/germansuh/Android/Sdk/ndk/25.2.9519653
+-DCMAKE_ANDROID_NDK=/home/germansuh/Android/Sdk/ndk/25.2.9519653
+-DCMAKE_TOOLCHAIN_FILE=/home/germansuh/Android/Sdk/ndk/25.2.9519653/build/cmake/android.toolchain.cmake
+-DCMAKE_MAKE_PROGRAM=/home/germansuh/Android/Sdk/cmake/3.22.1/bin/ninja
+-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=/home/germansuh/DungeonAdventure/android-project/app/build/intermediates/cxx/Debug/373v5273/obj/x86_64
+-DCMAKE_RUNTIME_OUTPUT_DIRECTORY=/home/germansuh/DungeonAdventure/android-project/app/build/intermediates/cxx/Debug/373v5273/obj/x86_64
+-DCMAKE_BUILD_TYPE=Debug
+-B/home/germansuh/DungeonAdventure/android-project/app/.cxx/Debug/373v5273/x86_64
+-GNinja
+-DANDROID_STL=c++_shared
+-DSDL3_SRC_DIR=/home/germansuh/LestaCources/SDL
+-DGLM_SRC_DIR=/home/germansuh/Libraries/glm
+                        Build command args: []
+                        Version: 2

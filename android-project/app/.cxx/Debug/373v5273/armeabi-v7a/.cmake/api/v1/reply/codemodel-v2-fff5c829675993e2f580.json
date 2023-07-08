@@ -1,0 +1,191 @@
+{
+	"configurations" : 
+	[
+		{
+			"directories" : 
+			[
+				{
+					"build" : ".",
+					"childIndexes" : 
+					[
+						1,
+						2,
+						4
+					],
+					"jsonFile" : "directory-.-Debug-f5ebdc15457944623624.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.6.0"
+					},
+					"projectIndex" : 0,
+					"source" : ".",
+					"targetIndexes" : 
+					[
+						2,
+						3
+					]
+				},
+				{
+					"build" : "SDL_armeabi-v7a",
+					"jsonFile" : "directory-SDL_armeabi-v7a-Debug-8a237f3428d61af74a53.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.6.0"
+					},
+					"parentIndex" : 0,
+					"projectIndex" : 1,
+					"source" : "/home/germansuh/LestaCources/SDL",
+					"targetIndexes" : 
+					[
+						0,
+						1,
+						5
+					]
+				},
+				{
+					"build" : "GLM_armeabi-v7a",
+					"childIndexes" : 
+					[
+						3
+					],
+					"jsonFile" : "directory-GLM_armeabi-v7a-Debug-bc9a79dd7e0a7430ba60.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.6.0"
+					},
+					"parentIndex" : 0,
+					"projectIndex" : 2,
+					"source" : "/home/germansuh/Libraries/glm"
+				},
+				{
+					"build" : "GLM_armeabi-v7a/glm",
+					"jsonFile" : "directory-GLM_armeabi-v7a.glm-Debug-a4e49f34a4d11702d251.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.6.0"
+					},
+					"parentIndex" : 2,
+					"projectIndex" : 2,
+					"source" : "/home/germansuh/Libraries/glm/glm"
+				},
+				{
+					"build" : "imgui",
+					"jsonFile" : "directory-imgui-Debug-9501a8a71dcfe9b6b2a4.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.6.0"
+					},
+					"parentIndex" : 0,
+					"projectIndex" : 0,
+					"source" : "imgui",
+					"targetIndexes" : 
+					[
+						4
+					]
+				}
+			],
+			"name" : "Debug",
+			"projects" : 
+			[
+				{
+					"childIndexes" : 
+					[
+						1,
+						2
+					],
+					"directoryIndexes" : 
+					[
+						0,
+						4
+					],
+					"name" : "dungeon-adventure",
+					"targetIndexes" : 
+					[
+						2,
+						3,
+						4
+					]
+				},
+				{
+					"directoryIndexes" : 
+					[
+						1
+					],
+					"name" : "SDL3",
+					"parentIndex" : 0,
+					"targetIndexes" : 
+					[
+						0,
+						1,
+						5
+					]
+				},
+				{
+					"directoryIndexes" : 
+					[
+						2,
+						3
+					],
+					"name" : "glm",
+					"parentIndex" : 0
+				}
+			],
+			"targets" : 
+			[
+				{
+					"directoryIndex" : 1,
+					"id" : "SDL3-shared::@a374c0c9a3e248f29371",
+					"jsonFile" : "target-SDL3-shared-Debug-cb0e909c310d22dfee53.json",
+					"name" : "SDL3-shared",
+					"projectIndex" : 1
+				},
+				{
+					"directoryIndex" : 1,
+					"id" : "SDL3_test::@a374c0c9a3e248f29371",
+					"jsonFile" : "target-SDL3_test-Debug-cca272e20e8b05d14ed3.json",
+					"name" : "SDL3_test",
+					"projectIndex" : 1
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "engine::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-engine-Debug-47a82b41884c33c0308a.json",
+					"name" : "engine",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "game::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-game-Debug-39d351d1fe35b9d8d9a8.json",
+					"name" : "game",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 4,
+					"id" : "imgui::@45ca6dacf63e9879b888",
+					"jsonFile" : "target-imgui-Debug-a503253551f842e3d885.json",
+					"name" : "imgui",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 1,
+					"id" : "uninstall::@a374c0c9a3e248f29371",
+					"jsonFile" : "target-uninstall-Debug-4b2d19b11e5184c4b9cf.json",
+					"name" : "uninstall",
+					"projectIndex" : 1
+				}
+			]
+		}
+	],
+	"kind" : "codemodel",
+	"paths" : 
+	{
+		"build" : "/home/germansuh/DungeonAdventure/android-project/app/.cxx/Debug/373v5273/armeabi-v7a",
+		"source" : "/home/germansuh/DungeonAdventure"
+	},
+	"version" : 
+	{
+		"major" : 2,
+		"minor" : 3
+	}
+}

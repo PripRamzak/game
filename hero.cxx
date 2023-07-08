@@ -31,11 +31,11 @@ hero::hero(int               health,
 
 void hero::initialize()
 {
-    warrior_idle_sprite_sheet   = create_texture("./img/warrior_idle.png");
-    warrior_run_sprite_sheet    = create_texture("./img/warrior_run.png");
-    warrior_attack_sprite_sheet = create_texture("./img/warrior_attack.png");
+    warrior_idle_sprite_sheet   = create_texture("img/warrior_idle.png");
+    warrior_run_sprite_sheet    = create_texture("img/warrior_run.png");
+    warrior_attack_sprite_sheet = create_texture("img/warrior_attack.png");
     warrior_run_n_attack_sprite_sheet =
-        create_texture("./img/warrior_run&attack.png");
+        create_texture("img/warrior_run&attack.png");
     warrior_idle =
         create_sprite(warrior_idle_sprite_sheet, 48.f, 48.f, 6, 24.f);
     warrior_run = create_sprite(warrior_run_sprite_sheet, 48.f, 48.f, 6, 24.f);

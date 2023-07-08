@@ -1,4 +1,5 @@
 #include "shader_program.hxx"
+#include "memory_buf.hxx"
 
 #include <cassert>
 #include <fstream>
@@ -7,7 +8,11 @@
 #include <stdexcept>
 #include <vector>
 
+#ifdef __ANDROID__
+#include <GLES2/gl2.h>
+#else
 #include "glad/glad.h"
+#endif
 
 void gl_check()
 {
@@ -112,24 +117,15 @@ public:
         }
 
         std::stringstream ss;
-        std::ifstream     vertex_shader_file;
-        std::string       vertex_shader_src;
+        memory_buf        buf = load_file(file_path);
+        std::string       shader_src;
         const char*       src_code;
 
-        vertex_shader_file.exceptions(std::ifstream::failbit);
-        try
-        {
-            vertex_shader_file.open(file_path);
-            ss << vertex_shader_file.rdbuf();
-            vertex_shader_file.close();
-        }
-        catch (std::ifstream::failure)
-        {
-            std::cerr << "Exception opening/reading/closing file" << std::endl;
-            return false;
-        }
-        vertex_shader_src = ss.str();
-        src_code          = vertex_shader_src.c_str();
+        std::istream shader_stream(&buf);
+        ss << shader_stream.rdbuf();
+
+        shader_src = ss.str();
+        src_code   = shader_src.c_str();
 
         glShaderSource(shader, 1, &src_code, nullptr);
         gl_check();
@@ -151,7 +147,7 @@ public:
             gl_check();
 
             std::cerr << "Error while compiling shader\nSourceCode:\n"
-                      << vertex_shader_src << std::endl
+                      << src_code << std::endl
                       << info_log.data();
             return false;
         }

@@ -15,12 +15,12 @@ static texture* wall_bottom = nullptr;
 
 void map::initialize()
 {
-    floor_      = create_texture("./img/floor.png");
-    wall        = create_texture("./img/wall.png");
-    wall_top    = create_texture("./img/wall_top.png");
-    wall_left   = create_texture("./img/wall_left.png");
-    wall_right  = create_texture("./img/wall_right.png");
-    wall_bottom = create_texture("./img/wall_bottom.png");
+    floor_      = create_texture("img/floor.png");
+    wall        = create_texture("img/wall.png");
+    wall_top    = create_texture("img/wall_top.png");
+    wall_left   = create_texture("img/wall_left.png");
+    wall_right  = create_texture("img/wall_right.png");
+    wall_bottom = create_texture("img/wall_bottom.png");
 }
 
 class game_map final : public map

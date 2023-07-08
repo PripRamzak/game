@@ -1,0 +1,5 @@
+/home/germansuh/DungeonAdventure/CMakeLists.txt
+/home/germansuh/DungeonAdventure/imgui/CMakeLists.txt
+/home/germansuh/LestaCources/SDL/CMakeLists.txt
+/home/germansuh/Libraries/glm/CMakeLists.txt
+/home/germansuh/Libraries/glm/glm/CMakeLists.txt

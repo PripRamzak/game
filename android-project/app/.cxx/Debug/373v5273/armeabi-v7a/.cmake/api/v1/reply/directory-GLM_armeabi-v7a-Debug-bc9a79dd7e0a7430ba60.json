@@ -1,0 +1,14 @@
+{
+	"backtraceGraph" : 
+	{
+		"commands" : [],
+		"files" : [],
+		"nodes" : []
+	},
+	"installers" : [],
+	"paths" : 
+	{
+		"build" : "GLM_armeabi-v7a",
+		"source" : "/home/germansuh/Libraries/glm"
+	}
+}

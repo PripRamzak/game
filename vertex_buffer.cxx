@@ -1,6 +1,10 @@
 #include "vertex_buffer.hxx"
 
+#ifdef __ANDROID__
+#include <GLES2/gl2.h>
+#else
 #include "glad/glad.h"
+#endif
 
 void gl_check();
 
