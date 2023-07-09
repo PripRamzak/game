@@ -1,1 +1,0 @@
-message(FATAL_ERROR "find_package(SDL3) using the SDL3 build directory not supported for CMake versions older then 3.26.")
