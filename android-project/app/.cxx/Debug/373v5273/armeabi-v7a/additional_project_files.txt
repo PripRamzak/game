@@ -11,6 +11,7 @@
 /home/germansuh/DungeonAdventure/texture.hxx
 /home/germansuh/DungeonAdventure/vertex_buffer.hxx
 /home/germansuh/DungeonAdventure/stb_image.h
+/home/germansuh/DungeonAdventure/stb_image_write.h
 /home/germansuh/DungeonAdventure/camera.hxx
 /home/germansuh/DungeonAdventure/enemy.hxx
 /home/germansuh/DungeonAdventure/game_object.hxx

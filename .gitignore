@@ -3,3 +3,8 @@ cmake-build-debug/
 imgui.ini
 build/
 win-build/
+android-project/.gradle
+android-project/.idea
+android-project/local.properties
+android-project/app/.cxx
+android-project/app/build

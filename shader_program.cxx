@@ -49,21 +49,15 @@ class opengl_shader_program final : public shader_program
     GLuint fragment_shader = 0;
 
 public:
-    bool link() final
+    opengl_shader_program()
     {
         program = glCreateProgram();
         gl_check();
         if (program == 0)
-        {
-            std::cerr << "Create program error" << std::endl;
-            return false;
-        }
-
-        glAttachShader(program, vertex_shader);
-        gl_check();
-        glAttachShader(program, fragment_shader);
-        gl_check();
-
+            throw std::runtime_error("Create program error");
+    }
+    bool link() final
+    {
         glLinkProgram(program);
         gl_check();
 
@@ -151,6 +145,9 @@ public:
                       << info_log.data();
             return false;
         }
+
+        glAttachShader(program, shader);
+        gl_check();
 
         return true;
     }

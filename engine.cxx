@@ -17,9 +17,6 @@
 
 #include <glm/matrix.hpp>
 
-#define STB_IMAGE_IMPLEMENTATION
-#include "stb_image.h"
-
 #include "imgui.h"
 
 bool check_pressing_key(SDL_Event sdl_event, event& event);
@@ -80,6 +77,7 @@ class game_engine final : public engine
     SDL_GLContext   context;
     shader_program* hero_program;
     shader_program* map_program;
+    shader_program* test_program;
 
     SDL_AudioDeviceID          audio_device;
     SDL_AudioSpec              device_audio_spec;
@@ -303,6 +301,10 @@ public:
             SDL_Quit();
             return false;
         }
+
+        hero_program->bind("vertex_position", 0);
+        hero_program->bind("texture_coordinates", 1);
+
         if (!hero_program->create_shader("shaders/fragment_hero_shader.glsl",
                                          shader_type::fragment))
         {
@@ -320,9 +322,6 @@ public:
             return false;
         }
 
-        hero_program->bind("vertex_position", 0);
-        hero_program->bind("texture_coordinates", 1);
-
         map_program = create_shader_program();
 
         if (!map_program->create_shader("shaders/vertex_map_shader.glsl",
@@ -333,6 +332,10 @@ public:
             SDL_Quit();
             return false;
         }
+
+        map_program->bind("vertex_position", 0);
+        map_program->bind("texture_coordinates", 1);
+
         if (!map_program->create_shader("shaders/fragment_map_shader.glsl",
                                         shader_type::fragment))
         {
@@ -349,9 +352,6 @@ public:
             SDL_Quit();
             return false;
         }
-
-        map_program->bind("vertex_position", 0);
-        map_program->bind("texture_coordinates", 1);
 
         glEnable(GL_BLEND);
         gl_check();
@@ -472,8 +472,8 @@ public:
         hero_program->set_uniform_matrix4fv(
             "matrix", 1, GL_FALSE, matrix_first_value);
 
-        sprite->get_texture()->bind();
         sprite->get_texture()->active(0);
+        sprite->get_texture()->bind();
 
         vertex_buffer->bind();
         index_buffer->bind();
@@ -500,6 +500,7 @@ public:
 
         glDrawElements(
             GL_TRIANGLES, index_buffer->get_size(), GL_UNSIGNED_SHORT, 0);
+        gl_check();
     }
     void render(vertex_buffer* vertex_buffer,
                 index_buffer*  index_buffer,
@@ -511,8 +512,8 @@ public:
         map_program->set_uniform_matrix4fv(
             "matrix", 1, GL_FALSE, matrix_first_value);
 
-        texture->bind();
         texture->active(0);
+        texture->bind();
 
         vertex_buffer->bind();
         index_buffer->bind();
@@ -539,6 +540,7 @@ public:
 
         glDrawElements(
             GL_TRIANGLES, index_buffer->get_size(), GL_UNSIGNED_SHORT, 0);
+        gl_check();
     }
     bool render_menu(bool& show_menu_window) final
     {
@@ -610,7 +612,7 @@ public:
         std::cout.rdbuf(cout_buf);
         std::cerr.rdbuf(cerr_buf);
 
-        // ImGui_ImplGameEngine_Shutdown();
+        ImGui_ImplGameEngine_Shutdown();
         delete hero_program;
 
         SDL_GL_DeleteContext(context);
@@ -688,7 +690,6 @@ bool ImGui_ImplGameEngine_ProcessEvent(const SDL_Event* event)
         case SDL_EVENT_MOUSE_MOTION:
         {
             ImVec2 mouse_pos((float)event->motion.x, (float)event->motion.y);
-            std::cout << mouse_pos.x << " " << mouse_pos.y << std::endl;
             io.AddMouseSourceEvent(event->motion.which == SDL_TOUCH_MOUSEID
                                        ? ImGuiMouseSource_TouchScreen
                                        : ImGuiMouseSource_Mouse);
@@ -777,16 +778,16 @@ void ImGui_ImplGameEngine_CreateDeviceObject()
                                              shader_type::vertex))
         return;
 
+    imgui_shader_program->bind("Position", 0);
+    imgui_shader_program->bind("UV", 1);
+    imgui_shader_program->bind("Color", 2);
+
     if (!imgui_shader_program->create_shader(
             "shaders/fragment_shader_imgui.glsl", shader_type::fragment))
         return;
 
     if (!imgui_shader_program->link())
         return;
-
-    imgui_shader_program->bind("Position", 0);
-    imgui_shader_program->bind("UV", 1);
-    imgui_shader_program->bind("Color", 2);
 
     glGenBuffers(1, &imgui_VBO);
     gl_check();
