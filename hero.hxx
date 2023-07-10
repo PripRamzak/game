@@ -19,6 +19,9 @@ public:
     virtual bool              is_alive()                           = 0;
     virtual void              hurt()                               = 0;
     virtual void              move(float delta_x_, float delta_y_) = 0;
+    virtual void              attack(game_object* enemy,
+                                     bool         collision_x,
+                                     bool         collision_y)             = 0;
     virtual void              set_state(game_object_state state_)  = 0;
     virtual void              set_direction(int direction_)        = 0;
     virtual float             get_current_pos_x()                  = 0;

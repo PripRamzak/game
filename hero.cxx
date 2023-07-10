@@ -3,14 +3,12 @@
 #include <algorithm>
 #include <iostream>
 
-static texture* warrior_idle_sprite_sheet         = nullptr;
-static texture* warrior_run_sprite_sheet          = nullptr;
-static texture* warrior_attack_sprite_sheet       = nullptr;
-static texture* warrior_run_n_attack_sprite_sheet = nullptr;
-static sprite*  warrior_idle                      = nullptr;
-static sprite*  warrior_run                       = nullptr;
-static sprite*  warrior_attack                    = nullptr;
-static sprite*  warrior_run_n_attack              = nullptr;
+static texture* warrior_idle_sprite_sheet   = nullptr;
+static texture* warrior_run_sprite_sheet    = nullptr;
+static texture* warrior_attack_sprite_sheet = nullptr;
+static sprite*  warrior_idle                = nullptr;
+static sprite*  warrior_run                 = nullptr;
+static sprite*  warrior_attack              = nullptr;
 
 hero::hero(int               health,
            float             local_pos_x,
@@ -34,19 +32,18 @@ void hero::initialize()
     warrior_idle_sprite_sheet   = create_texture("img/warrior_idle.png");
     warrior_run_sprite_sheet    = create_texture("img/warrior_run.png");
     warrior_attack_sprite_sheet = create_texture("img/warrior_attack.png");
-    warrior_run_n_attack_sprite_sheet =
-        create_texture("img/warrior_run&attack.png");
     warrior_idle =
-        create_sprite(warrior_idle_sprite_sheet, 48.f, 48.f, 6, 24.f);
-    warrior_run = create_sprite(warrior_run_sprite_sheet, 48.f, 48.f, 6, 24.f);
+        create_sprite(warrior_idle_sprite_sheet, 48.f, 48.f, 6, 24.f, 0.15f);
+    warrior_run =
+        create_sprite(warrior_run_sprite_sheet, 48.f, 48.f, 6, 24.f, 0.15f);
     warrior_attack =
-        create_sprite(warrior_attack_sprite_sheet, 86.f, 48.f, 4, 6.f);
-    warrior_run_n_attack =
-        create_sprite(warrior_run_n_attack_sprite_sheet, 64.f, 48.f, 4, 16.f);
+        create_sprite(warrior_attack_sprite_sheet, 86.f, 48.f, 4, 6.f, 0.25f);
 }
 
 class warrior : public hero
 {
+    bool attacked = false;
+
     auto find_sprite(game_object_state state_)
     {
         auto it = std::find_if(sprites.begin(),
@@ -124,7 +121,6 @@ public:
         add_sprite(warrior_idle, game_object_state::idle);
         add_sprite(warrior_run, game_object_state::run);
         add_sprite(warrior_attack, game_object_state::attack);
-        add_sprite(warrior_run_n_attack, game_object_state::run_n_attack);
     }
     void move(float delta_x_, float delta_y_) final
     {
@@ -132,11 +128,33 @@ public:
         delta_x += delta_x_;
         delta_y += delta_y_;
     }
+    void attack(game_object* enemy, bool collision_x, bool collision_y) final
+    {
+        auto it = find_sprite(state);
+        int  sprite_current_number =
+            it->game_object_sprite->get_current_number(direction);
+        int sprite_quantity = it->game_object_sprite->get_quantity();
+
+        if (sprite_current_number == 0 && direction == 0 ||
+            sprite_current_number == 3 && direction == 1)
+            attacked = false;
+
+        // Hit moment
+
+        if ((sprite_current_number == 2 && direction == 0 ||
+             sprite_current_number == 1 && direction == 1) &&
+            !attacked)
+        {
+            attacked = true;
+            if (collision_x && collision_y &&
+                direction != enemy->get_direction())
+                enemy->hurt();
+        }
+    }
     bool is_alive() { return alive; }
     void hurt() final
     {
         health--;
-        std::cout << health << std::endl;
         if (health == 0)
             alive = false;
     }

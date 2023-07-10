@@ -6,9 +6,9 @@
 static texture* skeleton_idle_sprite_sheet   = nullptr;
 static texture* skeleton_run_sprite_sheet    = nullptr;
 static texture* skeleton_attack_sprite_sheet = nullptr;
-sprite*         skeleton_idle                = nullptr;
-sprite*         skeleton_run                 = nullptr;
-sprite*         skeleton_attack              = nullptr;
+static sprite*  skeleton_idle                = nullptr;
+static sprite*  skeleton_run                 = nullptr;
+static sprite*  skeleton_attack              = nullptr;
 
 enemy::enemy(int               health,
              float             local_pos_x,
@@ -33,16 +33,17 @@ void enemy::initialize()
     skeleton_run_sprite_sheet    = create_texture("img/skeleton_run.png");
     skeleton_attack_sprite_sheet = create_texture("img/skeleton_attack.png");
     skeleton_idle =
-        create_sprite(skeleton_idle_sprite_sheet, 64.f, 64.f, 7, 32.f);
+        create_sprite(skeleton_idle_sprite_sheet, 64.f, 64.f, 7, 32.f, 0.15f);
     skeleton_run =
-        create_sprite(skeleton_run_sprite_sheet, 74.f, 64.f, 8, 32.f);
+        create_sprite(skeleton_run_sprite_sheet, 74.f, 64.f, 8, 32.f, 0.15f);
     skeleton_attack =
-        create_sprite(skeleton_attack_sprite_sheet, 96.f, 64.f, 4, 16.f);
+        create_sprite(skeleton_attack_sprite_sheet, 96.f, 64.f, 4, 16.f, 0.25f);
 }
 
 class skeleton final : public enemy
 {
     bool attacked = false;
+    bool spawned  = false;
 
     auto find_sprite(game_object_state state_)
     {
@@ -121,15 +122,20 @@ public:
         add_sprite(skeleton_run, game_object_state::run);
         add_sprite(skeleton_attack, game_object_state::attack);
     }
-    void spawn() final { alive = true; }
+    void spawn() final
+    {
+        spawned = true;
+        alive   = true;
+    }
     bool is_alive() { return alive; }
+    bool is_spawned() { return spawned; }
     void hurt() final
     {
         health--;
         if (health == 0)
             alive = false;
     }
-    void move(hero* hero) final
+    void move(game_object* hero) final
     {
         if (!check_hero_collision_y(hero))
         {
@@ -175,10 +181,22 @@ public:
 
             set_state(game_object_state::run);
         }
+        else if (state == game_object_state::idle)
+        {
+            auto it = find_sprite(state);
+            int  sprite_current_number =
+                it->game_object_sprite->get_current_number(direction);
+            int sprite_quantity = it->game_object_sprite->get_quantity();
+
+            if (sprite_current_number == sprite_quantity - 1 &&
+                    direction == 0 ||
+                sprite_current_number == 0 && direction == 1)
+                set_state(game_object_state::attack);
+        }
         else
             set_state(game_object_state::idle);
     }
-    void attack(hero* hero) final
+    void attack(game_object* hero) final
     {
         auto it = find_sprite(state);
         int  sprite_current_number =
@@ -207,7 +225,7 @@ public:
                 hero->hurt();
         }
     }
-    bool check_hero_collision_x(hero* hero) final
+    bool check_hero_collision_x(game_object* hero) final
     {
         auto it = find_sprite(state);
 
@@ -235,7 +253,7 @@ public:
 
         return false;
     }
-    bool check_hero_collision_y(hero* hero) final
+    bool check_hero_collision_y(game_object* hero) final
     {
         auto it = find_sprite(state);
 

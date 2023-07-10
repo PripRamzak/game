@@ -270,7 +270,7 @@ void generate_level_1(map*                 map,
     map->draw_vertical_line(19, 8, 4, map_tile::wall_left);
     map->draw_vertical_line(35, 2, 10, map_tile::wall_right);
 
-    enemy* skeleton_1 = create_enemy(2,
+    enemy* skeleton_1 = create_enemy(5,
                                      window_width / 2.f,
                                      window_height / 2.f,
                                      2100.f,
@@ -282,6 +282,6 @@ void generate_level_1(map*                 map,
 
 void game_logic_level_1(hero* hero, std::vector<enemy*>& enemies)
 {
-    if (hero->get_current_pos_x() > 1300.f && !enemies[0]->is_alive())
+    if (hero->get_current_pos_x() > 1300.f && !enemies[0]->is_spawned())
         enemies[0]->spawn();
 }
