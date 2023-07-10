@@ -82,11 +82,11 @@ bool check_pressing_key(SDL_Event sdl_event, event& event)
     return false;
 }
 
-bool check_pressing_button(SDL_Event            sdl_event,
-                           event&               event,
+bool check_pressing_button(SDL_Event             sdl_event,
+                           event&                event,
                            std::vector<buttons>& buttons_,
-                           float                window_width,
-                           float                window_height)
+                           float                 window_width,
+                           float                 window_height)
 {
     float finger_x = sdl_event.tfinger.x * window_width;
     float finger_y = sdl_event.tfinger.y * window_height;
@@ -160,5 +160,24 @@ bool check_pressing_button(SDL_Event            sdl_event,
         }
         return true;
     }
+
+    if (finger_x > buttons_[1].vertices[0].x &&
+        finger_x < buttons_[1].vertices[0].x + buttons_[1].width &&
+        finger_y > buttons_[1].vertices[0].y &&
+        finger_y < buttons_[1].vertices[0].y + buttons_[1].height)
+    {
+        if (sdl_event.type == SDL_EVENT_FINGER_DOWN)
+        {
+            event                  = event::pressed;
+            key_bindings[4].event_ = event::pressed;
+        }
+        else
+        {
+            event                  = event::released;
+            key_bindings[4].event_ = event::released;
+        }
+        return true;
+    }
+
     return false;
 }
