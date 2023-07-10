@@ -117,10 +117,14 @@ int main(int /*argc*/, char** /*argv*/)
     sound_buffer* sound_attack =
         engine->create_sound_buffer("sound/attack.wav");
 
-    float warrior_update_time  = engine->get_time();
+    float warrior_update_time              = engine->get_time();
+    bool  warrior_skeleton_collision_left  = false;
+    bool  warrior_skeleton_collision_right = false;
+
     float skeleton_update_time = engine->get_time();
-    bool  quit                 = false;
-    bool  show_menu_window     = true;
+
+    bool  quit             = false;
+    bool  show_menu_window = true;
     event event;
 
     while (!quit && warrior->is_alive())
@@ -198,9 +202,17 @@ int main(int /*argc*/, char** /*argv*/)
                     warrior->move(
                         0.f, 10.f, dungeon_map, map_tile::wall_bottom);
                 else if (engine->check_key(key::left))
-                    warrior->move(-10.f, 0.f, dungeon_map, map_tile::wall_left);
+                    warrior->move(-10.f,
+                                  0.f,
+                                  dungeon_map,
+                                  map_tile::wall_left,
+                                  warrior_skeleton_collision_left);
                 else if (engine->check_key(key::right))
-                    warrior->move(10.f, 0.f, dungeon_map, map_tile::wall_right);
+                    warrior->move(10.f,
+                                  0.f,
+                                  dungeon_map,
+                                  map_tile::wall_right,
+                                  warrior_skeleton_collision_right);
             }
             else
                 warrior->set_state(game_object_state::idle);
@@ -214,6 +226,8 @@ int main(int /*argc*/, char** /*argv*/)
                            warrior->get_direction(),
                            &warrior_mat_result[0][0]);
 
+            warrior_skeleton_collision_left  = false;
+            warrior_skeleton_collision_right = false;
             for (auto& enemy : enemies)
             {
                 if (enemy->is_alive())
@@ -223,10 +237,22 @@ int main(int /*argc*/, char** /*argv*/)
                     else
                         enemy->attack(warrior);
 
+                    bool skeleton_warrior_collision =
+                        enemy->check_hero_collision_x(warrior) &&
+                        enemy->check_hero_collision_y(warrior);
+
+                    if (skeleton_warrior_collision &&
+                        warrior->get_current_pos_x() <
+                            enemy->get_current_pos_x())
+                        warrior_skeleton_collision_right = true;
+
+                    if (skeleton_warrior_collision &&
+                        warrior->get_current_pos_x() >
+                            enemy->get_current_pos_x())
+                        warrior_skeleton_collision_left = true;
+
                     if (warrior->get_state() == game_object_state::attack)
-                        warrior->attack(enemy,
-                                        enemy->check_hero_collision_x(warrior),
-                                        enemy->check_hero_collision_y(warrior));
+                        warrior->attack(enemy, skeleton_warrior_collision);
 
                     glm::mat4 skeleton_mat_size{ 1 };
                     skeleton_mat_size[0].x = skeleton_mat_size[1].y =

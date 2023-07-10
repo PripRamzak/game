@@ -122,7 +122,11 @@ public:
         add_sprite(warrior_run, game_object_state::run);
         add_sprite(warrior_attack, game_object_state::attack);
     }
-    void move(float delta_x_, float delta_y_, map* map, map_tile type) final
+    void move(float    delta_x_,
+              float    delta_y_,
+              map*     map,
+              map_tile type,
+              bool     skeleton_collision = false) final
     {
         state = game_object_state::run;
         if (delta_x_ > 0.f)
@@ -138,8 +142,13 @@ public:
             delta_x -= delta_x_;
             delta_y -= delta_y_;
         }
+
+        if (delta_x_ > 0.f && skeleton_collision)
+            delta_x -= delta_x_;
+        else if (delta_x_ < 0.f && skeleton_collision)
+            delta_x -= delta_x_;
     }
-    void attack(game_object* enemy, bool collision_x, bool collision_y) final
+    void attack(game_object* enemy, bool skeleton_collision) final
     {
         auto it = find_sprite(state);
         int  sprite_current_number =
@@ -156,8 +165,7 @@ public:
             !attacked)
         {
             attacked = true;
-            if (collision_x && collision_y &&
-                direction != enemy->get_direction())
+            if (skeleton_collision && direction != enemy->get_direction())
                 enemy->hurt();
         }
     }

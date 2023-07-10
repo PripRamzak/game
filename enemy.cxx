@@ -137,6 +137,8 @@ public:
     }
     void move(game_object* hero) final
     {
+        bool hero_collision_x = check_hero_collision_x(hero);
+
         if (!check_hero_collision_y(hero))
         {
             if (hero->get_current_pos_y() > global_pos_y + delta_y)
@@ -149,15 +151,33 @@ public:
         else if (hero->get_current_pos_y() - 2.5f > global_pos_y + delta_y ||
                  hero->get_current_pos_y() + 2.5f < global_pos_y + delta_y)
         {
-            if (check_hero_collision_x(hero))
+            if (hero_collision_x)
             {
                 if (hero->get_current_pos_x() <= global_pos_x + delta_x)
+                {
                     delta_x += 5.f;
+                    direction = 0;
+                }
                 else if (hero->get_current_pos_x() > global_pos_x + delta_x)
+                {
                     delta_x -= 5.f;
+                    direction = 1;
+                }
             }
-            else
+
+            if (!check_hero_collision_x(hero))
             {
+                if (hero->get_current_pos_x() <= global_pos_x + delta_x)
+                {
+                    delta_x -= 5.f;
+                    direction = 1;
+                }
+                else if (hero->get_current_pos_x() > global_pos_x + delta_x)
+                {
+                    delta_x += 5.f;
+                    direction = 0;
+                }
+
                 if (hero->get_current_pos_y() - 2.5f > global_pos_y + delta_y)
                     delta_y += 5.f;
                 else if (hero->get_current_pos_y() + 2.5f <
@@ -166,7 +186,7 @@ public:
             }
             set_state(game_object_state::run);
         }
-        else if (!check_hero_collision_x(hero))
+        else if (!hero_collision_x)
         {
             if (hero->get_current_pos_x() < global_pos_x + delta_x)
             {
