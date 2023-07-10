@@ -1,4 +1,5 @@
 #include "engine.hxx"
+#include "buttons.hxx"
 #include "shader_program.hxx"
 
 #include <algorithm>
@@ -20,7 +21,12 @@
 #include "imgui.h"
 
 bool check_pressing_key(SDL_Event sdl_event, event& event);
-bool is_key_down(action action);
+bool check_pressing_button(SDL_Event            sdl_event,
+                           event&               event,
+                           std::vector<buttons>& buttons_,
+                           float                window_width,
+                           float                window_height);
+bool is_key_down(key key_);
 
 void gl_check();
 
@@ -77,11 +83,13 @@ class game_engine final : public engine
     SDL_GLContext   context;
     shader_program* hero_program;
     shader_program* map_program;
-    shader_program* test_program;
 
     SDL_AudioDeviceID          audio_device;
     SDL_AudioSpec              device_audio_spec;
     std::vector<sound_buffer*> sounds;
+
+    std::vector<buttons> mobile_buttons;
+    index_buffer*        buttons_index_buffer;
 
     std::basic_streambuf<char>* cout_buf = nullptr;
     std::basic_streambuf<char>* cerr_buf = nullptr;
@@ -411,35 +419,83 @@ public:
 
         SDL_PlayAudioDevice(audio_device);
 
+        mobile_buttons.resize(1);
+
+        mobile_buttons[0].width    = 240.f;
+        mobile_buttons[0].height   = 240.f;
+        mobile_buttons[0].texture_ = create_texture("img/mobile_buttons.png");
+        mobile_buttons[0].vertices[0] = { 50.f,
+                                          window_height_pixels -
+                                              mobile_buttons[0].height - 50.f,
+                                          0.f,
+                                          1.f };
+        mobile_buttons[0].vertices[1] = { 50.f + mobile_buttons[0].width,
+                                          window_height_pixels -
+                                              mobile_buttons[0].height - 50.f,
+                                          1.f,
+                                          1.f };
+        mobile_buttons[0].vertices[2] = { 50.f + mobile_buttons[0].width,
+                                          window_height_pixels - 50.f,
+                                          1.f,
+                                          0.f };
+        mobile_buttons[0].vertices[3] = {
+            50.f, window_height_pixels - 50.f, 0.f, 0.f
+        };
+        mobile_buttons[0].vertex_buffer_ = create_vertex_buffer();
+        mobile_buttons[0].vertex_buffer_->buffer_data(
+            mobile_buttons[0].vertices, static_cast<size_t>(4));
+
+        buttons_index_buffer = create_index_buffer();
+        buttons_index_buffer->add_indexes(static_cast<size_t>(4));
+
         return true;
     }
     bool read_input(event& event) final
     {
         SDL_Event sdl_event;
 
+        bool game_event = false;
+
         if (SDL_PollEvent(&sdl_event))
         {
             ImGui_ImplGameEngine_ProcessEvent(&sdl_event);
-            if (sdl_event.type == SDL_EVENT_QUIT)
+            switch (sdl_event.type)
             {
-                event = event::turn_off;
-                return true;
-            }
-            else
-            {
-                mouse_button_pressed =
-                    sdl_event.type != SDL_EVENT_MOUSE_BUTTON_DOWN ? false
-                                                                  : true;
-
-                if (sdl_event.type == SDL_EVENT_KEY_DOWN ||
-                    sdl_event.type == SDL_EVENT_KEY_UP)
+                case SDL_EVENT_KEY_DOWN:
+                case SDL_EVENT_KEY_UP:
                     if (check_pressing_key(sdl_event, event))
-                        return true;
+                        game_event = true;
+                    break;
+                case SDL_EVENT_FINGER_DOWN:
+                case SDL_EVENT_FINGER_UP:
+                    SDL_Event e1;
+                    SDL_Event e2;
+                    e1.type = SDL_EVENT_FINGER_DOWN;
+                    e2.type = SDL_EVENT_FINGER_UP;
+                    if (check_pressing_button(sdl_event,
+                                              event,
+                                              mobile_buttons,
+                                              window_width_pixels,
+                                              window_height_pixels))
+                        game_event = true;
+                    break;
+                case SDL_EVENT_MOUSE_BUTTON_DOWN:
+                    mouse_button_pressed = true;
+                    break;
+                case SDL_EVENT_MOUSE_BUTTON_UP:
+                    mouse_button_pressed = false;
+                    break;
+                case SDL_EVENT_QUIT:
+                    event      = event::turn_off;
+                    game_event = true;
+                    break;
+                default:
+                    break;
             }
         }
-        return false;
+        return game_event;
     }
-    bool check_action(action action) final { return is_key_down(action); }
+    bool          check_key(key key_) final { return is_key_down(key_); }
     sound_buffer* create_sound_buffer(const char* file_path) final
     {
         sound_buffer* sound_buffer = ::create_sound_buffer(
@@ -542,6 +598,14 @@ public:
             GL_TRIANGLES, index_buffer->get_size(), GL_UNSIGNED_SHORT, 0);
         gl_check();
     }
+    void render_buttons(float* matrix_first_value) final
+    {
+        for (auto button : mobile_buttons)
+            render(button.vertex_buffer_,
+                   buttons_index_buffer,
+                   button.texture_,
+                   matrix_first_value);
+    }
     bool render_menu(bool& show_menu_window) final
     {
         ImGui_ImplGameEngine_NewFrame(window);
@@ -583,7 +647,7 @@ public:
     }
     void clear() final
     {
-        glClearColor(1.f, 1.f, 1.f, 0.f);
+        glClearColor(0.1f, 0.1f, 0.1f, 0.f);
         gl_check();
         glClear(GL_COLOR_BUFFER_BIT);
         gl_check();

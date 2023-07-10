@@ -17,6 +17,7 @@ project(dungeon-adventure)
 add_library(engine SHARED
         engine.cxx
         engine.hxx
+        buttons.hxx
         event.cxx
         event.hxx
         geometry.hxx

@@ -9,7 +9,7 @@ enum class event
     turn_off
 };
 
-enum class action
+enum class key
 {
     up,
     down,

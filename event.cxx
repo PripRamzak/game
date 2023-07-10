@@ -1,4 +1,5 @@
 #include "event.hxx"
+#include "buttons.hxx"
 
 #include <algorithm>
 #include <array>
@@ -25,52 +26,139 @@ std::ostream& operator<<(std::ostream& out, const event& event)
 
 struct bind
 {
-    SDL_Keycode      key;
+    SDL_Keycode      keycode;
     std::string_view name;
-    action           action_;
+    key              key_;
+    event            event_;
 };
 
 std::array<bind, 6> key_bindings = {
-    { { SDLK_w, "Up", action::up },
-      { SDLK_s, "Down", action::down },
-      { SDLK_a, "Left", action::left },
-      { SDLK_d, "Right", action::right },
-      { SDLK_SPACE, "Attack", action::attack },
-      { SDLK_ESCAPE, "Menu", action::menu } }
+    { { SDLK_w, "Up", key::up, event::released },
+      { SDLK_s, "Down", key::down, event::released },
+      { SDLK_a, "Left", key::left, event::released },
+      { SDLK_d, "Right", key::right, event::released },
+      { SDLK_SPACE, "Attack", key::attack, event::released },
+      { SDLK_ESCAPE, "Menu", key::menu, event::released } }
 };
 
-bool is_key_down(action action)
+bool is_key_down(key key_)
 {
-    const auto it =
-        std::find_if(begin(key_bindings),
-                     key_bindings.end(),
-                     [&](const bind& b) { return b.action_ == action; });
+    const auto it = std::find_if(begin(key_bindings),
+                                 key_bindings.end(),
+                                 [&](const bind& b) { return b.key_ == key_; });
+
+    /*if (it != key_bindings.end())
+    {
+        const uint8_t* state         = SDL_GetKeyboardState(nullptr);
+        int            sdl_scan_code = SDL_GetScancodeFromKey(it->keycode);
+        return state[sdl_scan_code];
+    }*/
+
+    return it->event_ == event::pressed ? true : false;
+}
+
+bool check_pressing_key(SDL_Event sdl_event, event& event)
+{
+    const auto it = std::find_if(
+        key_bindings.begin(),
+        key_bindings.end(),
+        [&](const bind& b) { return b.keycode == sdl_event.key.keysym.sym; });
 
     if (it != key_bindings.end())
     {
-        const uint8_t* state         = SDL_GetKeyboardState(nullptr);
-        int            sdl_scan_code = SDL_GetScancodeFromKey(it->key);
-        return state[sdl_scan_code];
+        if (sdl_event.type == SDL_EVENT_KEY_DOWN)
+        {
+            event      = event::pressed;
+            it->event_ = event::pressed;
+        }
+        else if (sdl_event.type == SDL_EVENT_KEY_UP)
+        {
+            event      = event::released;
+            it->event_ = event::released;
+        }
+        return true;
     }
 
     return false;
 }
 
-bool check_pressing_key(SDL_Event sdl_event, event& event)
+bool check_pressing_button(SDL_Event            sdl_event,
+                           event&               event,
+                           std::vector<buttons>& buttons_,
+                           float                window_width,
+                           float                window_height)
 {
-    const auto it = std::find_if(key_bindings.begin(),
-                                 key_bindings.end(),
-                                 [&](const bind& b)
-                                 { return b.key == sdl_event.key.keysym.sym; });
+    float finger_x = sdl_event.tfinger.x * window_width;
+    float finger_y = sdl_event.tfinger.y * window_height;
 
-    if (it != key_bindings.end())
+    if (finger_x > buttons_[0].vertices[0].x + buttons_[0].width / 3 &&
+        finger_x < buttons_[0].vertices[0].x + buttons_[0].width / 3 * 2 &&
+        finger_y > buttons_[0].vertices[0].y &&
+        finger_y < buttons_[0].vertices[0].y + buttons_[0].height / 3)
     {
-        if (sdl_event.type == SDL_EVENT_KEY_DOWN)
-            event = event::pressed;
-        else if (sdl_event.type == SDL_EVENT_KEY_UP)
-            event = event::released;
+        if (sdl_event.type == SDL_EVENT_FINGER_DOWN)
+        {
+            event                  = event::pressed;
+            key_bindings[0].event_ = event::pressed;
+        }
+        else
+        {
+            event                  = event::released;
+            key_bindings[0].event_ = event::released;
+        }
         return true;
     }
-
+    else if (finger_x > buttons_[0].vertices[0].x + buttons_[0].width / 3 &&
+             finger_x < buttons_[0].vertices[0].x + buttons_[0].width / 3 * 2 &&
+             finger_y >
+                 buttons_[0].vertices[0].y + buttons_[0].height / 3 * 2 &&
+             finger_y < buttons_[0].vertices[0].y + buttons_[0].height)
+    {
+        if (sdl_event.type == SDL_EVENT_FINGER_DOWN)
+        {
+            event                  = event::pressed;
+            key_bindings[1].event_ = event::pressed;
+        }
+        else
+        {
+            event                  = event::released;
+            key_bindings[1].event_ = event::released;
+        }
+        return true;
+    }
+    else if (finger_x > buttons_[0].vertices[0].x &&
+             finger_x < buttons_[0].vertices[0].x + buttons_[0].width / 3 &&
+             finger_y > buttons_[0].vertices[0].y + buttons_[0].height / 3 &&
+             finger_y < buttons_[0].vertices[0].y + buttons_[0].height / 3 * 2)
+    {
+        if (sdl_event.type == SDL_EVENT_FINGER_DOWN)
+        {
+            event                  = event::pressed;
+            key_bindings[2].event_ = event::pressed;
+        }
+        else
+        {
+            event                  = event::released;
+            key_bindings[2].event_ = event::released;
+        }
+        return true;
+    }
+    else if (finger_x > buttons_[0].vertices[0].x + buttons_[0].width / 3 &&
+             finger_x < buttons_[0].vertices[0].x + buttons_[0].width &&
+             finger_y > buttons_[0].vertices[0].y + buttons_[0].height / 3 &&
+             finger_y < buttons_[0].vertices[0].y + buttons_[0].height / 3 * 2)
+    {
+        if (sdl_event.type == SDL_EVENT_FINGER_DOWN)
+        {
+            event                  = event::pressed;
+            key_bindings[3].event_ = event::pressed;
+        }
+        else
+        {
+            event                  = event::released;
+            key_bindings[3].event_ = event::released;
+        }
+        return true;
+    }
     return false;
 }
