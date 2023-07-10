@@ -1,7 +1,6 @@
 #pragma once
 
 #include "game_object.hxx"
-#include "hero.hxx"
 
 class enemy : public game_object
 {

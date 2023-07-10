@@ -193,35 +193,14 @@ int main(int /*argc*/, char** /*argv*/)
                         sound_attack->play(audio_properties::once);
                 }
                 else if (engine->check_key(key::up))
-                {
-                    warrior->move(0.f, -10.f);
-                    if (dungeon_map->check_hero_collision(warrior,
-                                                          map_tile::wall_top))
-                        warrior->move(0.f, 10.f);
-                }
+                    warrior->move(0.f, -10.f, dungeon_map, map_tile::wall_top);
                 else if (engine->check_key(key::down))
-                {
-                    warrior->move(0.f, 10.f);
-                    if (dungeon_map->check_hero_collision(
-                            warrior, map_tile::wall_bottom))
-                        warrior->move(0.f, -10.f);
-                }
+                    warrior->move(
+                        0.f, 10.f, dungeon_map, map_tile::wall_bottom);
                 else if (engine->check_key(key::left))
-                {
-                    warrior->move(-10.f, 0.f);
-                    warrior->set_direction(1);
-                    if (dungeon_map->check_hero_collision(warrior,
-                                                          map_tile::wall_left))
-                        warrior->move(10.f, 0.f);
-                }
+                    warrior->move(-10.f, 0.f, dungeon_map, map_tile::wall_left);
                 else if (engine->check_key(key::right))
-                {
-                    warrior->move(10.f, 0.f);
-                    warrior->set_direction(0);
-                    if (dungeon_map->check_hero_collision(warrior,
-                                                          map_tile::wall_right))
-                        warrior->move(-10.f, 0.f);
-                }
+                    warrior->move(10.f, 0.f, dungeon_map, map_tile::wall_right);
             }
             else
                 warrior->set_state(game_object_state::idle);

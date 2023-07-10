@@ -2,7 +2,6 @@
 
 #include "enemy.hxx"
 #include "geometry.hxx"
-#include "hero.hxx"
 #include "texture.hxx"
 #include "vertex_buffer.hxx"
 
@@ -43,8 +42,9 @@ public:
                                       map_tile type)      = 0;
     virtual void fill_rectangle(
         int start_x, int start_y, int width_, int height_, map_tile type) = 0;
-    virtual bool     check_hero_collision(hero* hero, map_tile type)      = 0;
-    virtual texture* get_tile(map_tile type)                              = 0;
+    virtual texture*   get_tile(map_tile type)                            = 0;
+    virtual vertex_2d* get_vertices(map_tile type)                        = 0;
+    virtual size_t     get_vertices_num(map_tile type)                    = 0;
     ~map();
 };
 
@@ -54,4 +54,4 @@ void generate_level_1(map*                 map,
                       std::vector<enemy*>& enemies,
                       float                window_width,
                       float                window_height);
-void game_logic_level_1(hero* hero, std::vector<enemy*>& enemies);
+void game_logic_level_1(game_object* hero, std::vector<enemy*>& enemies);

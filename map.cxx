@@ -184,42 +184,6 @@ public:
         else
             std::cout << "Such tile doesn't exists" << std::endl;
     }
-    bool check_hero_collision(hero* hero, map_tile type) final
-    {
-        auto it = find_tile(type);
-
-        if (it != tiles.end())
-        {
-            const vertex_2d* sprite_vertices = hero->get_vertices();
-            float            sprite_width    = hero->get_sprite()->get_width();
-            float            sprite_height   = hero->get_sprite()->get_height();
-            float            size            = hero->get_size();
-            vertex_2d*       map_vertices    = it->vertices.data();
-            int              num_vertices    = it->vertices.size();
-
-            float delta_x = hero->get_delta_x();
-            float delta_y = hero->get_delta_y();
-
-            for (int i = 0; i < num_vertices / 4; i++, map_vertices += 4)
-            {
-                bool collision_x =
-                    sprite_vertices[2].x + sprite_width / 2.f * (size - 1) >=
-                        map_vertices->x - delta_x &&
-                    (map_vertices + 2)->x - delta_x >=
-                        sprite_vertices[0].x - sprite_width / 2.f * (size - 1);
-                bool collision_y =
-                    sprite_vertices[2].y + sprite_height / 2.f * (size - 1) >=
-                        map_vertices->y - delta_y &&
-                    (map_vertices + 2)->y - delta_y >=
-                        sprite_vertices[0].y - sprite_height / 2.f * (size - 1);
-
-                if (collision_x && collision_y)
-                    return true;
-            }
-        }
-
-        return false;
-    }
     texture* get_tile(map_tile type) final
     {
         auto it = find_tile(type);
@@ -230,6 +194,28 @@ public:
             std::cout << "Such tile doesn't exists" << std::endl;
 
         return nullptr;
+    }
+    vertex_2d* get_vertices(map_tile type) final
+    {
+        auto it = find_tile(type);
+
+        if (it != tiles.end())
+            return it->vertices.data();
+        else
+            std::cout << "Such tile doesn't exists" << std::endl;
+
+        return nullptr;
+    }
+    size_t get_vertices_num(map_tile type) final
+    {
+        auto it = find_tile(type);
+
+        if (it != tiles.end())
+            return it->vertices.size();
+        else
+            std::cout << "Such tile doesn't exists" << std::endl;
+
+        return 0;
     }
 };
 
@@ -280,7 +266,7 @@ void generate_level_1(map*                 map,
     enemies.push_back(skeleton_1);
 }
 
-void game_logic_level_1(hero* hero, std::vector<enemy*>& enemies)
+void game_logic_level_1(game_object* hero, std::vector<enemy*>& enemies)
 {
     if (hero->get_current_pos_x() > 1300.f && !enemies[0]->is_spawned())
         enemies[0]->spawn();

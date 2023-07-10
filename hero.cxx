@@ -122,18 +122,28 @@ public:
         add_sprite(warrior_run, game_object_state::run);
         add_sprite(warrior_attack, game_object_state::attack);
     }
-    void move(float delta_x_, float delta_y_) final
+    void move(float delta_x_, float delta_y_, map* map, map_tile type) final
     {
         state = game_object_state::run;
+        if (delta_x_ > 0.f)
+            direction = 0;
+        else if (delta_x_ < 0.f)
+            direction = 1;
+
         delta_x += delta_x_;
         delta_y += delta_y_;
+
+        if (check_collision_map(map, type))
+        {
+            delta_x -= delta_x_;
+            delta_y -= delta_y_;
+        }
     }
     void attack(game_object* enemy, bool collision_x, bool collision_y) final
     {
         auto it = find_sprite(state);
         int  sprite_current_number =
             it->game_object_sprite->get_current_number(direction);
-        int sprite_quantity = it->game_object_sprite->get_quantity();
 
         if (sprite_current_number == 0 && direction == 0 ||
             sprite_current_number == 3 && direction == 1)
@@ -150,6 +160,36 @@ public:
                 direction != enemy->get_direction())
                 enemy->hurt();
         }
+    }
+    bool check_collision_map(map* map, map_tile type) final
+    {
+        auto it = find_sprite(state);
+
+        const vertex_2d* map_tile_vertices     = map->get_vertices(type);
+        const size_t     map_tile_vertices_num = map->get_vertices_num(type);
+        const vertex_2d* hero_vertices         = it->vertices;
+        float hero_sprite_height = it->game_object_sprite->get_height();
+        float hero_sprite_width  = it->game_object_sprite->get_width();
+
+        for (size_t i = 0; i < map_tile_vertices_num / 4;
+             i++, map_tile_vertices += 4)
+        {
+            bool collision_x =
+                hero_vertices[2].x + hero_sprite_width / 2.f * (size - 1) >=
+                    map_tile_vertices->x - delta_x &&
+                (map_tile_vertices + 2)->x - delta_x >=
+                    hero_vertices[0].x - hero_sprite_width / 2.f * (size - 1);
+            bool collision_y =
+                hero_vertices[2].y + hero_sprite_height / 2.f * (size - 1) >=
+                    map_tile_vertices->y - delta_y &&
+                (map_tile_vertices + 2)->y - delta_y >=
+                    hero_vertices[0].y - hero_sprite_height / 2.f * (size - 1);
+
+            if (collision_x && collision_y)
+                return true;
+        }
+
+        return false;
     }
     bool is_alive() { return alive; }
     void hurt() final
