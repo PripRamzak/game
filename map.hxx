@@ -2,6 +2,7 @@
 
 #include "enemy.hxx"
 #include "geometry.hxx"
+#include "index_buffer.hxx"
 #include "texture.hxx"
 #include "vertex_buffer.hxx"
 
@@ -20,8 +21,10 @@ enum class map_tile
 struct tile
 {
     texture*               tile_texture;
-    std::vector<vertex_2d> vertices;
     map_tile               type;
+    std::vector<vertex_2d> vertices;
+    vertex_buffer*         tile_vertex_buffer;
+    index_buffer*          tile_index_buffer;
 };
 
 class map
@@ -42,10 +45,12 @@ public:
                                       map_tile type)      = 0;
     virtual void fill_rectangle(
         int start_x, int start_y, int width_, int height_, map_tile type) = 0;
-    virtual texture*   get_tile(map_tile type)                            = 0;
-    virtual vertex_2d* get_vertices(map_tile type)                        = 0;
-    virtual size_t     get_vertices_num(map_tile type)                    = 0;
-    ~map();
+    virtual texture*       get_tile(map_tile type)                        = 0;
+    virtual vertex_2d*     get_vertices(map_tile type)                    = 0;
+    virtual size_t         get_vertices_num(map_tile type)                = 0;
+    virtual vertex_buffer* get_vertex_buffer(map_tile type)               = 0;
+    virtual index_buffer*  get_index_buffer(map_tile type)                = 0;
+    virtual ~map();
 };
 
 map* create_map(float tile_width, float tile_height);
@@ -54,4 +59,6 @@ void generate_level_1(map*                 map,
                       std::vector<enemy*>& enemies,
                       float                window_width,
                       float                window_height);
-void game_logic_level_1(game_object* hero, std::vector<enemy*>& enemies);
+void game_logic_level_1(map*                 map,
+                        game_object*         hero,
+                        std::vector<enemy*>& enemies);

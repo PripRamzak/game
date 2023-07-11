@@ -50,6 +50,8 @@ class game_map final : public map
             tile.type         = type;
             tile.tile_texture = tile_texture;
             tiles.push_back(tile);
+            tiles[tiles.size() - 1].tile_vertex_buffer = create_vertex_buffer();
+            tiles[tiles.size() - 1].tile_index_buffer  = create_index_buffer();
         }
     }
 
@@ -86,6 +88,7 @@ public:
         auto it = find_tile(type);
 
         if (it != tiles.end())
+        {
             for (int i = start_y - 1; i < start_y + length - 1; i++)
             {
                 vertex_2d v1 = { (static_cast<float>(start_x) - 1.f) *
@@ -112,6 +115,10 @@ public:
                 it->vertices.push_back(v3);
                 it->vertices.push_back(v4);
             }
+            it->tile_vertex_buffer->buffer_data(it->vertices.data(),
+                                                it->vertices.size());
+            it->tile_index_buffer->add_indexes(static_cast<size_t>(length * 4));
+        }
     }
     void draw_horizontal_line(int      start_x,
                               int      start_y,
@@ -121,6 +128,7 @@ public:
         auto it = find_tile(type);
 
         if (it != tiles.end())
+        {
             for (int i = start_x - 1; i < start_x + length - 1; i++)
             {
                 vertex_2d v1 = { static_cast<float>(i) * tile_width,
@@ -147,6 +155,10 @@ public:
                 it->vertices.push_back(v3);
                 it->vertices.push_back(v4);
             }
+            it->tile_vertex_buffer->buffer_data(it->vertices.data(),
+                                                it->vertices.size());
+            it->tile_index_buffer->add_indexes(static_cast<size_t>(length * 4));
+        }
     }
     void fill_rectangle(
         int start_x, int start_y, int width_, int height_, map_tile type) final
@@ -154,6 +166,7 @@ public:
         auto it = find_tile(type);
 
         if (it != tiles.end())
+        {
             for (int i = start_y - 1; i < start_y + height_ - 1; i++)
                 for (int j = start_x - 1; j < start_x + width_ - 1; j++)
                 {
@@ -180,7 +193,15 @@ public:
                     it->vertices.push_back(v2);
                     it->vertices.push_back(v3);
                     it->vertices.push_back(v4);
+
+                    it->tile_vertex_buffer->buffer_data(it->vertices.data(),
+                                                        it->vertices.size());
                 }
+            it->tile_vertex_buffer->buffer_data(it->vertices.data(),
+                                                it->vertices.size());
+            it->tile_index_buffer->add_indexes(
+                static_cast<size_t>(width_ * height_ * 4));
+        }
         else
             std::cout << "Such tile doesn't exists" << std::endl;
     }
@@ -216,6 +237,28 @@ public:
             std::cout << "Such tile doesn't exists" << std::endl;
 
         return 0;
+    }
+    vertex_buffer* get_vertex_buffer(map_tile type) final
+    {
+        auto it = find_tile(type);
+
+        if (it != tiles.end())
+            return it->tile_vertex_buffer;
+        else
+            std::cout << "Such tile doesn't exists" << std::endl;
+
+        return nullptr;
+    }
+    index_buffer* get_index_buffer(map_tile type) final
+    {
+        auto it = find_tile(type);
+
+        if (it != tiles.end())
+            return it->tile_index_buffer;
+        else
+            std::cout << "Such tile doesn't exists" << std::endl;
+
+        return nullptr;
     }
 };
 
@@ -265,10 +308,26 @@ void generate_level_1(map*                 map,
                                      1.75f,
                                      game_object_state::run);
     enemies.push_back(skeleton_1);
+    enemy* skeleton_2 = create_enemy(5,
+                                     5.f,
+                                     window_width / 2.f,
+                                     window_height / 2.f,
+                                     1700.f,
+                                     400.f,
+                                     1.75f,
+                                     game_object_state::run);
+    enemies.push_back(skeleton_2);
 }
 
-void game_logic_level_1(game_object* hero, std::vector<enemy*>& enemies)
+void game_logic_level_1(map*                 map,
+                        game_object*         hero,
+                        std::vector<enemy*>& enemies)
 {
     if (hero->get_current_pos_x() > 1300.f && !enemies[0]->is_spawned())
+    {
         enemies[0]->spawn();
+        // map->draw_vertical_line(21, 5, 3, map_tile::wall_left);
+    }
+    else if (!enemies[0]->is_alive() && enemies[0]->is_spawned())
+        enemies[1]->spawn();
 }
