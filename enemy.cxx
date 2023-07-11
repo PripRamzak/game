@@ -252,21 +252,16 @@ public:
 
         if (it != sprites.end())
         {
-            const vertex_2d* sprite_vertices = hero->get_vertices();
+            float hero_current_pos_x = hero->get_current_pos_x();
             float            hero_size       = hero->get_size();
             float            hero_width      = hero->get_sprite()->get_width();
-            vertex_2d*       vertices_       = it->vertices;
             float            width = it->game_object_sprite->get_width();
 
-            float hero_delta_x = hero->get_delta_x();
-            float delta_x_ =
-                global_pos_x - local_pos_x + delta_x - hero_delta_x;
-
             bool collision_x =
-                sprite_vertices[2].x + hero_width / 2 * (hero_size - 1) >=
-                    vertices_[0].x - width / 2 * (size - 1) + delta_x_ &&
-                vertices_[2].x + width / 2 * (size - 1) + delta_x_ >=
-                    sprite_vertices[0].x - hero_width / 2 * (hero_size - 1);
+                hero_current_pos_x + hero_width / 2 * hero_size >=
+                    get_current_pos_x() - width / 2 * size &&
+                get_current_pos_x() + width / 2 * size >=
+                    hero_current_pos_x - hero_width / 2 * hero_size;
 
             if (collision_x)
                 return true;
@@ -280,21 +275,16 @@ public:
 
         if (it != sprites.end())
         {
-            const vertex_2d* sprite_vertices = hero->get_vertices();
+            float hero_current_pos_y = hero->get_current_pos_y();
             float            hero_size       = hero->get_size();
             float            hero_height     = hero->get_sprite()->get_height();
-            vertex_2d*       vertices_       = it->vertices;
             float            height = it->game_object_sprite->get_height();
-            float            hero_delta_y = hero->get_delta_y();
-
-            float delta_y_ =
-                global_pos_y - local_pos_y + delta_y - hero_delta_y;
 
             bool collision_y =
-                sprite_vertices[2].y + hero_height / 2 * (hero_size - 1) >=
-                    vertices_[0].y - height / 2 * (size - 1) + delta_y_ &&
-                vertices_[2].y + height / 2 * (size - 1) + delta_y_ >=
-                    sprite_vertices[0].y - hero_height / 2 * (hero_size - 1);
+                hero_current_pos_y + hero_height / 2 * hero_size >=
+                    get_current_pos_y() - height / 2 * size &&
+                get_current_pos_y() + height / 2 * size >=
+                    hero_current_pos_y - hero_height / 2 * hero_size;
 
             if (collision_y)
                 return true;

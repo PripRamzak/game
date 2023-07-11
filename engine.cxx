@@ -421,8 +421,8 @@ public:
 
         mobile_buttons.resize(2);
 
-        mobile_buttons[0].width  = 240.f;
-        mobile_buttons[0].height = 240.f;
+        mobile_buttons[0].width  = 270.f;
+        mobile_buttons[0].height = 270.f;
         mobile_buttons[0].texture_ =
             create_texture("img/mobile_control_buttons.png");
         mobile_buttons[0].vertices[0] = { 50.f,
@@ -446,27 +446,27 @@ public:
         mobile_buttons[0].vertex_buffer_->buffer_data(
             mobile_buttons[0].vertices, static_cast<size_t>(4));
 
-        mobile_buttons[1].width  = 160.f;
-        mobile_buttons[1].height = 160.f;
+        mobile_buttons[1].width  = 180.f;
+        mobile_buttons[1].height = 180.f;
         mobile_buttons[1].texture_ =
             create_texture("img/mobile_attack_button.png");
         mobile_buttons[1].vertices[0] = {
             window_width_pixels - mobile_buttons[1].width - 50.f,
-            window_height_pixels - mobile_buttons[1].height - 50.f,
+            window_height_pixels - mobile_buttons[1].height - 100.f,
             0.f,
             1.f
         };
         mobile_buttons[1].vertices[1] = { window_width_pixels - 50.f,
                                           window_height_pixels -
-                                              mobile_buttons[1].height - 50.f,
+                                              mobile_buttons[1].height - 100.f,
                                           1.f,
                                           1.f };
         mobile_buttons[1].vertices[2] = {
-            window_width_pixels - 50.f, window_height_pixels - 50.f, 1.f, 0.f
+            window_width_pixels - 50.f, window_height_pixels - 100.f, 1.f, 0.f
         };
         mobile_buttons[1].vertices[3]    = { window_width_pixels -
                                                  mobile_buttons[1].width - 50.f,
-                                             window_height_pixels - 50.f,
+                                             window_height_pixels - 100.f,
                                              0.f,
                                              0.f };
         mobile_buttons[1].vertex_buffer_ = create_vertex_buffer();

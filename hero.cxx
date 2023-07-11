@@ -218,18 +218,18 @@ public:
                  j++, map_tile_vertices += 4)
             {
                 bool collision_x =
-                    hero_vertices[2].x + hero_sprite_width / 2.f * (size - 1) >=
-                        map_tile_vertices->x - delta_x &&
-                    (map_tile_vertices + 2)->x - delta_x >=
-                        hero_vertices[0].x -
-                            hero_sprite_width / 2.f * (size - 1);
-                bool collision_y = hero_vertices[2].y + hero_sprite_height /
-                                                            2.f * (size - 1) >=
-                                       map_tile_vertices->y - delta_y &&
-                                   (map_tile_vertices + 2)->y - delta_y >=
-                                       hero_vertices[0].y - hero_sprite_height /
+                    get_current_pos_x() + hero_sprite_width / 2.f * size >=
+                        map_tile_vertices->x &&
+                    (map_tile_vertices + 2)->x >=
+                        get_current_pos_x() -
+                            hero_sprite_width / 2.f * size;
+                bool collision_y = get_current_pos_y() + hero_sprite_height /
+                                                            2.f * size >=
+                                       map_tile_vertices->y &&
+                                   (map_tile_vertices + 2)->y >=
+                                       get_current_pos_y() - hero_sprite_height /
                                                                 2.f *
-                                                                (size - 1);
+                                                                size;
 
                 if (collision_x && collision_y)
                     return true;
