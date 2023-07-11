@@ -129,10 +129,8 @@ public:
     }
     void move(int dx, int dy, map* map, bool* skeleton_collision) final
     {
-        set_state(game_object_state::run);
-
-        float delta_x_ = dx * speed;
-        float delta_y_ = dy * speed;
+        float delta_x_ = static_cast<float>(dx) * speed;
+        float delta_y_ = static_cast<float>(dy) * speed;
 
         if (dx != 0 && dy != 0)
         {
@@ -142,19 +140,28 @@ public:
 
         if (delta_y_ < 0.f && skeleton_collision[0] ||
             delta_y_ > 0.f && skeleton_collision[1])
-            delta_y -= delta_y_;
+        {
+            set_state(game_object_state::idle);
+            return;
+        }
 
         if (delta_x_ < 0.f)
         {
             direction = 1;
             if (skeleton_collision[2])
-                delta_x -= delta_x_;
+            {
+                set_state(game_object_state::idle);
+                return;
+            }
         }
         else if (delta_x_ > 0.f)
         {
             direction = 0;
             if (skeleton_collision[3])
-                delta_x -= delta_x_;
+            {
+                set_state(game_object_state::idle);
+                return;
+            }
         }
 
         delta_x += delta_x_;
@@ -164,7 +171,10 @@ public:
         {
             delta_x -= delta_x_;
             delta_y -= delta_y_;
+            set_state(game_object_state::idle);
         }
+        else
+            set_state(game_object_state::run);
     }
     void attack(game_object* enemy, bool skeleton_collision) final
     {
@@ -204,8 +214,8 @@ public:
             float hero_sprite_height = it->game_object_sprite->get_height();
             float hero_sprite_width  = it->game_object_sprite->get_width();
 
-            for (size_t i = 0; i < map_tile_vertices_num / 4;
-                 i++, map_tile_vertices += 4)
+            for (size_t j = 0; j < map_tile_vertices_num / 4;
+                 j++, map_tile_vertices += 4)
             {
                 bool collision_x =
                     hero_vertices[2].x + hero_sprite_width / 2.f * (size - 1) >=

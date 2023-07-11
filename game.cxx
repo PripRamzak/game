@@ -232,7 +232,7 @@ int main(int /*argc*/, char** /*argv*/)
             warrior_skeleton_collision[2] = false;
             warrior_skeleton_collision[3] = false;
 
-            for (auto& enemy : enemies)
+            for (auto enemy : enemies)
             {
                 if (enemy->is_alive())
                 {
