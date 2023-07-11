@@ -9,6 +9,7 @@ class enemy : public game_object
 
 public:
     enemy(int               health,
+          float             speed,
           float             local_pos_x,
           float             local_pos_y,
           float             global_pos_x,
@@ -42,6 +43,7 @@ public:
 };
 
 enemy* create_enemy(int               health,
+                    float             speed,
                     float             local_pos_x,
                     float             local_pos_y,
                     float             global_pos_x,

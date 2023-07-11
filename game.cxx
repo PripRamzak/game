@@ -45,6 +45,7 @@ int main(int /*argc*/, char** /*argv*/)
 
     hero::initialize();
     hero* warrior = create_hero(4,
+                                10.f,
                                 window_width / 2.f,
                                 window_height / 2.f,
                                 window_width / 2.f,
@@ -197,30 +198,22 @@ int main(int /*argc*/, char** /*argv*/)
                             warrior->get_direction()) == 2)
                         sound_attack->play(audio_properties::once);
                 }
-                else if (engine->check_key(key::up))
-                    warrior->move(0.f,
-                                  -10.f,
-                                  dungeon_map,
-                                  map_tile::wall_top,
-                                  warrior_skeleton_collision);
-                else if (engine->check_key(key::down))
-                    warrior->move(0.f,
-                                  10.f,
-                                  dungeon_map,
-                                  map_tile::wall_bottom,
-                                  warrior_skeleton_collision);
-                else if (engine->check_key(key::left))
-                    warrior->move(-10.f,
-                                  0.f,
-                                  dungeon_map,
-                                  map_tile::wall_left,
-                                  warrior_skeleton_collision);
-                else if (engine->check_key(key::right))
-                    warrior->move(10.f,
-                                  0.f,
-                                  dungeon_map,
-                                  map_tile::wall_right,
-                                  warrior_skeleton_collision);
+                else
+                {
+                    int dx = 0;
+                    int dy = 0;
+
+                    if (engine->check_key(key::up))
+                        dy--;
+                    if (engine->check_key(key::down))
+                        dy++;
+                    if (engine->check_key(key::left))
+                        dx--;
+                    if (engine->check_key(key::right))
+                        dx++;
+                    warrior->move(
+                        dx, dy, dungeon_map, warrior_skeleton_collision);
+                }
             }
             else
                 warrior->set_state(game_object_state::idle);

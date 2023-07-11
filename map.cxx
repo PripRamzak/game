@@ -257,6 +257,7 @@ void generate_level_1(map*                 map,
     map->draw_vertical_line(35, 2, 10, map_tile::wall_right);
 
     enemy* skeleton_1 = create_enemy(5,
+                                     5.f,
                                      window_width / 2.f,
                                      window_height / 2.f,
                                      2100.f,

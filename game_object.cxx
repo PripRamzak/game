@@ -1,6 +1,7 @@
 #include "game_object.hxx"
 
 game_object::game_object(int               health_,
+                         float             speed_,
                          float             local_pos_x_,
                          float             local_pos_y_,
                          float             global_pos_x_,
@@ -8,6 +9,7 @@ game_object::game_object(int               health_,
                          float             size_,
                          game_object_state state_)
     : health(health_)
+    , speed(speed_)
     , local_pos_x(local_pos_x_)
     , local_pos_y(local_pos_y_)
     , global_pos_x(global_pos_x_)

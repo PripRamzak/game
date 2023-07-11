@@ -1,6 +1,7 @@
 #include "hero.hxx"
 
 #include <algorithm>
+#include <cmath>
 #include <iostream>
 
 static texture* warrior_idle_sprite_sheet   = nullptr;
@@ -11,6 +12,7 @@ static sprite*  warrior_run                 = nullptr;
 static sprite*  warrior_attack              = nullptr;
 
 hero::hero(int               health,
+           float             speed,
            float             local_pos_x,
            float             local_pos_y,
            float             global_pos_x,
@@ -18,6 +20,7 @@ hero::hero(int               health,
            float             size,
            game_object_state state)
     : game_object(health,
+                  speed,
                   local_pos_x,
                   local_pos_y,
                   global_pos_x,
@@ -103,6 +106,7 @@ class warrior : public hero
 
 public:
     warrior(int               health,
+            float             speed,
             float             local_pos_x,
             float             local_pos_y,
             float             global_pos_x,
@@ -110,6 +114,7 @@ public:
             float             size,
             game_object_state state)
         : hero(health,
+               speed,
                local_pos_x,
                local_pos_y,
                global_pos_x,
@@ -122,13 +127,18 @@ public:
         add_sprite(warrior_run, game_object_state::run);
         add_sprite(warrior_attack, game_object_state::attack);
     }
-    void move(float    delta_x_,
-              float    delta_y_,
-              map*     map,
-              map_tile type,
-              bool*    skeleton_collision) final
+    void move(int dx, int dy, map* map, bool* skeleton_collision) final
     {
-        state = game_object_state::run;
+        set_state(game_object_state::run);
+
+        float delta_x_ = dx * speed;
+        float delta_y_ = dy * speed;
+
+        if (dx != 0 && dy != 0)
+        {
+            delta_x_ /= sqrt(2.f);
+            delta_y_ /= sqrt(2.f);
+        }
 
         if (delta_y_ < 0.f && skeleton_collision[0] ||
             delta_y_ > 0.f && skeleton_collision[1])
@@ -150,7 +160,7 @@ public:
         delta_x += delta_x_;
         delta_y += delta_y_;
 
-        if (check_collision_map(map, type))
+        if (check_collision_map(map))
         {
             delta_x -= delta_x_;
             delta_y -= delta_y_;
@@ -177,32 +187,43 @@ public:
                 enemy->hurt();
         }
     }
-    bool check_collision_map(map* map, map_tile type) final
+    bool check_collision_map(map* map) final
     {
         auto it = find_sprite(state);
 
-        const vertex_2d* map_tile_vertices     = map->get_vertices(type);
-        const size_t     map_tile_vertices_num = map->get_vertices_num(type);
-        const vertex_2d* hero_vertices         = it->vertices;
-        float hero_sprite_height = it->game_object_sprite->get_height();
-        float hero_sprite_width  = it->game_object_sprite->get_width();
+        map_tile type[] = { map_tile::wall_top,
+                            map_tile::wall_bottom,
+                            map_tile::wall_left,
+                            map_tile::wall_right };
 
-        for (size_t i = 0; i < map_tile_vertices_num / 4;
-             i++, map_tile_vertices += 4)
+        for (int i = 0; i < 4; i++)
         {
-            bool collision_x =
-                hero_vertices[2].x + hero_sprite_width / 2.f * (size - 1) >=
-                    map_tile_vertices->x - delta_x &&
-                (map_tile_vertices + 2)->x - delta_x >=
-                    hero_vertices[0].x - hero_sprite_width / 2.f * (size - 1);
-            bool collision_y =
-                hero_vertices[2].y + hero_sprite_height / 2.f * (size - 1) >=
-                    map_tile_vertices->y - delta_y &&
-                (map_tile_vertices + 2)->y - delta_y >=
-                    hero_vertices[0].y - hero_sprite_height / 2.f * (size - 1);
+            const vertex_2d* map_tile_vertices = map->get_vertices(type[i]);
+            const size_t map_tile_vertices_num = map->get_vertices_num(type[i]);
+            const vertex_2d* hero_vertices     = it->vertices;
+            float hero_sprite_height = it->game_object_sprite->get_height();
+            float hero_sprite_width  = it->game_object_sprite->get_width();
 
-            if (collision_x && collision_y)
-                return true;
+            for (size_t i = 0; i < map_tile_vertices_num / 4;
+                 i++, map_tile_vertices += 4)
+            {
+                bool collision_x =
+                    hero_vertices[2].x + hero_sprite_width / 2.f * (size - 1) >=
+                        map_tile_vertices->x - delta_x &&
+                    (map_tile_vertices + 2)->x - delta_x >=
+                        hero_vertices[0].x -
+                            hero_sprite_width / 2.f * (size - 1);
+                bool collision_y = hero_vertices[2].y + hero_sprite_height /
+                                                            2.f * (size - 1) >=
+                                       map_tile_vertices->y - delta_y &&
+                                   (map_tile_vertices + 2)->y - delta_y >=
+                                       hero_vertices[0].y - hero_sprite_height /
+                                                                2.f *
+                                                                (size - 1);
+
+                if (collision_x && collision_y)
+                    return true;
+            }
         }
 
         return false;
@@ -278,6 +299,7 @@ public:
 hero::~hero() = default;
 
 hero* create_hero(int               health,
+                  float             speed,
                   float             local_pos_x,
                   float             local_pos_y,
                   float             global_pos_x,
@@ -286,6 +308,7 @@ hero* create_hero(int               health,
                   game_object_state state)
 {
     return new warrior(health,
+                       speed,
                        local_pos_x,
                        local_pos_y,
                        global_pos_x,

@@ -28,6 +28,7 @@ protected:
     std::vector<hero_sprite_state> sprites;
     bool                           alive        = false;
     int                            health       = 0;
+    float                          speed        = 0.f;
     float                          local_pos_x  = 0.f;
     float                          local_pos_y  = 0.f;
     float                          global_pos_x = 0.f;
@@ -40,6 +41,7 @@ protected:
 
 public:
     game_object(int               health_,
+                float             speed_,
                 float             local_pos_x_,
                 float             local_pos_y_,
                 float             global_pos_x,

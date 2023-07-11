@@ -11,6 +11,7 @@ static sprite*  skeleton_run                 = nullptr;
 static sprite*  skeleton_attack              = nullptr;
 
 enemy::enemy(int               health,
+             float             speed,
              float             local_pos_x,
              float             local_pos_y,
              float             global_pos_x,
@@ -18,6 +19,7 @@ enemy::enemy(int               health,
              float             size,
              game_object_state state)
     : game_object(health,
+                  speed,
                   local_pos_x,
                   local_pos_y,
                   global_pos_x,
@@ -104,6 +106,7 @@ class skeleton final : public enemy
 
 public:
     skeleton(int               health,
+             float             speed,
              float             local_pos_x,
              float             local_pos_y,
              float             global_pos_x,
@@ -111,6 +114,7 @@ public:
              float             size,
              game_object_state state)
         : enemy(health,
+                speed,
                 local_pos_x,
                 local_pos_y,
                 global_pos_x,
@@ -142,9 +146,9 @@ public:
         if (!check_hero_collision_y(hero))
         {
             if (hero->get_current_pos_y() > global_pos_y + delta_y)
-                delta_y += 5.f;
+                delta_y += speed;
             else if (hero->get_current_pos_y() < global_pos_y + delta_y)
-                delta_y -= 5.f;
+                delta_y -= speed;
 
             set_state(game_object_state::run);
         }
@@ -155,12 +159,12 @@ public:
             {
                 if (hero->get_current_pos_x() <= global_pos_x + delta_x)
                 {
-                    delta_x += 5.f;
+                    delta_x += speed;
                     direction = 0;
                 }
                 else if (hero->get_current_pos_x() > global_pos_x + delta_x)
                 {
-                    delta_x -= 5.f;
+                    delta_x -= speed;
                     direction = 1;
                 }
             }
@@ -169,20 +173,20 @@ public:
             {
                 if (hero->get_current_pos_x() <= global_pos_x + delta_x)
                 {
-                    delta_x -= 5.f;
+                    delta_x -= speed;
                     direction = 1;
                 }
                 else if (hero->get_current_pos_x() > global_pos_x + delta_x)
                 {
-                    delta_x += 5.f;
+                    delta_x += speed;
                     direction = 0;
                 }
 
                 if (hero->get_current_pos_y() - 2.5f > global_pos_y + delta_y)
-                    delta_y += 5.f;
+                    delta_y += speed;
                 else if (hero->get_current_pos_y() + 2.5f <
                          global_pos_y + delta_y)
-                    delta_y -= 5.f;
+                    delta_y -= speed;
             }
             set_state(game_object_state::run);
         }
@@ -367,6 +371,7 @@ public:
 enemy::~enemy() = default;
 
 enemy* create_enemy(int               health,
+                    float             speed,
                     float             local_pos_x,
                     float             local_pos_y,
                     float             global_pos_x,
@@ -375,6 +380,7 @@ enemy* create_enemy(int               health,
                     game_object_state state)
 {
     return new skeleton(health,
+                        speed,
                         local_pos_x,
                         local_pos_y,
                         global_pos_x,
