@@ -10,6 +10,12 @@
 #include <iostream>
 #include <vector>
 
+enum class gui_type
+{
+    menu,
+    in_game_menu
+};
+
 class engine
 {
 public:
@@ -28,16 +34,16 @@ public:
                         texture*       texture,
                         float* matrix_first_value)   = 0;
     // clang-format on
-    virtual void  render_buttons(float* matrix_first_value) = 0;
-    virtual bool  render_menu(bool& show_gui_window)        = 0;
-    virtual bool  swap_buffers()                            = 0;
-    virtual void  clear()                                   = 0;
-    virtual float get_time()                                = 0;
-    virtual int   get_window_width()                        = 0;
-    virtual int   get_window_height()                       = 0;
-    virtual int   get_window_width_pixels()                 = 0;
-    virtual int   get_window_height_pixels()                = 0;
-    virtual void  uninitialize()                            = 0;
+    virtual void  render_buttons(float* matrix_first_value)         = 0;
+    virtual bool  render_gui(bool& show_menu_window, gui_type type) = 0;
+    virtual bool  swap_buffers()                                    = 0;
+    virtual void  clear()                                           = 0;
+    virtual float get_time()                                        = 0;
+    [[maybe_unused]] virtual int get_window_width()                 = 0;
+    [[maybe_unused]] virtual int get_window_height()                = 0;
+    virtual int                  get_window_width_pixels()          = 0;
+    virtual int                  get_window_height_pixels()         = 0;
+    virtual void                 uninitialize()                     = 0;
     virtual ~engine();
 };
 

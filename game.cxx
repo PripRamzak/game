@@ -49,8 +49,8 @@ int main(int /*argc*/, char** /*argv*/)
                                 10.f,
                                 window_width / 2.f,
                                 window_height / 2.f,
-                                window_width / 2.f,
-                                window_height / 2.f,
+                                300.f,
+                                300.f,
                                 2.f,
                                 game_object_state::idle);
 
@@ -103,9 +103,10 @@ int main(int /*argc*/, char** /*argv*/)
 
     float skeleton_update_time = engine->get_time();
 
-    bool  quit             = false;
-    bool  show_menu_window = true;
-    event event            = event::released;
+    bool  quit                     = false;
+    bool  show_menu_window         = true;
+    bool  show_in_game_menu_window = false;
+    event event                    = event::released;
 
     while (!quit && warrior->is_alive())
     {
@@ -120,7 +121,7 @@ int main(int /*argc*/, char** /*argv*/)
 
         if (show_menu_window)
         {
-            if (engine->render_menu(show_menu_window))
+            if (engine->render_gui(show_menu_window, gui_type::menu))
                 quit = true;
         }
         else
@@ -169,7 +170,10 @@ int main(int /*argc*/, char** /*argv*/)
 
             if (event == event::pressed)
             {
-                if (engine->check_key(key::attack))
+                if (engine->check_key(key::menu))
+                    show_in_game_menu_window = true;
+                else if (engine->check_key(key::attack) &&
+                         !show_in_game_menu_window)
                 {
                     warrior->set_state(game_object_state::attack);
 
@@ -177,7 +181,7 @@ int main(int /*argc*/, char** /*argv*/)
                             warrior->get_direction()) == 2)
                         sound_attack->play(audio_properties::once);
                 }
-                else
+                else if (!show_in_game_menu_window)
                 {
                     int dx = 0;
                     int dy = 0;
@@ -215,56 +219,59 @@ int main(int /*argc*/, char** /*argv*/)
             {
                 if (enemy->is_alive())
                 {
-                    if (enemy->get_state() != game_object_state::attack)
-                        enemy->move(warrior);
-                    else
-                        enemy->attack(warrior);
+                    if (!show_in_game_menu_window)
+                    {
+                        if (enemy->get_state() != game_object_state::attack)
+                            enemy->move(warrior);
+                        else
+                            enemy->attack(warrior);
 
-                    bool skeleton_warrior_collision =
-                        enemy->check_hero_collision_x(warrior) &&
-                        enemy->check_hero_collision_y(warrior);
+                        bool skeleton_warrior_collision =
+                            enemy->check_hero_collision_x(warrior) &&
+                            enemy->check_hero_collision_y(warrior);
 
-                    if (skeleton_warrior_collision &&
-                        warrior->get_current_pos_y() -
-                                warrior->get_sprite()->get_height() / 2 *
-                                    warrior->get_size() <
-                            enemy->get_current_pos_y() +
-                                enemy->get_sprite()->get_height() / 2 *
-                                    enemy->get_size() &&
-                        warrior->get_current_pos_y() -
-                                warrior->get_sprite()->get_height() / 2 *
-                                    warrior->get_size() >
-                            enemy->get_current_pos_y() +
-                                enemy->get_sprite()->get_height() / 2 *
-                                    enemy->get_size() -
-                                10.f)
-                        warrior_skeleton_collision[0] = true;
-                    if (skeleton_warrior_collision &&
-                        warrior->get_current_pos_y() +
-                                warrior->get_sprite()->get_height() / 2 *
-                                    warrior->get_size() >
-                            enemy->get_current_pos_y() -
-                                enemy->get_sprite()->get_height() / 2 *
-                                    enemy->get_size() &&
-                        warrior->get_current_pos_y() +
-                                warrior->get_sprite()->get_height() / 2 *
-                                    warrior->get_size() <
-                            enemy->get_current_pos_y() -
-                                enemy->get_sprite()->get_height() / 2 *
-                                    enemy->get_size() +
-                                10.f)
-                        warrior_skeleton_collision[1] = true;
-                    if (skeleton_warrior_collision &&
-                        warrior->get_current_pos_x() >
-                            enemy->get_current_pos_x())
-                        warrior_skeleton_collision[2] = true;
-                    if (skeleton_warrior_collision &&
-                        warrior->get_current_pos_x() <
-                            enemy->get_current_pos_x())
-                        warrior_skeleton_collision[3] = true;
+                        if (skeleton_warrior_collision &&
+                            warrior->get_current_pos_y() -
+                                    warrior->get_sprite()->get_height() / 2 *
+                                        warrior->get_size() <
+                                enemy->get_current_pos_y() +
+                                    enemy->get_sprite()->get_height() / 2 *
+                                        enemy->get_size() &&
+                            warrior->get_current_pos_y() -
+                                    warrior->get_sprite()->get_height() / 2 *
+                                        warrior->get_size() >
+                                enemy->get_current_pos_y() +
+                                    enemy->get_sprite()->get_height() / 2 *
+                                        enemy->get_size() -
+                                    10.f)
+                            warrior_skeleton_collision[0] = true;
+                        if (skeleton_warrior_collision &&
+                            warrior->get_current_pos_y() +
+                                    warrior->get_sprite()->get_height() / 2 *
+                                        warrior->get_size() >
+                                enemy->get_current_pos_y() -
+                                    enemy->get_sprite()->get_height() / 2 *
+                                        enemy->get_size() &&
+                            warrior->get_current_pos_y() +
+                                    warrior->get_sprite()->get_height() / 2 *
+                                        warrior->get_size() <
+                                enemy->get_current_pos_y() -
+                                    enemy->get_sprite()->get_height() / 2 *
+                                        enemy->get_size() +
+                                    10.f)
+                            warrior_skeleton_collision[1] = true;
+                        if (skeleton_warrior_collision &&
+                            warrior->get_current_pos_x() >
+                                enemy->get_current_pos_x())
+                            warrior_skeleton_collision[2] = true;
+                        if (skeleton_warrior_collision &&
+                            warrior->get_current_pos_x() <
+                                enemy->get_current_pos_x())
+                            warrior_skeleton_collision[3] = true;
 
-                    if (warrior->get_state() == game_object_state::attack)
-                        warrior->attack(enemy, skeleton_warrior_collision);
+                        if (warrior->get_state() == game_object_state::attack)
+                            warrior->attack(enemy, skeleton_warrior_collision);
+                    }
 
                     glm::mat4 skeleton_mat_size{ 1 };
                     skeleton_mat_size[0].x = skeleton_mat_size[1].y =
@@ -286,18 +293,21 @@ int main(int /*argc*/, char** /*argv*/)
                                    enemy->get_direction(),
                                    &skeleton_mat_result[0][0]);
 
-                    if (engine->get_time() - skeleton_update_time >
-                        enemy->get_sprite()->get_animation_time())
+                    if (!show_in_game_menu_window)
                     {
-                        enemy->get_sprite()->next_sprite();
-                        skeleton_update_time = engine->get_time();
-                    }
+                        if (engine->get_time() - skeleton_update_time >
+                            enemy->get_sprite()->get_animation_time())
+                        {
+                            enemy->get_sprite()->next_sprite();
+                            skeleton_update_time = engine->get_time();
+                        }
 
-                    if (enemy->get_state() == game_object_state::idle &&
-                        engine->get_time() - skeleton_update_time > 1.f)
-                    {
-                        enemy->set_state(game_object_state::attack);
-                        skeleton_update_time = engine->get_time();
+                        if (enemy->get_state() == game_object_state::idle &&
+                            engine->get_time() - skeleton_update_time > 1.f)
+                        {
+                            enemy->set_state(game_object_state::attack);
+                            skeleton_update_time = engine->get_time();
+                        }
                     }
                 }
             }
@@ -329,18 +339,24 @@ int main(int /*argc*/, char** /*argv*/)
                                heart->get_texture(),
                                &to_ndc_coordinates[0][0]);
 
-            if (engine->get_time() - warrior_update_time >
-                warrior->get_sprite()->get_animation_time())
+            if (!show_in_game_menu_window)
             {
-                warrior->get_sprite()->next_sprite();
-                warrior_update_time = engine->get_time();
-            }
+                if (engine->get_time() - warrior_update_time >
+                    warrior->get_sprite()->get_animation_time())
+                {
+                    warrior->get_sprite()->next_sprite();
+                    warrior_update_time = engine->get_time();
+                }
 
 #ifdef __ANDROID__
-            engine->render_buttons(&to_ndc_coordinates[0][0]);
+                engine->render_buttons(&to_ndc_coordinates[0][0]);
 #endif
 
-            game_logic_level_1(dungeon_map, warrior, enemies);
+                game_logic_level_1(dungeon_map, warrior, enemies);
+            }
+            else if (engine->render_gui(show_in_game_menu_window,
+                                        gui_type::menu))
+                quit = true;
         }
 
         if (!engine->swap_buffers())

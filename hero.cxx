@@ -221,15 +221,12 @@ public:
                     get_current_pos_x() + hero_sprite_width / 2.f * size >=
                         map_tile_vertices->x &&
                     (map_tile_vertices + 2)->x >=
-                        get_current_pos_x() -
-                            hero_sprite_width / 2.f * size;
-                bool collision_y = get_current_pos_y() + hero_sprite_height /
-                                                            2.f * size >=
-                                       map_tile_vertices->y &&
-                                   (map_tile_vertices + 2)->y >=
-                                       get_current_pos_y() - hero_sprite_height /
-                                                                2.f *
-                                                                size;
+                        get_current_pos_x() - hero_sprite_width / 2.f * size;
+                bool collision_y =
+                    get_current_pos_y() + hero_sprite_height / 2.f * size >=
+                        map_tile_vertices->y &&
+                    (map_tile_vertices + 2)->y >=
+                        get_current_pos_y() - hero_sprite_height / 2.f * size;
 
                 if (collision_x && collision_y)
                     return true;

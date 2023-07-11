@@ -634,11 +634,9 @@ public:
                    button.texture_,
                    matrix_first_value);
     }
-    bool render_menu(bool& show_menu_window) final
+    bool render_gui(bool& show_menu_window, gui_type type) final
     {
         ImGui_ImplGameEngine_NewFrame(window);
-
-        SDL_GetWindowSize(window, &window_width, &window_height);
 
         int menu_width  = window_width / 4;
         int menu_height = window_height / 4;
@@ -656,9 +654,18 @@ public:
         ImGui::Begin("Menu", nullptr, flags);
 
         ImGui::SetCursorPos(ImVec2(10, 10));
-        if (ImGui::Button("Play",
-                          ImVec2(menu_width - 20, menu_height / 2 - 15)))
-            show_menu_window = false;
+        if (type == gui_type::menu)
+        {
+            if (ImGui::Button("Play",
+                              ImVec2(menu_width - 20, menu_height / 2 - 15)))
+                show_menu_window = false;
+        }
+        else
+        {
+            if (ImGui::Button("Continue",
+                              ImVec2(menu_width - 20, menu_height / 2 - 15)))
+                show_menu_window = false;
+        }
 
         ImGui::SetCursorPos(ImVec2(10, menu_height / 2 + 5));
         bool close_window = false;

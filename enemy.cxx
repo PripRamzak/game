@@ -253,9 +253,9 @@ public:
         if (it != sprites.end())
         {
             float hero_current_pos_x = hero->get_current_pos_x();
-            float            hero_size       = hero->get_size();
-            float            hero_width      = hero->get_sprite()->get_width();
-            float            width = it->game_object_sprite->get_width();
+            float hero_size          = hero->get_size();
+            float hero_width         = hero->get_sprite()->get_width();
+            float width              = it->game_object_sprite->get_width();
 
             bool collision_x =
                 hero_current_pos_x + hero_width / 2 * hero_size >=
@@ -276,9 +276,9 @@ public:
         if (it != sprites.end())
         {
             float hero_current_pos_y = hero->get_current_pos_y();
-            float            hero_size       = hero->get_size();
-            float            hero_height     = hero->get_sprite()->get_height();
-            float            height = it->game_object_sprite->get_height();
+            float hero_size          = hero->get_size();
+            float hero_height        = hero->get_sprite()->get_height();
+            float height             = it->game_object_sprite->get_height();
 
             bool collision_y =
                 hero_current_pos_y + hero_height / 2 * hero_size >=
