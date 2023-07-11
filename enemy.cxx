@@ -143,64 +143,61 @@ public:
     {
         bool hero_collision_x = check_hero_collision_x(hero);
 
-        if (!check_hero_collision_y(hero))
+        if (!hero_collision_x)
         {
-            if (hero->get_current_pos_y() > global_pos_y + delta_y)
+            if (hero->get_current_pos_x() < get_current_pos_x())
+            {
+                delta_x -= speed;
+                direction = 1;
+            }
+            else
+            {
+                delta_x += speed;
+                direction = 0;
+            }
+
+            set_state(game_object_state::run);
+        }
+        else if (!check_hero_collision_y(hero))
+        {
+            if (hero->get_current_pos_y() > get_current_pos_y())
                 delta_y += speed;
-            else if (hero->get_current_pos_y() < global_pos_y + delta_y)
+            else
                 delta_y -= speed;
 
             set_state(game_object_state::run);
         }
-        else if (hero->get_current_pos_y() - 2.5f > global_pos_y + delta_y ||
-                 hero->get_current_pos_y() + 2.5f < global_pos_y + delta_y)
+        else if (hero->get_current_pos_y() - 2.5f > get_current_pos_y() ||
+                 hero->get_current_pos_y() + 2.5f < get_current_pos_y())
         {
-            if (hero_collision_x)
+            if (hero->get_current_pos_x() <= get_current_pos_x())
             {
-                if (hero->get_current_pos_x() <= global_pos_x + delta_x)
-                {
-                    delta_x += speed;
-                    direction = 0;
-                }
-                else if (hero->get_current_pos_x() > global_pos_x + delta_x)
-                {
-                    delta_x -= speed;
-                    direction = 1;
-                }
+                delta_x += speed;
+                direction = 0;
+            }
+            else
+            {
+                delta_x -= speed;
+                direction = 1;
             }
 
             if (!check_hero_collision_x(hero))
             {
-                if (hero->get_current_pos_x() <= global_pos_x + delta_x)
+                if (hero->get_current_pos_x() <= get_current_pos_x())
                 {
                     delta_x -= speed;
                     direction = 1;
                 }
-                else if (hero->get_current_pos_x() > global_pos_x + delta_x)
+                else
                 {
                     delta_x += speed;
                     direction = 0;
                 }
 
-                if (hero->get_current_pos_y() - 2.5f > global_pos_y + delta_y)
+                if (hero->get_current_pos_y() - 2.5f > get_current_pos_y())
                     delta_y += speed;
-                else if (hero->get_current_pos_y() + 2.5f <
-                         global_pos_y + delta_y)
+                else if (hero->get_current_pos_y() + 2.5f < get_current_pos_y())
                     delta_y -= speed;
-            }
-            set_state(game_object_state::run);
-        }
-        else if (!hero_collision_x)
-        {
-            if (hero->get_current_pos_x() < global_pos_x + delta_x)
-            {
-                delta_x -= 5.f;
-                direction = 1;
-            }
-            else if (hero->get_current_pos_x() > global_pos_x + delta_x)
-            {
-                delta_x += 5.f;
-                direction = 0;
             }
 
             set_state(game_object_state::run);
