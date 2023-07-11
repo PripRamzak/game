@@ -23,7 +23,7 @@ public:
                        float    delta_y_,
                        map*     map,
                        map_tile type,
-                       bool     skeleton_collision = false)               = 0;
+                       bool*    skeleton_collision)                      = 0;
     virtual void  attack(game_object* enemy, bool skeleton_collision) = 0;
     virtual bool  check_collision_map(map* map, map_tile type)        = 0;
     virtual void  set_state(game_object_state state_)                 = 0;

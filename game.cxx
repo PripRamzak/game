@@ -117,9 +117,10 @@ int main(int /*argc*/, char** /*argv*/)
     sound_buffer* sound_attack =
         engine->create_sound_buffer("sound/attack.wav");
 
-    float warrior_update_time              = engine->get_time();
-    bool  warrior_skeleton_collision_left  = false;
-    bool  warrior_skeleton_collision_right = false;
+    float warrior_update_time = engine->get_time();
+
+    // 0 - top, 1 - bottom, 2 - left, 3 - right
+    bool warrior_skeleton_collision[4]{ false };
 
     float skeleton_update_time = engine->get_time();
 
@@ -197,22 +198,29 @@ int main(int /*argc*/, char** /*argv*/)
                         sound_attack->play(audio_properties::once);
                 }
                 else if (engine->check_key(key::up))
-                    warrior->move(0.f, -10.f, dungeon_map, map_tile::wall_top);
+                    warrior->move(0.f,
+                                  -10.f,
+                                  dungeon_map,
+                                  map_tile::wall_top,
+                                  warrior_skeleton_collision);
                 else if (engine->check_key(key::down))
-                    warrior->move(
-                        0.f, 10.f, dungeon_map, map_tile::wall_bottom);
+                    warrior->move(0.f,
+                                  10.f,
+                                  dungeon_map,
+                                  map_tile::wall_bottom,
+                                  warrior_skeleton_collision);
                 else if (engine->check_key(key::left))
                     warrior->move(-10.f,
                                   0.f,
                                   dungeon_map,
                                   map_tile::wall_left,
-                                  warrior_skeleton_collision_left);
+                                  warrior_skeleton_collision);
                 else if (engine->check_key(key::right))
                     warrior->move(10.f,
                                   0.f,
                                   dungeon_map,
                                   map_tile::wall_right,
-                                  warrior_skeleton_collision_right);
+                                  warrior_skeleton_collision);
             }
             else
                 warrior->set_state(game_object_state::idle);
@@ -226,8 +234,11 @@ int main(int /*argc*/, char** /*argv*/)
                            warrior->get_direction(),
                            &warrior_mat_result[0][0]);
 
-            warrior_skeleton_collision_left  = false;
-            warrior_skeleton_collision_right = false;
+            warrior_skeleton_collision[0] = false;
+            warrior_skeleton_collision[1] = false;
+            warrior_skeleton_collision[2] = false;
+            warrior_skeleton_collision[3] = false;
+
             for (auto& enemy : enemies)
             {
                 if (enemy->is_alive())
@@ -242,14 +253,43 @@ int main(int /*argc*/, char** /*argv*/)
                         enemy->check_hero_collision_y(warrior);
 
                     if (skeleton_warrior_collision &&
-                        warrior->get_current_pos_x() <
-                            enemy->get_current_pos_x())
-                        warrior_skeleton_collision_right = true;
-
+                        warrior->get_current_pos_y() -
+                                warrior->get_sprite()->get_height() / 2 *
+                                    warrior->get_size() <
+                            enemy->get_current_pos_y() +
+                                enemy->get_sprite()->get_height() / 2 *
+                                    enemy->get_size() &&
+                        warrior->get_current_pos_y() -
+                                warrior->get_sprite()->get_height() / 2 *
+                                    warrior->get_size() >
+                            enemy->get_current_pos_y() +
+                                enemy->get_sprite()->get_height() / 2 *
+                                    enemy->get_size() -
+                                10.f)
+                        warrior_skeleton_collision[0] = true;
+                    if (skeleton_warrior_collision &&
+                        warrior->get_current_pos_y() +
+                                warrior->get_sprite()->get_height() / 2 *
+                                    warrior->get_size() >
+                            enemy->get_current_pos_y() -
+                                enemy->get_sprite()->get_height() / 2 *
+                                    enemy->get_size() &&
+                        warrior->get_current_pos_y() +
+                                warrior->get_sprite()->get_height() / 2 *
+                                    warrior->get_size() <
+                            enemy->get_current_pos_y() -
+                                enemy->get_sprite()->get_height() / 2 *
+                                    enemy->get_size() +
+                                10.f)
+                        warrior_skeleton_collision[1] = true;
                     if (skeleton_warrior_collision &&
                         warrior->get_current_pos_x() >
                             enemy->get_current_pos_x())
-                        warrior_skeleton_collision_left = true;
+                        warrior_skeleton_collision[2] = true;
+                    if (skeleton_warrior_collision &&
+                        warrior->get_current_pos_x() <
+                            enemy->get_current_pos_x())
+                        warrior_skeleton_collision[3] = true;
 
                     if (warrior->get_state() == game_object_state::attack)
                         warrior->attack(enemy, skeleton_warrior_collision);

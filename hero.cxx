@@ -126,13 +126,26 @@ public:
               float    delta_y_,
               map*     map,
               map_tile type,
-              bool     skeleton_collision = false) final
+              bool*    skeleton_collision) final
     {
         state = game_object_state::run;
-        if (delta_x_ > 0.f)
-            direction = 0;
-        else if (delta_x_ < 0.f)
+
+        if (delta_y_ < 0.f && skeleton_collision[0] ||
+            delta_y_ > 0.f && skeleton_collision[1])
+            delta_y -= delta_y_;
+
+        if (delta_x_ < 0.f)
+        {
             direction = 1;
+            if (skeleton_collision[2])
+                delta_x -= delta_x_;
+        }
+        else if (delta_x_ > 0.f)
+        {
+            direction = 0;
+            if (skeleton_collision[3])
+                delta_x -= delta_x_;
+        }
 
         delta_x += delta_x_;
         delta_y += delta_y_;
@@ -142,11 +155,6 @@ public:
             delta_x -= delta_x_;
             delta_y -= delta_y_;
         }
-
-        if (delta_x_ > 0.f && skeleton_collision)
-            delta_x -= delta_x_;
-        else if (delta_x_ < 0.f && skeleton_collision)
-            delta_x -= delta_x_;
     }
     void attack(game_object* enemy, bool skeleton_collision) final
     {
