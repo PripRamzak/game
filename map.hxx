@@ -15,7 +15,8 @@ enum class map_tile
     wall_top,
     wall_left,
     wall_right,
-    wall_bottom
+    wall_bottom,
+    coin
 };
 
 struct tile
@@ -33,18 +34,24 @@ class map
 
 public:
     static void  initialize();
-    virtual void create_tile_vertex_buffer(vertex_buffer* tile_vertex_buffer,
-                                           map_tile       type) = 0;
     virtual void draw_vertical_line(int      start_x,
                                     int      start_y,
                                     int      length,
-                                    map_tile type)        = 0;
+                                    map_tile type)   = 0;
     virtual void draw_horizontal_line(int      start_x,
                                       int      start_y,
                                       int      length,
-                                      map_tile type)      = 0;
+                                      map_tile type) = 0;
     virtual void fill_rectangle(
         int start_x, int start_y, int width_, int height_, map_tile type) = 0;
+    virtual void           delete_tiles_horizontal(int      start_x,
+                                                   int      start_y,
+                                                   int      length,
+                                                   map_tile type)         = 0;
+    virtual void           delete_tiles_vertical(int      start_x,
+                                                 int      start_y,
+                                                 int      length,
+                                                 map_tile type)           = 0;
     virtual texture*       get_tile(map_tile type)                        = 0;
     virtual vertex_2d*     get_vertices(map_tile type)                    = 0;
     virtual size_t         get_vertices_num(map_tile type)                = 0;

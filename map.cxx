@@ -67,19 +67,6 @@ public:
         add_tile(wall_right, map_tile::wall_right);
         add_tile(wall_bottom, map_tile::wall_bottom);
     }
-    void create_tile_vertex_buffer(vertex_buffer* tile_vertex_buffer,
-                                   map_tile       type) final
-    {
-        auto it = find_tile(type);
-
-        if (it != tiles.end())
-        {
-            tile_vertex_buffer->buffer_data(it->vertices.data(),
-                                            it->vertices.size());
-        }
-        else
-            std::cout << "Such tile doesn't exists" << std::endl;
-    }
     void draw_vertical_line(int      start_x,
                             int      start_y,
                             int      length,
@@ -205,6 +192,71 @@ public:
         else
             std::cout << "Such tile doesn't exists" << std::endl;
     }
+    void delete_tiles_horizontal(int      start_x,
+                                 int      start_y,
+                                 int      length,
+                                 map_tile type) final
+    {
+        auto tile_it = find_tile(type);
+
+        if (tile_it != tiles.end())
+        {
+            for (int i = start_x - 1; i < start_x + length - 1; i++)
+            {
+                auto vertex_it = std::find_if(
+                    tile_it->vertices.begin(),
+                    tile_it->vertices.end(),
+                    [&](const vertex_2d vertex)
+                    {
+                        return vertex.x == static_cast<float>(i) * tile_width &&
+                               vertex.y == (static_cast<float>(start_y) - 1.f) *
+                                               tile_height &&
+                               vertex.u == 0.f && vertex.v == 1.0;
+                    });
+
+                if (vertex_it != tile_it->vertices.end())
+                    tile_it->vertices.erase(vertex_it, vertex_it + 4);
+            }
+
+            tile_it->tile_vertex_buffer->buffer_data(tile_it->vertices.data(),
+                                                     tile_it->vertices.size());
+            tile_it->tile_index_buffer->delete_indexes(
+                static_cast<size_t>(length));
+        }
+    }
+    void delete_tiles_vertical(int      start_x,
+                               int      start_y,
+                               int      length,
+                               map_tile type) final
+    {
+        auto tile_it = find_tile(type);
+
+        if (tile_it != tiles.end())
+        {
+            for (int i = start_y - 1; i < start_y + length - 1; i++)
+            {
+                auto vertex_it = std::find_if(
+                    tile_it->vertices.begin(),
+                    tile_it->vertices.end(),
+                    [&](const vertex_2d vertex)
+                    {
+                        return vertex.x == (static_cast<float>(start_x) - 1.f) *
+                                               tile_width &&
+                               vertex.y ==
+                                   static_cast<float>(i) * tile_height &&
+                               vertex.u == 0.f && vertex.v == 1.0;
+                    });
+
+                if (vertex_it != tile_it->vertices.end())
+                    tile_it->vertices.erase(vertex_it, vertex_it + 4);
+            }
+
+            tile_it->tile_vertex_buffer->buffer_data(tile_it->vertices.data(),
+                                                     tile_it->vertices.size());
+            tile_it->tile_index_buffer->delete_indexes(
+                static_cast<size_t>(length));
+        }
+    }
     texture* get_tile(map_tile type) final
     {
         auto it = find_tile(type);
@@ -275,36 +327,36 @@ void generate_level_1(map*                 map,
                       float                window_height)
 {
     // first room
-    map->fill_rectangle(4, 4, 10, 5, map_tile::floor);
-    map->draw_horizontal_line(4, 3, 10, map_tile::wall);
-    map->draw_horizontal_line(4, 2, 10, map_tile::wall_top);
-    map->draw_horizontal_line(4, 9, 10, map_tile::wall);
-    map->draw_horizontal_line(4, 9, 10, map_tile::wall_bottom);
+    map->fill_rectangle(4, 4, 6, 5, map_tile::floor);
+    map->draw_horizontal_line(4, 3, 6, map_tile::wall);
+    map->draw_horizontal_line(4, 2, 6, map_tile::wall_top);
+    map->draw_horizontal_line(4, 9, 6, map_tile::wall);
+    map->draw_horizontal_line(4, 9, 6, map_tile::wall_bottom);
     map->draw_vertical_line(3, 3, 6, map_tile::wall_left);
-    map->draw_vertical_line(14, 3, 1, map_tile::wall_right);
-    map->draw_vertical_line(14, 8, 1, map_tile::wall_right);
+    map->draw_vertical_line(10, 3, 1, map_tile::wall_right);
+    map->draw_vertical_line(10, 8, 1, map_tile::wall_right);
 
     // corridor from first room to second
-    map->fill_rectangle(14, 5, 6, 3, map_tile::floor);
-    map->draw_horizontal_line(14, 4, 6, map_tile::wall);
-    map->draw_horizontal_line(14, 3, 6, map_tile::wall_top);
-    map->draw_horizontal_line(14, 8, 6, map_tile::wall_bottom);
+    map->fill_rectangle(10, 5, 4, 3, map_tile::floor);
+    map->draw_horizontal_line(10, 4, 4, map_tile::wall);
+    map->draw_horizontal_line(10, 3, 4, map_tile::wall_top);
+    map->draw_horizontal_line(10, 8, 4, map_tile::wall_bottom);
 
     // second room
-    map->fill_rectangle(20, 3, 15, 9, map_tile::floor);
-    map->draw_horizontal_line(20, 2, 15, map_tile::wall);
-    map->draw_horizontal_line(20, 1, 15, map_tile::wall_top);
-    map->draw_horizontal_line(20, 12, 15, map_tile::wall_bottom);
-    map->draw_vertical_line(19, 2, 2, map_tile::wall_left);
-    map->draw_vertical_line(19, 8, 4, map_tile::wall_left);
-    map->draw_vertical_line(35, 2, 10, map_tile::wall_right);
+    map->fill_rectangle(14, 3, 12, 9, map_tile::floor);
+    map->draw_horizontal_line(14, 2, 12, map_tile::wall);
+    map->draw_horizontal_line(14, 1, 12, map_tile::wall_top);
+    map->draw_horizontal_line(14, 12, 12, map_tile::wall_bottom);
+    map->draw_vertical_line(13, 2, 2, map_tile::wall_left);
+    map->draw_vertical_line(13, 8, 4, map_tile::wall_left);
+    map->draw_vertical_line(26, 2, 10, map_tile::wall_right);
 
     enemy* skeleton_1 = create_enemy(5,
                                      5.f,
                                      window_width / 2.f,
                                      window_height / 2.f,
-                                     2100.f,
-                                     300.f,
+                                     1500.f,
+                                     250.f,
                                      1.75f,
                                      game_object_state::run);
     enemies.push_back(skeleton_1);
@@ -312,8 +364,8 @@ void generate_level_1(map*                 map,
                                      5.f,
                                      window_width / 2.f,
                                      window_height / 2.f,
-                                     1700.f,
-                                     400.f,
+                                     1000.f,
+                                     650.f,
                                      1.75f,
                                      game_object_state::run);
     enemies.push_back(skeleton_2);
@@ -323,11 +375,21 @@ void game_logic_level_1(map*                 map,
                         game_object*         hero,
                         std::vector<enemy*>& enemies)
 {
-    if (hero->get_current_pos_x() > 1300.f && !enemies[0]->is_spawned())
+    static bool second_room_cleaned = false;
+
+    if (hero->get_current_pos_x() > 900.f && !enemies[0]->is_spawned())
     {
         enemies[0]->spawn();
-        // map->draw_vertical_line(21, 5, 3, map_tile::wall_left);
+        map->draw_vertical_line(13, 4, 4, map_tile::wall_left);
     }
-    else if (!enemies[0]->is_alive() && enemies[0]->is_spawned())
+    else if (!enemies[0]->is_alive() && enemies[0]->is_spawned() &&
+             !enemies[1]->is_spawned())
         enemies[1]->spawn();
+    else if (enemies[1]->is_spawned() && !enemies[1]->is_alive() &&
+             !second_room_cleaned)
+    {
+        map->delete_tiles_vertical(13, 4, 4, map_tile::wall_left);
+        map->delete_tiles_horizontal(18, 12, 4, map_tile::wall_bottom);
+        second_room_cleaned = true;
+    }
 }

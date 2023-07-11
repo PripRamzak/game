@@ -40,6 +40,13 @@ public:
 
         buffer_data();
     }
+    void delete_indexes(size_t objects_num) final
+    {
+        indexes.erase(indexes.end() - objects_num * 6, indexes.end());
+        size -= objects_num * 6;
+
+        buffer_data();
+    }
     void buffer_data() final
     {
         bind();
