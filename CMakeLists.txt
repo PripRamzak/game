@@ -83,6 +83,8 @@ target_sources(game PRIVATE
         game_object.hxx
         hero.cxx
         hero.hxx
+        interface.cxx
+        interface.hxx
         map.cxx
         map.hxx)
 target_compile_features(game PRIVATE cxx_std_20)

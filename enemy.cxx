@@ -319,6 +319,7 @@ public:
         }
         state = state_;
     }
+    int   get_health() final { return health; }
     float get_current_pos_x() final { return global_pos_x + delta_x; }
     float get_current_pos_y() final { return global_pos_y + delta_y; }
     float get_delta_x() final { return delta_x; }

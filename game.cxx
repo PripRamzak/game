@@ -3,6 +3,7 @@
 #include "enemy.hxx"
 #include "engine.hxx"
 #include "hero.hxx"
+#include "interface.hxx"
 #include "map.hxx"
 
 #include <chrono>
@@ -38,8 +39,8 @@ int main(int /*argc*/, char** /*argv*/)
 
     camera* camera = create_camera(window_width, window_height);
 
-    index_buffer* game_objects_index_buffer = create_index_buffer();
-    game_objects_index_buffer->add_indexes(static_cast<size_t>(4));
+    index_buffer* solo_objects_index_buffer = create_index_buffer();
+    solo_objects_index_buffer->add_indexes(static_cast<size_t>(4));
 
     // Warrior creating
 
@@ -67,6 +68,25 @@ int main(int /*argc*/, char** /*argv*/)
     map::initialize();
     map* dungeon_map = create_map(64.f, 64.f);
     generate_level_1(dungeon_map, enemies, window_width, window_height);
+
+    // Interface
+
+    texture* heart_full_texture  = create_texture("img/heart_full.png");
+    texture* heart_half_texture  = create_texture("img/heart_half.png");
+    texture* heart_empty_texture = create_texture("img/heart_empty.png");
+
+    std::vector<interface*> health;
+    health.resize(2);
+
+    health[0] = create_interface(10.f, 10.f, 64.f, 64.f);
+    health[0]->add_texture(heart_full_texture);
+    health[0]->add_texture(heart_half_texture);
+    health[0]->add_texture(heart_empty_texture);
+
+    health[1] = create_interface(84.f, 10.f, 64.f, 64.f);
+    health[1]->add_texture(heart_full_texture);
+    health[1]->add_texture(heart_half_texture);
+    health[1]->add_texture(heart_empty_texture);
 
     // Sound
 
@@ -181,7 +201,7 @@ int main(int /*argc*/, char** /*argv*/)
                 warrior_mat_size * to_ndc_coordinates;
 
             engine->render(warrior->get_vertex_buffer(),
-                           game_objects_index_buffer,
+                           solo_objects_index_buffer,
                            warrior->get_sprite(),
                            warrior->get_direction(),
                            &warrior_mat_result[0][0]);
@@ -261,7 +281,7 @@ int main(int /*argc*/, char** /*argv*/)
                         to_ndc_coordinates;
 
                     engine->render(enemy->get_vertex_buffer(),
-                                   game_objects_index_buffer,
+                                   solo_objects_index_buffer,
                                    enemy->get_sprite(),
                                    enemy->get_direction(),
                                    &skeleton_mat_result[0][0]);
@@ -281,6 +301,33 @@ int main(int /*argc*/, char** /*argv*/)
                     }
                 }
             }
+
+            switch (warrior->get_health())
+            {
+                case 0:
+                    health[0]->set_texture(2);
+                case 1:
+                    health[0]->set_texture(1);
+                    break;
+                case 2:
+                    health[0]->set_texture(0);
+                    health[1]->set_texture(2);
+                    break;
+                case 3:
+                    health[1]->set_texture(1);
+                    break;
+                case 4:
+                    health[1]->set_texture(0);
+                    break;
+                default:
+                    health[1]->set_texture(0);
+            }
+
+            for (auto heart : health)
+                engine->render(heart->get_vertex_buffer(),
+                               solo_objects_index_buffer,
+                               heart->get_texture(),
+                               &to_ndc_coordinates[0][0]);
 
             if (engine->get_time() - warrior_update_time >
                 warrior->get_sprite()->get_animation_time())

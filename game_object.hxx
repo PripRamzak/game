@@ -54,6 +54,7 @@ public:
     virtual void              hurt()                              = 0;
     virtual void              set_state(game_object_state state_) = 0;
     virtual void              set_direction(int direction_)       = 0;
+    virtual int               get_health()                        = 0;
     virtual float             get_current_pos_x()                 = 0;
     virtual float             get_current_pos_y()                 = 0;
     virtual float             get_delta_x()                       = 0;
