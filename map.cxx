@@ -6,21 +6,30 @@
 
 #include <glm/matrix.hpp>
 
-static texture* floor_      = nullptr;
-static texture* wall        = nullptr;
-static texture* wall_top    = nullptr;
-static texture* wall_left   = nullptr;
-static texture* wall_right  = nullptr;
-static texture* wall_bottom = nullptr;
+static texture* floor_                   = nullptr;
+static texture* wall                     = nullptr;
+static texture* wall_top                 = nullptr;
+static texture* wall_left                = nullptr;
+static texture* wall_right               = nullptr;
+static texture* wall_bottom              = nullptr;
+static texture* wall_top_corner_left     = nullptr;
+static texture* wall_top_corner_right    = nullptr;
+static texture* wall_bottom_corner_left  = nullptr;
+static texture* wall_bottom_corner_right = nullptr;
 
 void map::initialize()
 {
-    floor_      = create_texture("img/floor.png");
-    wall        = create_texture("img/wall.png");
-    wall_top    = create_texture("img/wall_top.png");
-    wall_left   = create_texture("img/wall_left.png");
-    wall_right  = create_texture("img/wall_right.png");
-    wall_bottom = create_texture("img/wall_bottom.png");
+    floor_                  = create_texture("img/floor.png");
+    wall                    = create_texture("img/wall.png");
+    wall_top                = create_texture("img/wall_top.png");
+    wall_left               = create_texture("img/wall_left.png");
+    wall_right              = create_texture("img/wall_right.png");
+    wall_bottom             = create_texture("img/wall_bottom.png");
+    wall_top_corner_left    = create_texture("img/wall_corner_top_left.png");
+    wall_top_corner_right   = create_texture("img/wall_corner_top_right.png");
+    wall_bottom_corner_left = create_texture("img/wall_corner_bottom_left.png");
+    wall_bottom_corner_right =
+        create_texture("img/wall_corner_bottom_right.png");
 }
 
 class game_map final : public map
@@ -66,6 +75,10 @@ public:
         add_tile(wall_left, map_tile::wall_left);
         add_tile(wall_right, map_tile::wall_right);
         add_tile(wall_bottom, map_tile::wall_bottom);
+        add_tile(wall_top_corner_left, map_tile::wall_corner_top_left);
+        add_tile(wall_top_corner_right, map_tile::wall_corner_top_right);
+        add_tile(wall_bottom_corner_left, map_tile::wall_corner_bottom_left);
+        add_tile(wall_bottom_corner_right, map_tile::wall_corner_bottom_right);
     }
     void draw_vertical_line(int      start_x,
                             int      start_y,
@@ -330,8 +343,12 @@ void generate_level_1(map*                 map,
     map->fill_rectangle(4, 4, 6, 5, map_tile::floor);
     map->draw_horizontal_line(4, 3, 6, map_tile::wall);
     map->draw_horizontal_line(4, 2, 6, map_tile::wall_top);
+    map->draw_horizontal_line(3, 2, 1, map_tile::wall_corner_top_left);
+    map->draw_horizontal_line(10, 2, 1, map_tile::wall_corner_top_right);
     map->draw_horizontal_line(4, 9, 6, map_tile::wall);
     map->draw_horizontal_line(4, 9, 6, map_tile::wall_bottom);
+    map->draw_horizontal_line(3, 9, 1, map_tile::wall_corner_bottom_left);
+    map->draw_horizontal_line(10, 9, 1, map_tile::wall_corner_bottom_right);
     map->draw_vertical_line(3, 3, 6, map_tile::wall_left);
     map->draw_vertical_line(10, 3, 1, map_tile::wall_right);
     map->draw_vertical_line(10, 8, 1, map_tile::wall_right);
@@ -340,13 +357,20 @@ void generate_level_1(map*                 map,
     map->fill_rectangle(10, 5, 4, 3, map_tile::floor);
     map->draw_horizontal_line(10, 4, 4, map_tile::wall);
     map->draw_horizontal_line(10, 3, 4, map_tile::wall_top);
+    map->draw_horizontal_line(10, 8, 4, map_tile::wall);
     map->draw_horizontal_line(10, 8, 4, map_tile::wall_bottom);
 
     // second room
     map->fill_rectangle(14, 3, 12, 9, map_tile::floor);
     map->draw_horizontal_line(14, 2, 12, map_tile::wall);
     map->draw_horizontal_line(14, 1, 12, map_tile::wall_top);
+    map->draw_horizontal_line(13, 1, 1, map_tile::wall_corner_top_left);
+    map->draw_horizontal_line(26, 1, 1, map_tile::wall_corner_top_right);
+    map->draw_horizontal_line(14, 12, 4, map_tile::wall);
+    map->draw_horizontal_line(22, 12, 4, map_tile::wall);
     map->draw_horizontal_line(14, 12, 12, map_tile::wall_bottom);
+    map->draw_horizontal_line(13, 12, 1, map_tile::wall_corner_bottom_left);
+    map->draw_horizontal_line(26, 12, 1, map_tile::wall_corner_bottom_right);
     map->draw_vertical_line(13, 2, 2, map_tile::wall_left);
     map->draw_vertical_line(13, 8, 4, map_tile::wall_left);
     map->draw_vertical_line(26, 2, 10, map_tile::wall_right);
@@ -358,7 +382,8 @@ void generate_level_1(map*                 map,
                                      1500.f,
                                      250.f,
                                      1.75f,
-                                     game_object_state::run);
+                                     game_object_state::run,
+                                     enemy_type::spearman);
     enemies.push_back(skeleton_1);
     enemy* skeleton_2 = create_enemy(5,
                                      5.f,
@@ -367,7 +392,8 @@ void generate_level_1(map*                 map,
                                      1000.f,
                                      650.f,
                                      1.75f,
-                                     game_object_state::run);
+                                     game_object_state::run,
+                                     enemy_type::warrior);
     enemies.push_back(skeleton_2);
 }
 

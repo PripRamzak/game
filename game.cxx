@@ -166,6 +166,34 @@ int main(int /*argc*/, char** /*argv*/)
                            dungeon_map->get_tile(map_tile::wall_right),
                            &map_mat_result[0][0]);
 
+            engine->render(
+                dungeon_map->get_vertex_buffer(map_tile::wall_corner_top_left),
+                dungeon_map->get_index_buffer(map_tile::wall_corner_top_left),
+                dungeon_map->get_tile(map_tile::wall_corner_top_left),
+                &map_mat_result[0][0]);
+
+            engine->render(
+                dungeon_map->get_vertex_buffer(map_tile::wall_corner_top_right),
+                dungeon_map->get_index_buffer(map_tile::wall_corner_top_right),
+                dungeon_map->get_tile(map_tile::wall_corner_top_right),
+                &map_mat_result[0][0]);
+
+            engine->render(
+                dungeon_map->get_vertex_buffer(
+                    map_tile::wall_corner_bottom_left),
+                dungeon_map->get_index_buffer(
+                    map_tile::wall_corner_bottom_left),
+                dungeon_map->get_tile(map_tile::wall_corner_bottom_left),
+                &map_mat_result[0][0]);
+
+            engine->render(
+                dungeon_map->get_vertex_buffer(
+                    map_tile::wall_corner_bottom_right),
+                dungeon_map->get_index_buffer(
+                    map_tile::wall_corner_bottom_right),
+                dungeon_map->get_tile(map_tile::wall_corner_bottom_right),
+                &map_mat_result[0][0]);
+
             // Objects render
 
             if (event == event::pressed)

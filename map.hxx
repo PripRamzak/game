@@ -16,6 +16,10 @@ enum class map_tile
     wall_left,
     wall_right,
     wall_bottom,
+    wall_corner_top_left,
+    wall_corner_top_right,
+    wall_corner_bottom_left,
+    wall_corner_bottom_right,
     coin
 };
 
