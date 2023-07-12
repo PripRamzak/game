@@ -200,8 +200,8 @@ public:
 
             set_state(game_object_state::run);
         }
-        else if (hero->get_current_pos_y() - 2.5f > get_current_pos_y() ||
-                 hero->get_current_pos_y() + 2.5f < get_current_pos_y())
+        else if (hero->get_current_pos_y() - 3.5f > get_current_pos_y() ||
+                 hero->get_current_pos_y() + 3.5f < get_current_pos_y())
         {
             if (hero->get_current_pos_x() <= get_current_pos_x())
             {
@@ -227,9 +227,9 @@ public:
                     direction = 0;
                 }
 
-                if (hero->get_current_pos_y() - 2.5f > get_current_pos_y())
+                if (hero->get_current_pos_y() - 3.5f > get_current_pos_y())
                     delta_y += speed;
-                else if (hero->get_current_pos_y() + 2.5f < get_current_pos_y())
+                else if (hero->get_current_pos_y() + 3.5f < get_current_pos_y())
                     delta_y -= speed;
             }
 
