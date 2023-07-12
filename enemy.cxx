@@ -3,12 +3,19 @@
 #include <algorithm>
 #include <iostream>
 
-static texture* skeleton_idle_sprite_sheet   = nullptr;
-static texture* skeleton_run_sprite_sheet    = nullptr;
-static texture* skeleton_attack_sprite_sheet = nullptr;
-static sprite*  skeleton_idle                = nullptr;
-static sprite*  skeleton_run                 = nullptr;
-static sprite*  skeleton_attack              = nullptr;
+static texture* skeleton_warrior_idle_sprite_sheet    = nullptr;
+static texture* skeleton_warrior_run_sprite_sheet     = nullptr;
+static texture* skeleton_warrior_attack_sprite_sheet  = nullptr;
+static texture* skeleton_spearman_idle_sprite_sheet   = nullptr;
+static texture* skeleton_spearman_run_sprite_sheet    = nullptr;
+static texture* skeleton_spearman_attack_sprite_sheet = nullptr;
+
+static sprite* skeleton_warrior_idle    = nullptr;
+static sprite* skeleton_warrior_run     = nullptr;
+static sprite* skeleton_warrior_attack  = nullptr;
+static sprite* skeleton_spearman_idle   = nullptr;
+static sprite* skeleton_spearman_run    = nullptr;
+static sprite* skeleton_spearman_attack = nullptr;
 
 enemy::enemy(int               health,
              float             speed,
@@ -31,15 +38,31 @@ enemy::enemy(int               health,
 
 void enemy::initialize()
 {
-    skeleton_idle_sprite_sheet   = create_texture("img/skeleton_idle.png");
-    skeleton_run_sprite_sheet    = create_texture("img/skeleton_run.png");
-    skeleton_attack_sprite_sheet = create_texture("img/skeleton_attack.png");
-    skeleton_idle =
-        create_sprite(skeleton_idle_sprite_sheet, 64.f, 64.f, 7, 32.f, 0.15f);
-    skeleton_run =
-        create_sprite(skeleton_run_sprite_sheet, 74.f, 64.f, 8, 32.f, 0.15f);
-    skeleton_attack =
-        create_sprite(skeleton_attack_sprite_sheet, 96.f, 64.f, 4, 16.f, 0.25f);
+    skeleton_warrior_idle_sprite_sheet =
+        create_texture("img/skeleton_warrior_idle.png");
+    skeleton_warrior_run_sprite_sheet =
+        create_texture("img/skeleton_warrior_run.png");
+    skeleton_warrior_attack_sprite_sheet =
+        create_texture("img/skeleton_warrior_attack.png");
+    skeleton_warrior_idle = create_sprite(
+        skeleton_warrior_idle_sprite_sheet, 64.f, 64.f, 7, 32.f, 0.15f);
+    skeleton_warrior_run = create_sprite(
+        skeleton_warrior_run_sprite_sheet, 74.f, 64.f, 8, 32.f, 0.15f);
+    skeleton_warrior_attack = create_sprite(
+        skeleton_warrior_attack_sprite_sheet, 96.f, 64.f, 4, 16.f, 0.2f);
+
+    skeleton_spearman_idle_sprite_sheet =
+        create_texture("img/skeleton_spearman_idle.png");
+    skeleton_spearman_run_sprite_sheet =
+        create_texture("img/skeleton_spearman_run.png");
+    skeleton_spearman_attack_sprite_sheet =
+        create_texture("img/skeleton_spearman_attack.png");
+    skeleton_spearman_idle = create_sprite(
+        skeleton_spearman_idle_sprite_sheet, 64.f, 64.f, 7, 32.f, 0.2f);
+    skeleton_spearman_run = create_sprite(
+        skeleton_spearman_run_sprite_sheet, 88.f, 64.f, 6, 20.f, 0.15f);
+    skeleton_spearman_attack = create_sprite(
+        skeleton_spearman_attack_sprite_sheet, 128.f, 64.f, 4, 0.f, 0.25f);
 }
 
 class skeleton final : public enemy
@@ -112,7 +135,8 @@ public:
              float             global_pos_x,
              float             global_pos_y,
              float             size,
-             game_object_state state)
+             game_object_state state,
+             enemy_type        type)
         : enemy(health,
                 speed,
                 local_pos_x,
@@ -122,9 +146,18 @@ public:
                 size,
                 state)
     {
-        add_sprite(skeleton_idle, game_object_state::idle);
-        add_sprite(skeleton_run, game_object_state::run);
-        add_sprite(skeleton_attack, game_object_state::attack);
+        if (type == enemy_type::warrior)
+        {
+            add_sprite(skeleton_warrior_idle, game_object_state::idle);
+            add_sprite(skeleton_warrior_run, game_object_state::run);
+            add_sprite(skeleton_warrior_attack, game_object_state::attack);
+        }
+        else
+        {
+            add_sprite(skeleton_spearman_idle, game_object_state::idle);
+            add_sprite(skeleton_spearman_run, game_object_state::run);
+            add_sprite(skeleton_spearman_attack, game_object_state::attack);
+        }
     }
     void spawn() final
     {
@@ -365,7 +398,8 @@ enemy* create_enemy(int               health,
                     float             global_pos_x,
                     float             global_pos_y,
                     float             size,
-                    game_object_state state)
+                    game_object_state state,
+                    enemy_type        type)
 {
     return new skeleton(health,
                         speed,
@@ -374,5 +408,6 @@ enemy* create_enemy(int               health,
                         global_pos_x,
                         global_pos_y,
                         size,
-                        state);
+                        state,
+                        type);
 }

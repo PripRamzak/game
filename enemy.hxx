@@ -2,6 +2,12 @@
 
 #include "game_object.hxx"
 
+enum class enemy_type
+{
+    warrior,
+    spearman
+};
+
 class enemy : public game_object
 {
     virtual void add_sprite(sprite*           game_object_sprite_,
@@ -50,4 +56,5 @@ enemy* create_enemy(int               health,
                     float             global_pos_x,
                     float             global_pos_y,
                     float             size,
-                    game_object_state state);
+                    game_object_state state,
+                    enemy_type        type);
