@@ -353,7 +353,7 @@ void generate_level_1(map*                 map,
     map->draw_vertical_line(10, 3, 1, map_tile::wall_right);
     map->draw_vertical_line(10, 8, 1, map_tile::wall_right);
 
-    // corridor from first room to second
+    // hall from first room to second
     map->fill_rectangle(10, 5, 4, 3, map_tile::floor);
     map->draw_horizontal_line(10, 4, 4, map_tile::wall);
     map->draw_horizontal_line(10, 3, 4, map_tile::wall_top);
@@ -375,8 +375,28 @@ void generate_level_1(map*                 map,
     map->draw_vertical_line(13, 8, 4, map_tile::wall_left);
     map->draw_vertical_line(26, 2, 10, map_tile::wall_right);
 
-    enemy* skeleton_1 = create_enemy(5,
-                                     5.f,
+    // hall from second room to third
+    map->fill_rectangle(18, 12, 4, 7, map_tile::floor);
+    map->draw_vertical_line(17, 12, 6, map_tile::wall_left);
+    map->draw_vertical_line(22, 12, 6, map_tile::wall_right);
+
+    // third room
+    map->fill_rectangle(14, 19, 12, 8, map_tile::floor);
+    map->draw_horizontal_line(14, 18, 4, map_tile::wall);
+    map->draw_horizontal_line(22, 18, 4, map_tile::wall);
+    map->draw_horizontal_line(14, 17, 4, map_tile::wall_top);
+    map->draw_horizontal_line(22, 17, 4, map_tile::wall_top);
+    map->draw_horizontal_line(13, 17, 1, map_tile::wall_corner_top_left);
+    map->draw_horizontal_line(26, 17, 1, map_tile::wall_corner_top_right);
+    map->draw_horizontal_line(14, 27, 12, map_tile::wall);
+    map->draw_horizontal_line(14, 27, 12, map_tile::wall_bottom);
+    map->draw_horizontal_line(13, 27, 1, map_tile::wall_corner_bottom_left);
+    map->draw_horizontal_line(26, 27, 1, map_tile::wall_corner_bottom_right);
+    map->draw_vertical_line(13, 18, 9, map_tile::wall_left);
+    map->draw_vertical_line(26, 18, 9, map_tile::wall_right);
+
+    enemy* skeleton_1 = create_enemy(3,
+                                     4.f,
                                      window_width / 2.f,
                                      window_height / 2.f,
                                      1500.f,
@@ -386,7 +406,7 @@ void generate_level_1(map*                 map,
                                      enemy_type::spearman);
     enemies.push_back(skeleton_1);
     enemy* skeleton_2 = create_enemy(5,
-                                     5.f,
+                                     7.f,
                                      window_width / 2.f,
                                      window_height / 2.f,
                                      1000.f,
@@ -395,6 +415,36 @@ void generate_level_1(map*                 map,
                                      game_object_state::run,
                                      enemy_type::warrior);
     enemies.push_back(skeleton_2);
+    enemy* skeleton_3 = create_enemy(5,
+                                     7.f,
+                                     window_width / 2.f,
+                                     window_height / 2.f,
+                                     1500.f,
+                                     1200.f,
+                                     1.75f,
+                                     game_object_state::run,
+                                     enemy_type::warrior);
+    enemies.push_back(skeleton_3);
+    enemy* skeleton_4 = create_enemy(5,
+                                     7.f,
+                                     window_width / 2.f,
+                                     window_height / 2.f,
+                                     1000.f,
+                                     1400.f,
+                                     1.75f,
+                                     game_object_state::run,
+                                     enemy_type::warrior);
+    enemies.push_back(skeleton_4);
+    enemy* skeleton_5 = create_enemy(3,
+                                     4.f,
+                                     window_width / 2.f,
+                                     window_height / 2.f,
+                                     1200.f,
+                                     1200.f,
+                                     1.75f,
+                                     game_object_state::run,
+                                     enemy_type::spearman);
+    enemies.push_back(skeleton_5);
 }
 
 void game_logic_level_1(map*                 map,
@@ -418,4 +468,16 @@ void game_logic_level_1(map*                 map,
         map->delete_tiles_horizontal(18, 12, 4, map_tile::wall_bottom);
         second_room_cleaned = true;
     }
+    else if (hero->get_current_pos_y() > 1300.f && !enemies[2]->is_spawned())
+    {
+        enemies[2]->spawn();
+        map->draw_horizontal_line(18, 17, 4, map_tile::wall_top);
+        map->draw_horizontal_line(18, 18, 4, map_tile::wall);
+    }
+    else if (!enemies[2]->is_alive() && enemies[2]->is_spawned() &&
+             !enemies[3]->is_spawned())
+        enemies[3]->spawn();
+    else if (!enemies[3]->is_alive() && enemies[3]->is_spawned() &&
+             !enemies[4]->is_spawned())
+        enemies[4]->spawn();
 }
