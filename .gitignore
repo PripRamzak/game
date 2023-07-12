@@ -8,3 +8,4 @@ android-project/.idea
 android-project/local.properties
 android-project/app/.cxx
 android-project/app/build
+android-project/app/release

@@ -26,7 +26,7 @@ android {
 
     defaultConfig {
         if (buildAsApplication) {
-            applicationId "org.libsdl.app"
+            applicationId "org.home.pripramzak"
         }
         minSdkVersion 16
         targetSdkVersion 33
@@ -64,7 +64,7 @@ android {
     lintOptions {
         abortOnError false
     }
-    namespace 'org.libsdl.app'
+    namespace 'org.home.pripramzak'
 
     if (buildAsLibrary) {
         libraryVariants.all { variant ->
