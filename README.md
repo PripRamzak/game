@@ -7,6 +7,7 @@ My simple game made with SDL3
 Game requires:
 
 - SDL3
+- GLM
 - CMake 3.20+
 
 ## Android:
