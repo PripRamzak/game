@@ -9,6 +9,7 @@
 #include <chrono>
 #include <cstdlib>
 #include <memory>
+#include <thread>
 
 #ifdef __ANDROID__
 #include <SDL3/SDL_main.h>
@@ -108,16 +109,36 @@ int main(int /*argc*/, char** /*argv*/)
     bool  show_in_game_menu_window = false;
     event event                    = event::released;
 
+    std::chrono::high_resolution_clock timer;
+    using timepoint =
+        std::chrono::time_point<std::chrono::high_resolution_clock,
+                                std::chrono::nanoseconds>;
+
+    timepoint start = timer.now();
+
     while (!quit && warrior->is_alive())
     {
         // Event handling
 
-        engine->read_input(event);
-        if (event == event::turn_off)
+        while (engine->read_input(event))
+            if (event == event::turn_off)
+            {
+                quit = true;
+                break;
+            }
+
+        timepoint last_frame_time = timer.now();
+
+        std::chrono::milliseconds frame_time_dif =
+            std::chrono::duration_cast<std::chrono::milliseconds>(
+                last_frame_time - start);
+
+        if (frame_time_dif.count() < 1000 / 60)
         {
-            quit = true;
-            break;
+            std::this_thread::yield();
+            continue;
         }
+        start = last_frame_time;
 
         if (show_menu_window)
         {

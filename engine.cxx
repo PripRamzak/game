@@ -275,8 +275,6 @@ public:
             return false;
         }
 
-        SDL_GL_SetSwapInterval(1);
-
         std::cout << "OpenGL " << gl_major_version << '.' << gl_minor_version
                   << std::endl;
         SDL_ShowWindow(window);
@@ -372,6 +370,8 @@ public:
         glDisable(GL_STENCIL_TEST);
         gl_check();
         glEnable(GL_SCISSOR_TEST);
+        gl_check();
+        glClearColor(0.1f, 0.1f, 0.1f, 0.f);
         gl_check();
 
         SDL_GetWindowSizeInPixels(
@@ -482,8 +482,6 @@ public:
     {
         SDL_Event sdl_event;
 
-        bool game_event = false;
-
         if (SDL_PollEvent(&sdl_event))
         {
             ImGui_ImplGameEngine_ProcessEvent(&sdl_event);
@@ -492,7 +490,7 @@ public:
                 case SDL_EVENT_KEY_DOWN:
                 case SDL_EVENT_KEY_UP:
                     if (check_pressing_key(sdl_event, event))
-                        game_event = true;
+                        return true;
                     break;
                 case SDL_EVENT_FINGER_DOWN:
                 case SDL_EVENT_FINGER_UP:
@@ -505,23 +503,25 @@ public:
                                               mobile_buttons,
                                               window_width_pixels,
                                               window_height_pixels))
-                        game_event = true;
+                        return true;
                     break;
                 case SDL_EVENT_MOUSE_BUTTON_DOWN:
                     mouse_button_pressed = true;
-                    break;
+                    return true;
                 case SDL_EVENT_MOUSE_BUTTON_UP:
                     mouse_button_pressed = false;
-                    break;
+                    return true;
                 case SDL_EVENT_QUIT:
-                    event      = event::turn_off;
-                    game_event = true;
+                    event = event::turn_off;
+                    return true;
+                case SDL_EVENT_MOUSE_MOTION:
+                    std::cout << "mouse motion " << std::endl;
                     break;
                 default:
                     break;
             }
         }
-        return game_event;
+        return false;
     }
     bool          check_key(key key_) final { return is_key_down(key_); }
     sound_buffer* create_sound_buffer(const char* file_path) final
@@ -682,8 +682,6 @@ public:
     }
     void clear() final
     {
-        glClearColor(0.1f, 0.1f, 0.1f, 0.f);
-        gl_check();
         glClear(GL_COLOR_BUFFER_BIT);
         gl_check();
     }
