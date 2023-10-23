@@ -43,6 +43,8 @@ int main(int /*argc*/, char** /*argv*/)
     index_buffer* solo_objects_index_buffer = create_index_buffer();
     solo_objects_index_buffer->add_indexes(static_cast<size_t>(4));
 
+    std::vector<vertex_2d> vertices
+
     // Warrior creating
 
     hero::initialize();
@@ -147,6 +149,41 @@ int main(int /*argc*/, char** /*argv*/)
         }
         else
         {
+            if (engine->check_key(key::menu))
+                show_in_game_menu_window = true;
+
+            if (!show_in_game_menu_window)
+            {
+                if (engine->check_key(key::attack))
+                {
+                    warrior->set_state(game_object_state::attack);
+
+                    if (warrior->get_sprite()->get_current_number(
+                            warrior->get_direction()) == 2)
+                        sound_attack->play(audio_properties::once);
+                }
+                else
+                {
+                    int dx = 0;
+                    int dy = 0;
+
+                    if (engine->check_key(key::up))
+                        dy--;
+                    if (engine->check_key(key::down))
+                        dy++;
+                    if (engine->check_key(key::left))
+                        dx--;
+                    if (engine->check_key(key::right))
+                        dx++;
+
+                    if (dx == 0 && dy == 0)
+                        warrior->set_state(game_object_state::idle);
+                    else
+                        warrior->move(
+                            dx, dy, dungeon_map, warrior_skeleton_collision);
+                }
+            }
+
             camera->look_at(warrior->get_current_pos_x(),
                             warrior->get_current_pos_y());
 
@@ -217,39 +254,6 @@ int main(int /*argc*/, char** /*argv*/)
 
             // Objects render
 
-            if (event == event::pressed)
-            {
-                if (engine->check_key(key::menu))
-                    show_in_game_menu_window = true;
-                else if (engine->check_key(key::attack) &&
-                         !show_in_game_menu_window)
-                {
-                    warrior->set_state(game_object_state::attack);
-
-                    if (warrior->get_sprite()->get_current_number(
-                            warrior->get_direction()) == 2)
-                        sound_attack->play(audio_properties::once);
-                }
-                else if (!show_in_game_menu_window)
-                {
-                    int dx = 0;
-                    int dy = 0;
-
-                    if (engine->check_key(key::up))
-                        dy--;
-                    if (engine->check_key(key::down))
-                        dy++;
-                    if (engine->check_key(key::left))
-                        dx--;
-                    if (engine->check_key(key::right))
-                        dx++;
-                    warrior->move(
-                        dx, dy, dungeon_map, warrior_skeleton_collision);
-                }
-            }
-            else
-                warrior->set_state(game_object_state::idle);
-
             glm::mat4 warrior_mat_result =
                 warrior_mat_size * to_ndc_coordinates;
 
@@ -259,7 +263,7 @@ int main(int /*argc*/, char** /*argv*/)
                            warrior->get_direction(),
                            &warrior_mat_result[0][0]);
 
-            warrior_skeleton_collision[0] = false;
+            /*warrior_skeleton_collision[0] = false;
             warrior_skeleton_collision[1] = false;
             warrior_skeleton_collision[2] = false;
             warrior_skeleton_collision[3] = false;
@@ -359,7 +363,7 @@ int main(int /*argc*/, char** /*argv*/)
                         }
                     }
                 }
-            }
+            }*/
 
             switch (warrior->get_health())
             {
@@ -401,7 +405,7 @@ int main(int /*argc*/, char** /*argv*/)
                 engine->render_buttons(&to_ndc_coordinates[0][0]);
 #endif
 
-                game_logic_level_1(dungeon_map, warrior, enemies);
+                // game_logic_level_1(dungeon_map, warrior, enemies);
             }
             else if (engine->render_gui(show_in_game_menu_window,
                                         gui_type::menu))

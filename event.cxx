@@ -47,14 +47,14 @@ bool is_key_down(key key_)
                                  key_bindings.end(),
                                  [&](const bind& b) { return b.key_ == key_; });
 
-    /*if (it != key_bindings.end())
+    if (it != key_bindings.end())
     {
         const uint8_t* state         = SDL_GetKeyboardState(nullptr);
         int            sdl_scan_code = SDL_GetScancodeFromKey(it->keycode);
         return state[sdl_scan_code];
-    }*/
+    }
 
-    return it->event_ == event::pressed ? true : false;
+    return false;
 }
 
 bool check_pressing_key(SDL_Event sdl_event, event& event)
