@@ -1,8 +1,8 @@
 #pragma once
 
-#include "geometry.hxx"
-#include "sprite.hxx"
-#include "vertex_buffer.hxx"
+#include "engine/include/geometry.hxx"
+#include "engine/include/sprite.hxx"
+#include "engine/include/vertex_buffer.hxx"
 
 #include <vector>
 

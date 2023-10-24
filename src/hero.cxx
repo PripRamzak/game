@@ -1,4 +1,4 @@
-#include "hero.hxx"
+#include "include/hero.hxx"
 
 #include <algorithm>
 #include <cmath>

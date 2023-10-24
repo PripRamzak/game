@@ -1,5 +1,5 @@
-#include "shader_program.hxx"
-#include "memory_buf.hxx"
+#include "include/shader_program.hxx"
+#include "include/memory_buf.hxx"
 
 #include <cassert>
 #include <fstream>

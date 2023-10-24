@@ -1,7 +1,7 @@
 #pragma once
 
-#include "texture.hxx"
-#include "vertex_buffer.hxx"
+#include "engine/include/texture.hxx"
+#include "engine/include/vertex_buffer.hxx"
 
 class interface
 {

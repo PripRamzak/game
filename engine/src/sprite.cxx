@@ -1,4 +1,4 @@
-#include "sprite.hxx"
+#include "include/sprite.hxx"
 
 #include <vector>
 

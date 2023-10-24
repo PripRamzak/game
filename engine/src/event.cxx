@@ -1,5 +1,5 @@
-#include "event.hxx"
-#include "buttons.hxx"
+#include "include/event.hxx"
+#include "include/buttons.hxx"
 
 #include <algorithm>
 #include <array>

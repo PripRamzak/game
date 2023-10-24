@@ -1,10 +1,11 @@
-#include "buttons.hxx"
-#include "camera.hxx"
-#include "enemy.hxx"
-#include "engine.hxx"
-#include "hero.hxx"
-#include "interface.hxx"
-#include "map.hxx"
+#include "engine/include/buttons.hxx"
+#include "engine/include/engine.hxx"
+#include "include/camera.hxx"
+#include "include/enemy.hxx"
+#include "include/hero.hxx"
+#include "include/interface.hxx"
+#include "include/map.hxx"
+#include <include/enemy.hxx>
 
 #include <chrono>
 #include <cstdlib>
@@ -42,8 +43,6 @@ int main(int /*argc*/, char** /*argv*/)
 
     index_buffer* solo_objects_index_buffer = create_index_buffer();
     solo_objects_index_buffer->add_indexes(static_cast<size_t>(4));
-
-    std::vector<vertex_2d> vertices
 
     // Warrior creating
 

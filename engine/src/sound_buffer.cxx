@@ -1,5 +1,5 @@
-#include "sound_buffer.hxx"
-#include "engine.hxx"
+#include "include/sound_buffer.hxx"
+#include "include/engine.hxx"
 
 #include <iostream>
 #include <mutex>

@@ -1,10 +1,10 @@
 #pragma once
 
-#include "enemy.hxx"
-#include "geometry.hxx"
-#include "index_buffer.hxx"
-#include "texture.hxx"
-#include "vertex_buffer.hxx"
+#include "include/enemy.hxx"
+#include "engine/include/geometry.hxx"
+#include "engine/include/index_buffer.hxx"
+#include "engine/include/texture.hxx"
+#include "engine/include/vertex_buffer.hxx"
 
 #include <vector>
 

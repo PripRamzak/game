@@ -1,6 +1,6 @@
-#include "engine.hxx"
-#include "buttons.hxx"
-#include "shader_program.hxx"
+#include "include/engine.hxx"
+#include "include/buttons.hxx"
+#include "include/shader_program.hxx"
 
 #include <algorithm>
 #include <array>

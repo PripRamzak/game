@@ -1,4 +1,4 @@
-#include "vertex_buffer.hxx"
+#include "include/vertex_buffer.hxx"
 
 #ifdef __ANDROID__
 #include <GLES2/gl2.h>

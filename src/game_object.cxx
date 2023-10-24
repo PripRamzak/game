@@ -1,4 +1,4 @@
-#include "game_object.hxx"
+#include "include/game_object.hxx"
 
 game_object::game_object(int               health_,
                          float             speed_,

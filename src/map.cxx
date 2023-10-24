@@ -1,5 +1,5 @@
-#include "map.hxx"
-#include "enemy.hxx"
+#include "include/map.hxx"
+#include "include/enemy.hxx"
 
 #include <algorithm>
 #include <iostream>
