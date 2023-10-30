@@ -1,5 +1,7 @@
 #include "include/vertex_buffer.hxx"
 
+#include <vector>
+
 #ifdef __ANDROID__
 #include <GLES2/gl2.h>
 #else
@@ -10,8 +12,8 @@ void gl_check();
 
 class opengl_vertex_buffer final : public vertex_buffer
 {
-    GLuint VBO  = 0;
-    size_t size = 0;
+    GLuint                 VBO = 0;
+    std::vector<vertex_2d> vertices;
 
 public:
     opengl_vertex_buffer()
@@ -19,19 +21,20 @@ public:
         glGenBuffers(1, &VBO);
         gl_check();
     }
-    void buffer_data(const vertex_2d* vertices, std::size_t quantity) final
+    void add_vertex(const vertex_2d& v) final { vertices.push_back(v); }
+    void buffer_data() final
     {
-        size = quantity;
-
         bind();
 
         GLsizeiptr buffer_size =
-            static_cast<GLsizeiptr>(quantity * sizeof(vertex_2d));
-        glBufferData(GL_ARRAY_BUFFER, buffer_size, vertices, GL_STREAM_DRAW);
+            static_cast<GLsizeiptr>(vertices.size() * sizeof(vertex_2d));
+        glBufferData(
+            GL_ARRAY_BUFFER, buffer_size, vertices.data(), GL_DYNAMIC_DRAW);
         gl_check();
     }
-    size_t get_size() final { return size; }
-    void   bind() final
+    vertex_2d* data() final { return vertices.data(); }
+    size_t     size() final { return vertices.size(); }
+    void       bind() final
     {
         glBindBuffer(GL_ARRAY_BUFFER, VBO);
         gl_check();

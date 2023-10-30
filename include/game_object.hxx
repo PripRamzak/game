@@ -18,7 +18,6 @@ struct hero_sprite_state
 {
     sprite*           game_object_sprite = nullptr;
     game_object_state state;
-    vertex_2d         vertices[4];
     vertex_buffer*    sprite_vertex_buffer = nullptr;
 };
 
@@ -63,7 +62,6 @@ public:
     virtual game_object_state get_state()                         = 0;
     virtual int               get_direction()                     = 0;
     virtual sprite*           get_sprite()                        = 0;
-    virtual vertex_2d*        get_vertices()                      = 0;
     virtual vertex_buffer*    get_vertex_buffer()                 = 0;
     virtual ~game_object();
 };

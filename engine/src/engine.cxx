@@ -199,14 +199,12 @@ public:
 
         std::string_view platform{ SDL_GetPlatform() };
         using namespace std::string_view_literals;
-        auto       os_list = { "Windows"sv, "Mac OS X"sv };
-        const auto it = std::find(os_list.begin(), os_list.end(), platform);
-        int        gl_major_version;
-        int        gl_minor_version;
-        int        gl_profile_mask;
-        if (it != os_list.end())
+        int gl_major_version;
+        int gl_minor_version;
+        int gl_profile_mask;
+        if (platform == "Windows"sv)
         {
-            gl_major_version = (platform == "Windows"sv) ? 2 : 4;
+            gl_major_version = 2;
             gl_minor_version = 1;
             gl_profile_mask  = SDL_GL_CONTEXT_PROFILE_CORE;
         }
@@ -258,17 +256,6 @@ public:
             std::cerr << "Current OpenGL version: " << gl_major_version << '.'
                       << gl_minor_version << std::endl;
             std::cerr << "At least need OpenGL version: 4.3" << std::endl;
-            SDL_GL_DeleteContext(context);
-            SDL_DestroyWindow(window);
-            SDL_Quit();
-            return false;
-        }
-        else if (platform == "Mac OS X"sv && gl_major_version < 4 &&
-                 gl_minor_version < 1)
-        {
-            std::cerr << "Current OpenGL version: " << gl_major_version << '.'
-                      << gl_minor_version << std::endl;
-            std::cerr << "At least need OpenGL version: 4.1" << std::endl;
             SDL_GL_DeleteContext(context);
             SDL_DestroyWindow(window);
             SDL_Quit();
@@ -425,53 +412,52 @@ public:
         mobile_buttons[0].height = 270.f;
         mobile_buttons[0].texture_ =
             create_texture("img/mobile_control_buttons.png");
-        mobile_buttons[0].vertices[0] = { 50.f,
-                                          window_height_pixels -
-                                              mobile_buttons[0].height - 50.f,
-                                          0.f,
-                                          1.f };
-        mobile_buttons[0].vertices[1] = { 50.f + mobile_buttons[0].width,
-                                          window_height_pixels -
-                                              mobile_buttons[0].height - 50.f,
-                                          1.f,
-                                          1.f };
-        mobile_buttons[0].vertices[2] = { 50.f + mobile_buttons[0].width,
-                                          window_height_pixels - 50.f,
-                                          1.f,
-                                          0.f };
-        mobile_buttons[0].vertices[3] = {
-            50.f, window_height_pixels - 50.f, 0.f, 0.f
-        };
         mobile_buttons[0].vertex_buffer_ = create_vertex_buffer();
-        mobile_buttons[0].vertex_buffer_->buffer_data(
-            mobile_buttons[0].vertices, static_cast<size_t>(4));
+        mobile_buttons[0].vertex_buffer_->add_vertex(
+            { 50.f,
+              window_height_pixels - mobile_buttons[0].height - 50.f,
+              0.f,
+              1.f });
+        mobile_buttons[0].vertex_buffer_->add_vertex(
+            { 50.f + mobile_buttons[0].width,
+              window_height_pixels - mobile_buttons[0].height - 50.f,
+              1.f,
+              1.f });
+        mobile_buttons[0].vertex_buffer_->add_vertex(
+            { 50.f + mobile_buttons[0].width,
+              window_height_pixels - 50.f,
+              1.f,
+              0.f });
+        mobile_buttons[0].vertex_buffer_->add_vertex(
+            { 50.f, window_height_pixels - 50.f, 0.f, 0.f });
+        mobile_buttons[0].vertex_buffer_->buffer_data();
 
         mobile_buttons[1].width  = 180.f;
         mobile_buttons[1].height = 180.f;
         mobile_buttons[1].texture_ =
             create_texture("img/mobile_attack_button.png");
-        mobile_buttons[1].vertices[0] = {
-            window_width_pixels - mobile_buttons[1].width - 50.f,
-            window_height_pixels - mobile_buttons[1].height - 100.f,
-            0.f,
-            1.f
-        };
-        mobile_buttons[1].vertices[1] = { window_width_pixels - 50.f,
-                                          window_height_pixels -
-                                              mobile_buttons[1].height - 100.f,
-                                          1.f,
-                                          1.f };
-        mobile_buttons[1].vertices[2] = {
-            window_width_pixels - 50.f, window_height_pixels - 100.f, 1.f, 0.f
-        };
-        mobile_buttons[1].vertices[3]    = { window_width_pixels -
-                                                 mobile_buttons[1].width - 50.f,
-                                             window_height_pixels - 100.f,
-                                             0.f,
-                                             0.f };
         mobile_buttons[1].vertex_buffer_ = create_vertex_buffer();
-        mobile_buttons[1].vertex_buffer_->buffer_data(
-            mobile_buttons[1].vertices, static_cast<size_t>(4));
+        mobile_buttons[1].vertex_buffer_->add_vertex(
+            { window_width_pixels - mobile_buttons[1].width - 50.f,
+              window_height_pixels - mobile_buttons[1].height - 100.f,
+              0.f,
+              1.f });
+        mobile_buttons[1].vertex_buffer_->add_vertex(
+            { window_width_pixels - 50.f,
+              window_height_pixels - mobile_buttons[1].height - 100.f,
+              1.f,
+              1.f });
+        mobile_buttons[1].vertex_buffer_->add_vertex(
+            { window_width_pixels - 50.f,
+              window_height_pixels - 100.f,
+              1.f,
+              0.f });
+        mobile_buttons[1].vertex_buffer_->add_vertex(
+            { window_width_pixels - mobile_buttons[1].width - 50.f,
+              window_height_pixels - 100.f,
+              0.f,
+              0.f });
+        mobile_buttons[1].vertex_buffer_->buffer_data();
 
         buttons_index_buffer = create_index_buffer();
         buttons_index_buffer->add_indexes(static_cast<size_t>(4));

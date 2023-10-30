@@ -97,31 +97,28 @@ class skeleton final : public enemy
             float sprite_width  = game_object_sprite_->get_width();
             float sprite_height = game_object_sprite_->get_height();
 
-            vertex_2d v1 = { local_pos_x - sprite_width / 2.f,
-                             local_pos_y - sprite_height / 2.f,
-                             0.f,
-                             1.f };
-            vertex_2d v2 = { local_pos_x + sprite_width / 2.f,
-                             local_pos_y - sprite_height / 2.f,
-                             1.f,
-                             1.f };
-            vertex_2d v3 = { local_pos_x + sprite_width / 2.f,
-                             local_pos_y + sprite_height / 2.f,
-                             1.f,
-                             0.f };
-            vertex_2d v4 = { local_pos_x - sprite_width / 2.f,
-                             local_pos_y + sprite_height / 2.f,
-                             0.f,
-                             0.f };
-
-            sprite_.vertices[0] = v1;
-            sprite_.vertices[1] = v2;
-            sprite_.vertices[2] = v3;
-            sprite_.vertices[3] = v4;
-
             sprite_.sprite_vertex_buffer = create_vertex_buffer();
-            sprite_.sprite_vertex_buffer->buffer_data(sprite_.vertices,
-                                                      static_cast<size_t>(4));
+            sprite_.sprite_vertex_buffer->add_vertex(
+                { local_pos_x - sprite_width / 2.f,
+                  local_pos_y - sprite_height / 2.f,
+                  0.f,
+                  1.f });
+            sprite_.sprite_vertex_buffer->add_vertex(
+                { local_pos_x + sprite_width / 2.f,
+                  local_pos_y - sprite_height / 2.f,
+                  1.f,
+                  1.f });
+            sprite_.sprite_vertex_buffer->add_vertex(
+                { local_pos_x + sprite_width / 2.f,
+                  local_pos_y + sprite_height / 2.f,
+                  1.f,
+                  0.f });
+            sprite_.sprite_vertex_buffer->add_vertex(
+                { local_pos_x - sprite_width / 2.f,
+                  local_pos_y + sprite_height / 2.f,
+                  0.f,
+                  0.f });
+            sprite_.sprite_vertex_buffer->buffer_data();
 
             sprites.push_back(sprite_);
         }
@@ -357,18 +354,6 @@ public:
 
         if (it != sprites.end())
             return it->game_object_sprite;
-        else
-        {
-            std::cout << "Such sprite doesn't exists" << std::endl;
-            return nullptr;
-        }
-    }
-    vertex_2d* get_vertices() final
-    {
-        auto it = find_sprite(state);
-
-        if (it != sprites.end())
-            return it->vertices;
         else
         {
             std::cout << "Such sprite doesn't exists" << std::endl;

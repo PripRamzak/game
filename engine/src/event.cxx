@@ -3,6 +3,7 @@
 
 #include <algorithm>
 #include <array>
+#include <vector>
 
 #include <SDL3/SDL_events.h>
 
@@ -91,10 +92,13 @@ bool check_pressing_button(SDL_Event             sdl_event,
     float finger_x = sdl_event.tfinger.x * window_width;
     float finger_y = sdl_event.tfinger.y * window_height;
 
-    if (finger_x > buttons_[0].vertices[0].x + buttons_[0].width / 3 &&
-        finger_x < buttons_[0].vertices[0].x + buttons_[0].width / 3 * 2 &&
-        finger_y > buttons_[0].vertices[0].y &&
-        finger_y < buttons_[0].vertices[0].y + buttons_[0].height / 3)
+    vertex_2d movement_buttons_vertex = *buttons_[0].vertex_buffer_->data();
+    vertex_2d attack_button_vertex    = *buttons_[1].vertex_buffer_->data();
+
+    if (finger_x > movement_buttons_vertex.x + buttons_[0].width / 3 &&
+        finger_x < movement_buttons_vertex.x + buttons_[0].width / 3 * 2 &&
+        finger_y > movement_buttons_vertex.y &&
+        finger_y < movement_buttons_vertex.y + buttons_[0].height / 3)
     {
         if (sdl_event.type == SDL_EVENT_FINGER_DOWN)
         {
@@ -108,11 +112,11 @@ bool check_pressing_button(SDL_Event             sdl_event,
         }
         return true;
     }
-    else if (finger_x > buttons_[0].vertices[0].x + buttons_[0].width / 3 &&
-             finger_x < buttons_[0].vertices[0].x + buttons_[0].width / 3 * 2 &&
+    else if (finger_x > movement_buttons_vertex.x + buttons_[0].width / 3 &&
+             finger_x < movement_buttons_vertex.x + buttons_[0].width / 3 * 2 &&
              finger_y >
-                 buttons_[0].vertices[0].y + buttons_[0].height / 3 * 2 &&
-             finger_y < buttons_[0].vertices[0].y + buttons_[0].height)
+                 movement_buttons_vertex.y + buttons_[0].height / 3 * 2 &&
+             finger_y < movement_buttons_vertex.y + buttons_[0].height)
     {
         if (sdl_event.type == SDL_EVENT_FINGER_DOWN)
         {
@@ -126,10 +130,10 @@ bool check_pressing_button(SDL_Event             sdl_event,
         }
         return true;
     }
-    else if (finger_x > buttons_[0].vertices[0].x &&
-             finger_x < buttons_[0].vertices[0].x + buttons_[0].width / 3 &&
-             finger_y > buttons_[0].vertices[0].y + buttons_[0].height / 3 &&
-             finger_y < buttons_[0].vertices[0].y + buttons_[0].height / 3 * 2)
+    else if (finger_x > movement_buttons_vertex.x &&
+             finger_x < movement_buttons_vertex.x + buttons_[0].width / 3 &&
+             finger_y > movement_buttons_vertex.y + buttons_[0].height / 3 &&
+             finger_y < movement_buttons_vertex.y + buttons_[0].height / 3 * 2)
     {
         if (sdl_event.type == SDL_EVENT_FINGER_DOWN)
         {
@@ -143,10 +147,10 @@ bool check_pressing_button(SDL_Event             sdl_event,
         }
         return true;
     }
-    else if (finger_x > buttons_[0].vertices[0].x + buttons_[0].width / 3 &&
-             finger_x < buttons_[0].vertices[0].x + buttons_[0].width &&
-             finger_y > buttons_[0].vertices[0].y + buttons_[0].height / 3 &&
-             finger_y < buttons_[0].vertices[0].y + buttons_[0].height / 3 * 2)
+    else if (finger_x > movement_buttons_vertex.x + buttons_[0].width / 3 &&
+             finger_x < movement_buttons_vertex.x + buttons_[0].width &&
+             finger_y > movement_buttons_vertex.y + buttons_[0].height / 3 &&
+             finger_y < movement_buttons_vertex.y + buttons_[0].height / 3 * 2)
     {
         if (sdl_event.type == SDL_EVENT_FINGER_DOWN)
         {
@@ -161,10 +165,10 @@ bool check_pressing_button(SDL_Event             sdl_event,
         return true;
     }
 
-    if (finger_x > buttons_[1].vertices[0].x &&
-        finger_x < buttons_[1].vertices[0].x + buttons_[1].width &&
-        finger_y > buttons_[1].vertices[0].y &&
-        finger_y < buttons_[1].vertices[0].y + buttons_[1].height)
+    if (finger_x > attack_button_vertex.x &&
+        finger_x < attack_button_vertex.x + buttons_[1].width &&
+        finger_y > attack_button_vertex.y &&
+        finger_y < attack_button_vertex.y + buttons_[1].height)
     {
         if (sdl_event.type == SDL_EVENT_FINGER_DOWN)
         {

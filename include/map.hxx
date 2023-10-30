@@ -1,10 +1,10 @@
 #pragma once
 
-#include "include/enemy.hxx"
 #include "engine/include/geometry.hxx"
 #include "engine/include/index_buffer.hxx"
 #include "engine/include/texture.hxx"
 #include "engine/include/vertex_buffer.hxx"
+#include "include/enemy.hxx"
 
 #include <vector>
 
@@ -25,11 +25,10 @@ enum class map_tile
 
 struct tile
 {
-    texture*               tile_texture;
-    map_tile               type;
-    std::vector<vertex_2d> vertices;
-    vertex_buffer*         tile_vertex_buffer;
-    index_buffer*          tile_index_buffer;
+    texture*       tile_texture;
+    map_tile       type;
+    vertex_buffer* tile_vertex_buffer;
+    index_buffer*  tile_index_buffer;
 };
 
 class map
@@ -48,19 +47,17 @@ public:
                                       map_tile type) = 0;
     virtual void fill_rectangle(
         int start_x, int start_y, int width_, int height_, map_tile type) = 0;
-    virtual void           delete_tiles_horizontal(int      start_x,
+    /*virtual void           delete_tiles_horizontal(int      start_x,
                                                    int      start_y,
                                                    int      length,
                                                    map_tile type)         = 0;
     virtual void           delete_tiles_vertical(int      start_x,
                                                  int      start_y,
                                                  int      length,
-                                                 map_tile type)           = 0;
-    virtual texture*       get_tile(map_tile type)                        = 0;
-    virtual vertex_2d*     get_vertices(map_tile type)                    = 0;
-    virtual size_t         get_vertices_num(map_tile type)                = 0;
-    virtual vertex_buffer* get_vertex_buffer(map_tile type)               = 0;
-    virtual index_buffer*  get_index_buffer(map_tile type)                = 0;
+                                                 map_tile type)           = 0;*/
+    virtual texture*       get_tile(map_tile type)          = 0;
+    virtual vertex_buffer* get_vertex_buffer(map_tile type) = 0;
+    virtual index_buffer*  get_index_buffer(map_tile type)  = 0;
     virtual ~map();
 };
 
