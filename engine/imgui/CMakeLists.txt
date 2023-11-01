@@ -3,6 +3,10 @@ add_library(imgui STATIC
         imgui.h
         imgui_demo.cpp
         imgui_draw.cpp
+        imgui_impl_opengl3.cpp
+        imgui_impl_opengl3.h
+        imgui_impl_sdl3.cpp
+        imgui_impl_sdl3.h
         imgui_tables.cpp
         imgui_widgets.cpp
         imconfig.h
