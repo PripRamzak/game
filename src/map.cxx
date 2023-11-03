@@ -89,29 +89,26 @@ public:
 
         if (it != tiles.end())
         {
-            for (int i = start_y - 1; i < start_y + length - 1; i++)
-            {
-                it->tile_vertex_buffer->add_vertex(
-                    { (static_cast<float>(start_x) - 1.f) * tile_width,
-                      static_cast<float>(i) * tile_height,
-                      0.f,
-                      1.f });
-                it->tile_vertex_buffer->add_vertex(
-                    { static_cast<float>(start_x) * tile_width,
-                      static_cast<float>(i) * tile_height,
-                      1.f,
-                      1.f });
-                it->tile_vertex_buffer->add_vertex(
-                    { static_cast<float>(start_x) * tile_width,
-                      (static_cast<float>(i) + 1.f) * tile_height,
-                      1.f,
-                      0.f });
-                it->tile_vertex_buffer->add_vertex(
-                    { (static_cast<float>(start_x) - 1.f) * tile_width,
-                      (static_cast<float>(i) + 1.f) * tile_height,
-                      0.f,
-                      0.f });
-            }
+            it->tile_vertex_buffer->add_vertex(
+                { static_cast<float>(start_x - 1) * tile_width,
+                  static_cast<float>(start_y - 1) * tile_height,
+                  0.f,
+                  static_cast<float>(length) });
+            it->tile_vertex_buffer->add_vertex(
+                { static_cast<float>(start_x) * tile_width,
+                  static_cast<float>(start_y - 1) * tile_height,
+                  1.f,
+                  static_cast<float>(length) });
+            it->tile_vertex_buffer->add_vertex(
+                { static_cast<float>(start_x) * tile_width,
+                  static_cast<float>(start_y + length - 1) * tile_height,
+                  1.f,
+                  0.f });
+            it->tile_vertex_buffer->add_vertex(
+                { static_cast<float>(start_x - 1) * tile_width,
+                  static_cast<float>(start_y + length - 1) * tile_height,
+                  0.f,
+                  0.f });
             it->tile_vertex_buffer->buffer_data();
             it->tile_index_buffer->add_indexes(static_cast<size_t>(length * 4));
         }
@@ -125,29 +122,27 @@ public:
 
         if (it != tiles.end())
         {
-            for (int i = start_x - 1; i < start_x + length - 1; i++)
-            {
-                it->tile_vertex_buffer->add_vertex(
-                    { static_cast<float>(i) * tile_width,
-                      (static_cast<float>(start_y) - 1.f) * tile_height,
-                      0.f,
-                      1.f });
-                it->tile_vertex_buffer->add_vertex(
-                    { (static_cast<float>(i) + 1.f) * tile_width,
-                      (static_cast<float>(start_y) - 1.f) * tile_height,
-                      1.f,
-                      1.f });
-                it->tile_vertex_buffer->add_vertex(
-                    { (static_cast<float>(i) + 1.f) * tile_width,
-                      static_cast<float>(start_y) * tile_height,
-                      1.f,
-                      0.f });
-                it->tile_vertex_buffer->add_vertex(
-                    { static_cast<float>(i) * tile_width,
-                      static_cast<float>(start_y) * tile_height,
-                      0.f,
-                      0.f });
-            }
+            it->tile_vertex_buffer->add_vertex(
+                { static_cast<float>(start_x - 1) * tile_width,
+                  static_cast<float>(start_y - 1) * tile_height,
+                  0.f,
+                  1.f });
+            it->tile_vertex_buffer->add_vertex(
+                { static_cast<float>(start_x + length - 1) * tile_width,
+                  static_cast<float>(start_y - 1) * tile_height,
+                  static_cast<float>(length),
+                  1.f });
+            it->tile_vertex_buffer->add_vertex(
+                { static_cast<float>(start_x + length - 1) * tile_width,
+                  static_cast<float>(start_y) * tile_height,
+                  static_cast<float>(length),
+                  0.f });
+            it->tile_vertex_buffer->add_vertex(
+                { static_cast<float>(start_x - 1) * tile_width,
+                  static_cast<float>(start_y) * tile_height,
+                  0.f,
+                  0.f });
+
             it->tile_vertex_buffer->buffer_data();
             it->tile_index_buffer->add_indexes(static_cast<size_t>(length * 4));
         }
@@ -159,30 +154,27 @@ public:
 
         if (it != tiles.end())
         {
-            for (int i = start_y - 1; i < start_y + height_ - 1; i++)
-                for (int j = start_x - 1; j < start_x + width_ - 1; j++)
-                {
-                    it->tile_vertex_buffer->add_vertex(
-                        { static_cast<float>(j) * tile_width,
-                          static_cast<float>(i) * tile_height,
-                          0.f,
-                          1.f });
-                    it->tile_vertex_buffer->add_vertex(
-                        { (static_cast<float>(j) + 1.f) * tile_width,
-                          static_cast<float>(i) * tile_height,
-                          1.f,
-                          1.f });
-                    it->tile_vertex_buffer->add_vertex(
-                        { (static_cast<float>(j) + 1.f) * tile_width,
-                          (static_cast<float>(i) + 1.f) * tile_height,
-                          1.f,
-                          0.f });
-                    it->tile_vertex_buffer->add_vertex(
-                        { static_cast<float>(j) * tile_width,
-                          (static_cast<float>(i) + 1.f) * tile_height,
-                          0.f,
-                          0.f });
-                }
+            it->tile_vertex_buffer->add_vertex(
+                { static_cast<float>(start_x - 1) * tile_width,
+                  static_cast<float>(start_y + height_ - 1) * tile_height,
+                  0.f,
+                  static_cast<float>(height_) });
+            it->tile_vertex_buffer->add_vertex(
+                { static_cast<float>(start_x + width_ - 1) * tile_width,
+                  static_cast<float>(start_y + height_ - 1) * tile_height,
+                  static_cast<float>(width_),
+                  static_cast<float>(height_) });
+            it->tile_vertex_buffer->add_vertex(
+                { static_cast<float>(start_x + width_ - 1) * tile_width,
+                  static_cast<float>(start_y - 1) * tile_height,
+                  static_cast<float>(width_),
+                  0.f });
+            it->tile_vertex_buffer->add_vertex(
+                { static_cast<float>(start_x - 1) * tile_width,
+                  static_cast<float>(start_y - 1) * tile_height,
+                  0.f,
+                  0.f });
+
             it->tile_vertex_buffer->buffer_data();
             it->tile_index_buffer->add_indexes(
                 static_cast<size_t>(width_ * height_ * 4));
