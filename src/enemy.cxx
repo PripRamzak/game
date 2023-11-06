@@ -19,20 +19,11 @@ static sprite* skeleton_spearman_attack = nullptr;
 
 enemy::enemy(int               health,
              float             speed,
-             float             local_pos_x,
-             float             local_pos_y,
              float             global_pos_x,
              float             global_pos_y,
              float             size,
              game_object_state state)
-    : game_object(health,
-                  speed,
-                  local_pos_x,
-                  local_pos_y,
-                  global_pos_x,
-                  global_pos_y,
-                  size,
-                  state)
+    : game_object(health, speed, global_pos_x, global_pos_y, size, state)
 {
 }
 
@@ -94,32 +85,6 @@ class skeleton final : public enemy
             sprite_.game_object_sprite = game_object_sprite_;
             sprite_.state              = state_;
 
-            float sprite_width  = game_object_sprite_->get_width();
-            float sprite_height = game_object_sprite_->get_height();
-
-            sprite_.sprite_vertex_buffer = create_vertex_buffer();
-            sprite_.sprite_vertex_buffer->add_vertex(
-                { local_pos_x - sprite_width / 2.f,
-                  local_pos_y - sprite_height / 2.f,
-                  0.f,
-                  1.f });
-            sprite_.sprite_vertex_buffer->add_vertex(
-                { local_pos_x + sprite_width / 2.f,
-                  local_pos_y - sprite_height / 2.f,
-                  1.f,
-                  1.f });
-            sprite_.sprite_vertex_buffer->add_vertex(
-                { local_pos_x + sprite_width / 2.f,
-                  local_pos_y + sprite_height / 2.f,
-                  1.f,
-                  0.f });
-            sprite_.sprite_vertex_buffer->add_vertex(
-                { local_pos_x - sprite_width / 2.f,
-                  local_pos_y + sprite_height / 2.f,
-                  0.f,
-                  0.f });
-            sprite_.sprite_vertex_buffer->buffer_data();
-
             sprites.push_back(sprite_);
         }
     }
@@ -127,21 +92,12 @@ class skeleton final : public enemy
 public:
     skeleton(int               health,
              float             speed,
-             float             local_pos_x,
-             float             local_pos_y,
              float             global_pos_x,
              float             global_pos_y,
              float             size,
              game_object_state state,
              enemy_type        type)
-        : enemy(health,
-                speed,
-                local_pos_x,
-                local_pos_y,
-                global_pos_x,
-                global_pos_y,
-                size,
-                state)
+        : enemy(health, speed, global_pos_x, global_pos_y, size, state)
     {
         if (type == enemy_type::warrior)
         {
@@ -322,8 +278,8 @@ public:
 
         return false;
     }
-    float get_move_x() { return global_pos_x - local_pos_x + delta_x; }
-    float get_move_y() { return global_pos_y - local_pos_y + delta_y; }
+    float get_move_x() { return global_pos_x + delta_x; }
+    float get_move_y() { return global_pos_y + delta_y; }
     void  set_state(game_object_state state_) final
     {
         if (state != state_)
@@ -360,39 +316,18 @@ public:
             return nullptr;
         }
     }
-    vertex_buffer* get_vertex_buffer() final
-    {
-        auto it = find_sprite(state);
-
-        if (it != sprites.end())
-            return it->sprite_vertex_buffer;
-        else
-        {
-            std::cout << "Such sprite doesn't exists" << std::endl;
-            return nullptr;
-        }
-    }
 };
 
 enemy::~enemy() = default;
 
 enemy* create_enemy(int               health,
                     float             speed,
-                    float             local_pos_x,
-                    float             local_pos_y,
                     float             global_pos_x,
                     float             global_pos_y,
                     float             size,
                     game_object_state state,
                     enemy_type        type)
 {
-    return new skeleton(health,
-                        speed,
-                        local_pos_x,
-                        local_pos_y,
-                        global_pos_x,
-                        global_pos_y,
-                        size,
-                        state,
-                        type);
+    return new skeleton(
+        health, speed, global_pos_x, global_pos_y, size, state, type);
 }

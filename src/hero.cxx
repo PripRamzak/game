@@ -13,20 +13,11 @@ static sprite*  warrior_attack              = nullptr;
 
 hero::hero(int               health,
            float             speed,
-           float             local_pos_x,
-           float             local_pos_y,
            float             global_pos_x,
            float             global_pos_y,
            float             size,
            game_object_state state)
-    : game_object(health,
-                  speed,
-                  local_pos_x,
-                  local_pos_y,
-                  global_pos_x,
-                  global_pos_y,
-                  size,
-                  state)
+    : game_object(health, speed, global_pos_x, global_pos_y, size, state)
 {
 }
 
@@ -71,32 +62,6 @@ class warrior : public hero
             sprite_.game_object_sprite = game_object_sprite_;
             sprite_.state              = state_;
 
-            float sprite_width  = game_object_sprite_->get_width();
-            float sprite_height = game_object_sprite_->get_height();
-
-            sprite_.sprite_vertex_buffer = create_vertex_buffer();
-            sprite_.sprite_vertex_buffer->add_vertex(
-                { local_pos_x - sprite_width / 2.f,
-                  local_pos_y - sprite_height / 2.f,
-                  0.f,
-                  1.f });
-            sprite_.sprite_vertex_buffer->add_vertex(
-                { local_pos_x + sprite_width / 2.f,
-                  local_pos_y - sprite_height / 2.f,
-                  1.f,
-                  1.f });
-            sprite_.sprite_vertex_buffer->add_vertex(
-                { local_pos_x + sprite_width / 2.f,
-                  local_pos_y + sprite_height / 2.f,
-                  1.f,
-                  0.f });
-            sprite_.sprite_vertex_buffer->add_vertex(
-                { local_pos_x - sprite_width / 2.f,
-                  local_pos_y + sprite_height / 2.f,
-                  0.f,
-                  0.f });
-            sprite_.sprite_vertex_buffer->buffer_data();
-
             sprites.push_back(sprite_);
         }
     }
@@ -104,20 +69,11 @@ class warrior : public hero
 public:
     warrior(int               health,
             float             speed,
-            float             local_pos_x,
-            float             local_pos_y,
             float             global_pos_x,
             float             global_pos_y,
             float             size,
             game_object_state state)
-        : hero(health,
-               speed,
-               local_pos_x,
-               local_pos_y,
-               global_pos_x,
-               global_pos_y,
-               size,
-               state)
+        : hero(health, speed, global_pos_x, global_pos_y, size, state)
     {
         alive = true;
         add_sprite(warrior_idle, game_object_state::idle);
@@ -276,37 +232,16 @@ public:
             return nullptr;
         }
     }
-    vertex_buffer* get_vertex_buffer() final
-    {
-        auto it = find_sprite(state);
-
-        if (it != sprites.end())
-            return it->sprite_vertex_buffer;
-        else
-        {
-            std::cout << "Such sprite doesn't exists" << std::endl;
-            return nullptr;
-        }
-    }
 };
 
 hero::~hero() = default;
 
 hero* create_hero(int               health,
                   float             speed,
-                  float             local_pos_x,
-                  float             local_pos_y,
                   float             global_pos_x,
                   float             global_pos_y,
                   float             size,
                   game_object_state state)
 {
-    return new warrior(health,
-                       speed,
-                       local_pos_x,
-                       local_pos_y,
-                       global_pos_x,
-                       global_pos_y,
-                       size,
-                       state);
+    return new warrior(health, speed, global_pos_x, global_pos_y, size, state);
 }

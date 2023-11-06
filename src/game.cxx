@@ -30,16 +30,10 @@ int main(int /*argc*/, char** /*argv*/)
     float window_height =
         static_cast<float>(engine->get_window_height_pixels());
 
-    /*glm::mat4 projection =
-        glm::ortho<float>(0.f, window_width, window_height, 0.f, -1.f, 1.f);*/
+    glm::mat4 projection =
+        glm::ortho<float>(0.f, window_width, window_height, 0.f, -1.f, 1.f);
 
-    glm::mat4 to_ndc_coordinates{ 1 };
-    to_ndc_coordinates[0].x = 2.f / window_width;
-    to_ndc_coordinates[1].y = -2.f / window_height;
-    to_ndc_coordinates[3].x = -1.f;
-    to_ndc_coordinates[3].y = 1.f;
-
-    camera* camera = create_camera(window_width, window_height);
+    camera* camera = create_camera(window_width / 2, window_height / 2);
 
     index_buffer* solo_objects_index_buffer = create_index_buffer();
     solo_objects_index_buffer->add_indexes(static_cast<size_t>(4));
@@ -47,14 +41,8 @@ int main(int /*argc*/, char** /*argv*/)
     // Warrior creating
 
     hero::initialize();
-    hero* warrior = create_hero(4,
-                                10.f,
-                                window_width / 2.f,
-                                window_height / 2.f,
-                                300.f,
-                                300.f,
-                                2.f,
-                                game_object_state::idle);
+    hero* warrior =
+        create_hero(4, 10.f, 300.f, 300.f, 2.f, game_object_state::idle);
 
     glm::mat4 warrior_mat_size =
         glm::scale(glm::mat4{ 1 },
@@ -190,75 +178,78 @@ int main(int /*argc*/, char** /*argv*/)
 
             // Map render
 
-            glm::mat4 map_mat_result = mat_view * to_ndc_coordinates;
+            glm::mat4 map_mat_result = projection * mat_view;
 
-            engine->render(dungeon_map->get_vertex_buffer(map_tile::floor),
+            engine->render(dungeon_map->get_tile(map_tile::floor),
+                           dungeon_map->get_vertex_buffer(map_tile::floor),
                            dungeon_map->get_index_buffer(map_tile::floor),
-                           dungeon_map->get_tile(map_tile::floor),
                            &map_mat_result[0][0]);
 
-            engine->render(dungeon_map->get_vertex_buffer(map_tile::wall),
+            engine->render(dungeon_map->get_tile(map_tile::wall),
+                           dungeon_map->get_vertex_buffer(map_tile::wall),
                            dungeon_map->get_index_buffer(map_tile::wall),
-                           dungeon_map->get_tile(map_tile::wall),
                            &map_mat_result[0][0]);
 
-            engine->render(dungeon_map->get_vertex_buffer(map_tile::wall_top),
+            engine->render(dungeon_map->get_tile(map_tile::wall_top),
+                           dungeon_map->get_vertex_buffer(map_tile::wall_top),
                            dungeon_map->get_index_buffer(map_tile::wall_top),
-                           dungeon_map->get_tile(map_tile::wall_top),
                            &map_mat_result[0][0]);
 
             engine->render(
+                dungeon_map->get_tile(map_tile::wall_bottom),
                 dungeon_map->get_vertex_buffer(map_tile::wall_bottom),
                 dungeon_map->get_index_buffer(map_tile::wall_bottom),
-                dungeon_map->get_tile(map_tile::wall_bottom),
                 &map_mat_result[0][0]);
 
-            engine->render(dungeon_map->get_vertex_buffer(map_tile::wall_left),
+            engine->render(dungeon_map->get_tile(map_tile::wall_left),
+                           dungeon_map->get_vertex_buffer(map_tile::wall_left),
                            dungeon_map->get_index_buffer(map_tile::wall_left),
-                           dungeon_map->get_tile(map_tile::wall_left),
                            &map_mat_result[0][0]);
 
-            engine->render(dungeon_map->get_vertex_buffer(map_tile::wall_right),
+            engine->render(dungeon_map->get_tile(map_tile::wall_right),
+                           dungeon_map->get_vertex_buffer(map_tile::wall_right),
                            dungeon_map->get_index_buffer(map_tile::wall_right),
-                           dungeon_map->get_tile(map_tile::wall_right),
                            &map_mat_result[0][0]);
 
             engine->render(
+                dungeon_map->get_tile(map_tile::wall_corner_top_left),
                 dungeon_map->get_vertex_buffer(map_tile::wall_corner_top_left),
                 dungeon_map->get_index_buffer(map_tile::wall_corner_top_left),
-                dungeon_map->get_tile(map_tile::wall_corner_top_left),
                 &map_mat_result[0][0]);
 
             engine->render(
+                dungeon_map->get_tile(map_tile::wall_corner_top_right),
                 dungeon_map->get_vertex_buffer(map_tile::wall_corner_top_right),
                 dungeon_map->get_index_buffer(map_tile::wall_corner_top_right),
-                dungeon_map->get_tile(map_tile::wall_corner_top_right),
                 &map_mat_result[0][0]);
 
             engine->render(
-                dungeon_map->get_vertex_buffer(
-                    map_tile::wall_corner_bottom_left),
-                dungeon_map->get_index_buffer(
-                    map_tile::wall_corner_bottom_left),
                 dungeon_map->get_tile(map_tile::wall_corner_bottom_left),
+                dungeon_map->get_vertex_buffer(
+                    map_tile::wall_corner_bottom_left),
+                dungeon_map->get_index_buffer(
+                    map_tile::wall_corner_bottom_left),
                 &map_mat_result[0][0]);
 
             engine->render(
+                dungeon_map->get_tile(map_tile::wall_corner_bottom_right),
                 dungeon_map->get_vertex_buffer(
                     map_tile::wall_corner_bottom_right),
                 dungeon_map->get_index_buffer(
                     map_tile::wall_corner_bottom_right),
-                dungeon_map->get_tile(map_tile::wall_corner_bottom_right),
                 &map_mat_result[0][0]);
 
             // Objects render
 
-            glm::mat4 warrior_mat_result =
-                warrior_mat_size * to_ndc_coordinates;
+            glm::mat4 war_mat_move{ 1 };
+            war_mat_move[3].x = warrior->get_current_pos_x();
+            war_mat_move[3].y = warrior->get_current_pos_y();
 
-            engine->render(warrior->get_vertex_buffer(),
+            glm::mat4 warrior_mat_result =
+                projection * mat_view * war_mat_move * warrior_mat_size;
+
+            engine->render(warrior->get_sprite(),
                            solo_objects_index_buffer,
-                           warrior->get_sprite(),
                            warrior->get_direction(),
                            &warrior_mat_result[0][0]);
 
@@ -386,10 +377,10 @@ int main(int /*argc*/, char** /*argv*/)
             }
 
             for (auto heart : health)
-                engine->render(heart->get_vertex_buffer(),
+                engine->render(heart->get_texture(),
+                               heart->get_vertex_buffer(),
                                solo_objects_index_buffer,
-                               heart->get_texture(),
-                               &to_ndc_coordinates[0][0]);
+                               &projection[0][0]);
 
             if (!show_in_game_menu_window)
             {

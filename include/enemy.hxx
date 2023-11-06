@@ -16,8 +16,6 @@ class enemy : public game_object
 public:
     enemy(int               health,
           float             speed,
-          float             local_pos_x,
-          float             local_pos_y,
           float             global_pos_x,
           float             global_pos_y,
           float             size,
@@ -44,14 +42,11 @@ public:
     virtual game_object_state get_state()                               = 0;
     virtual int               get_direction()                           = 0;
     virtual sprite*           get_sprite()                              = 0;
-    virtual vertex_buffer*    get_vertex_buffer()                       = 0;
     virtual ~enemy();
 };
 
 enemy* create_enemy(int               health,
                     float             speed,
-                    float             local_pos_x,
-                    float             local_pos_y,
                     float             global_pos_x,
                     float             global_pos_y,
                     float             size,

@@ -20,20 +20,8 @@ public:
     }
     void look_at(float pos_x, float pos_y) final
     {
-        if (pos_x <= width / 2)
-            pos_x = -1 * (width / 2 - pos_x);
-        else
-            pos_x -= width / 2;
-        if (pos_y >= height / 2)
-            pos_y = -1 * (pos_y - height / 2);
-        else
-            pos_y = height / 2 - pos_y;
-
-        pos_x = pos_x * 2.f / width;
-        pos_y = pos_y * 2.f / height;
-
-        position = glm::vec3(pos_x, pos_y, 2.f);
-        target   = glm::vec3(pos_x, pos_y, 0.f);
+        position = glm::vec3(pos_x - width, pos_y - height, 2.f);
+        target   = glm::vec3(pos_x - width, pos_y - height, 0.f);
         view     = glm::lookAt(position, target, up);
     }
     float* get_view() final { return &view[0][0]; }

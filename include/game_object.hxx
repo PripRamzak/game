@@ -18,7 +18,6 @@ struct hero_sprite_state
 {
     sprite*           game_object_sprite = nullptr;
     game_object_state state;
-    vertex_buffer*    sprite_vertex_buffer = nullptr;
 };
 
 class game_object
@@ -28,8 +27,6 @@ protected:
     bool                           alive        = false;
     int                            health       = 0;
     float                          speed        = 0.f;
-    float                          local_pos_x  = 0.f;
-    float                          local_pos_y  = 0.f;
     float                          global_pos_x = 0.f;
     float                          global_pos_y = 0.f;
     float                          delta_x      = 0.f;
@@ -41,8 +38,6 @@ protected:
 public:
     game_object(int               health_,
                 float             speed_,
-                float             local_pos_x_,
-                float             local_pos_y_,
                 float             global_pos_x,
                 float             global_pos_y,
                 float             size_,
@@ -62,6 +57,5 @@ public:
     virtual game_object_state get_state()                         = 0;
     virtual int               get_direction()                     = 0;
     virtual sprite*           get_sprite()                        = 0;
-    virtual vertex_buffer*    get_vertex_buffer()                 = 0;
     virtual ~game_object();
 };

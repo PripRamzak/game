@@ -4,13 +4,14 @@
 
 class game_sprite final : public sprite
 {
-    texture* textures;
-    float    width          = 0.f;
-    float    height         = 0.f;
-    int      quantity       = 0;
-    int      current_number = 0;
-    float    start_position = 0.f;
-    float    animation_time = 0.f;
+    texture*       textures       = nullptr;
+    vertex_buffer* vb             = nullptr;
+    float          width          = 0.f;
+    float          height         = 0.f;
+    int            quantity       = 0;
+    int            current_number = 0;
+    float          start_position = 0.f;
+    float          animation_time = 0.f;
 
 public:
     game_sprite(texture* textures_,
@@ -27,6 +28,14 @@ public:
     {
         start_position =
             start_position_ / static_cast<float>(textures->get_width());
+
+        vb = create_vertex_buffer();
+
+        vb->add_vertex({ -(width / 2), -(height / 2), 0.f, 1.f });
+        vb->add_vertex({ width / 2, -(height / 2), 1.f, 1.f });
+        vb->add_vertex({ width / 2, height / 2, 1.f, 0.f });
+        vb->add_vertex({ -(width / 2), height / 2, 0.f, 0.f });
+        vb->buffer_data();
     }
     void next_sprite() final
     {
@@ -44,9 +53,10 @@ public:
             return quantity - current_number - 1;
         return current_number;
     }
-    float    get_start_position() final { return start_position; }
-    float    get_animation_time() final { return animation_time; }
-    texture* get_texture() final { return textures; }
+    float          get_start_position() final { return start_position; }
+    float          get_animation_time() final { return animation_time; }
+    texture*       get_texture() final { return textures; }
+    vertex_buffer* get_vertex_buffer() final { return vb; }
 };
 
 sprite::~sprite() = default;

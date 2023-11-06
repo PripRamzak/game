@@ -498,11 +498,10 @@ public:
         sound_buffer->unlock_thread();
         return sound_buffer;
     }
-    void render(vertex_buffer* vertex_buffer,
-                index_buffer*  index_buffer,
-                sprite*        sprite,
-                int            direction,
-                float*         matrix_first_value) final
+    void render(sprite*       sprite,
+                index_buffer* index_buffer,
+                int           direction,
+                float*        matrix) final
     {
         hero_program->use();
         hero_program->set_uniform_1f(
@@ -518,13 +517,12 @@ public:
                 static_cast<float>(sprite->get_texture()->get_width()));
         hero_program->set_uniform_1i("direction", direction);
         hero_program->set_uniform_1i("texture", 0);
-        hero_program->set_uniform_matrix4fv(
-            "matrix", 1, GL_FALSE, matrix_first_value);
+        hero_program->set_uniform_matrix4fv("matrix", 1, GL_FALSE, matrix);
 
         sprite->get_texture()->active(0);
         sprite->get_texture()->bind();
 
-        vertex_buffer->bind();
+        sprite->get_vertex_buffer()->bind();
         index_buffer->bind();
 
         glVertexAttribPointer(0,
@@ -551,9 +549,9 @@ public:
             GL_TRIANGLES, index_buffer->get_size(), GL_UNSIGNED_SHORT, 0);
         gl_check();
     }
-    void render(vertex_buffer* vertex_buffer,
+    void render(texture*       texture,
+                vertex_buffer* vertex_buffer,
                 index_buffer*  index_buffer,
-                texture*       texture,
                 float*         matrix_first_value) final
     {
         map_program->use();
@@ -591,13 +589,13 @@ public:
             GL_TRIANGLES, index_buffer->get_size(), GL_UNSIGNED_SHORT, 0);
         gl_check();
     }
-    void render_buttons(float* matrix_first_value) final
+    void render_buttons(float* matrix) final
     {
         for (auto button : mobile_buttons)
-            render(button.vertex_buffer_,
+            render(button.texture_,
+                   button.vertex_buffer_,
                    buttons_index_buffer,
-                   button.texture_,
-                   matrix_first_value);
+                   matrix);
     }
     bool render_gui(bool& show_menu_window, gui_type type) final
     {
