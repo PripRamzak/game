@@ -42,7 +42,7 @@ int main(int /*argc*/, char** /*argv*/)
 
     hero::initialize();
     hero* warrior =
-        create_hero(4, 10.f, 300.f, 300.f, 2.f, game_object_state::idle);
+        new hero(4, 10.f, 300.f, 300.f, 2.f, game_object_state::idle);
 
     glm::mat4 warrior_mat_size =
         glm::scale(glm::mat4{ 1 },
@@ -56,7 +56,7 @@ int main(int /*argc*/, char** /*argv*/)
     // Map creating
 
     map::initialize();
-    map* dungeon_map = create_map(64.f, 64.f);
+    map* dungeon_map = new map(64.f, 64.f);
     generate_level_1(dungeon_map, enemies, window_width, window_height);
 
     // Interface

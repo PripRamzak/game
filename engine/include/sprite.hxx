@@ -7,22 +7,31 @@
 class sprite
 {
 public:
-    virtual void           next_sprite()                     = 0;
-    virtual void           reset()                           = 0;
-    virtual float          get_width()                       = 0;
-    virtual float          get_height()                      = 0;
-    virtual int            get_quantity()                    = 0;
-    virtual int            get_current_number(int direction) = 0;
-    virtual float          get_start_position()              = 0;
-    virtual float          get_animation_time()              = 0;
-    virtual texture*       get_texture()                     = 0;
-    virtual vertex_buffer* get_vertex_buffer()               = 0;
-    virtual ~sprite();
-};
+    sprite(texture* textures_,
+           float    width_,
+           float    height_,
+           int      quantity_,
+           float    start_position_,
+           float    animation_time_);
+    void           next_sprite();
+    void           reset();
+    float          get_width();
+    float          get_height();
+    int            get_quantity();
+    int            get_current_number(int direction);
+    float          get_start_position();
+    float          get_animation_time();
+    texture*       get_texture();
+    vertex_buffer* get_vertex_buffer();
+    ~sprite();
 
-sprite* create_sprite(texture* textures,
-                      float    width,
-                      float    height,
-                      int      quantity,
-                      float    start_position,
-                      float    animation_time);
+private:
+    texture*       textures       = nullptr;
+    vertex_buffer* vb             = nullptr;
+    float          width          = 0.f;
+    float          height         = 0.f;
+    int            quantity       = 0;
+    int            current_number = 0;
+    float          start_position = 0.f;
+    float          animation_time = 0.f;
+};

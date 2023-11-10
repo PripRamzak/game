@@ -33,20 +33,19 @@ struct tile
 
 class map
 {
-    virtual void add_tile(texture* tile_texture, map_tile type) = 0;
-
 public:
-    static void  initialize();
-    virtual void draw_vertical_line(int      start_x,
-                                    int      start_y,
-                                    int      length,
-                                    map_tile type)   = 0;
-    virtual void draw_horizontal_line(int      start_x,
-                                      int      start_y,
-                                      int      length,
-                                      map_tile type) = 0;
-    virtual void fill_rectangle(
-        int start_x, int start_y, int width_, int height_, map_tile type) = 0;
+    map(float tile_width_, float tile_height_);
+    static void initialize();
+    void        draw_vertical_line(int      start_x,
+                                   int      start_y,
+                                   int      length,
+                                   map_tile type);
+    void        draw_horizontal_line(int      start_x,
+                                     int      start_y,
+                                     int      length,
+                                     map_tile type);
+    void        fill_rectangle(
+               int start_x, int start_y, int width_, int height_, map_tile type);
     /*virtual void           delete_tiles_horizontal(int      start_x,
                                                    int      start_y,
                                                    int      length,
@@ -55,13 +54,19 @@ public:
                                                  int      start_y,
                                                  int      length,
                                                  map_tile type)           = 0;*/
-    virtual texture*       get_tile(map_tile type)          = 0;
-    virtual vertex_buffer* get_vertex_buffer(map_tile type) = 0;
-    virtual index_buffer*  get_index_buffer(map_tile type)  = 0;
-    virtual ~map();
-};
+    texture*       get_tile(map_tile type);
+    vertex_buffer* get_vertex_buffer(map_tile type);
+    index_buffer*  get_index_buffer(map_tile type);
+    ~map();
 
-map* create_map(float tile_width, float tile_height);
+private:
+    void add_tile(texture* tile_texture, map_tile type);
+    auto find_tile(map_tile type) -> std::vector<tile>::iterator;
+
+    std::vector<tile> tiles;
+    float             tile_width  = 0;
+    float             tile_height = 0;
+};
 
 void generate_level_1(map*                 map,
                       std::vector<enemy*>& enemies,

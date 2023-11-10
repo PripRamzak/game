@@ -32,261 +32,264 @@ void map::initialize()
         create_texture("img/wall_corner_bottom_right.png");
 }
 
-class game_map final : public map
+map::map(float tile_width_, float tile_height_)
+    : tile_width(tile_width_)
+    , tile_height(tile_height_)
 {
-    float             tile_width  = 0;
-    float             tile_height = 0;
-    std::vector<tile> tiles;
+    add_tile(floor_, map_tile::floor);
+    add_tile(wall, map_tile::wall);
+    add_tile(wall_top, map_tile::wall_top);
+    add_tile(wall_left, map_tile::wall_left);
+    add_tile(wall_right, map_tile::wall_right);
+    add_tile(wall_bottom, map_tile::wall_bottom);
+    add_tile(wall_top_corner_left, map_tile::wall_corner_top_left);
+    add_tile(wall_top_corner_right, map_tile::wall_corner_top_right);
+    add_tile(wall_bottom_corner_left, map_tile::wall_corner_bottom_left);
+    add_tile(wall_bottom_corner_right, map_tile::wall_corner_bottom_right);
+}
 
-    auto find_tile(map_tile type)
+void map::draw_vertical_line(int      start_x,
+                             int      start_y,
+                             int      length,
+                             map_tile type)
+{
+    auto it = find_tile(type);
+
+    if (it != tiles.end())
     {
-        return std::find_if(tiles.begin(),
-                            tiles.end(),
-                            [&](const tile tile) { return tile.type == type; });
+        it->tile_vertex_buffer->add_vertex(
+            { static_cast<float>(start_x - 1) * tile_width,
+              static_cast<float>(start_y - 1) * tile_height,
+              0.f,
+              static_cast<float>(length) });
+        it->tile_vertex_buffer->add_vertex(
+            { static_cast<float>(start_x) * tile_width,
+              static_cast<float>(start_y - 1) * tile_height,
+              1.f,
+              static_cast<float>(length) });
+        it->tile_vertex_buffer->add_vertex(
+            { static_cast<float>(start_x) * tile_width,
+              static_cast<float>(start_y + length - 1) * tile_height,
+              1.f,
+              0.f });
+        it->tile_vertex_buffer->add_vertex(
+            { static_cast<float>(start_x - 1) * tile_width,
+              static_cast<float>(start_y + length - 1) * tile_height,
+              0.f,
+              0.f });
+        it->tile_vertex_buffer->buffer_data();
+        it->tile_index_buffer->add_indexes(static_cast<size_t>(length * 4));
     }
-    void add_tile(texture* tile_texture, map_tile type) final
-    {
-        auto it = find_tile(type);
+}
 
-        if (it != tiles.end())
-        {
-            std::cout << "This tile already exists" << std::endl;
-            return;
-        }
-        else
-        {
-            tile tile;
-            tile.type         = type;
-            tile.tile_texture = tile_texture;
-            tiles.push_back(tile);
-            tiles[tiles.size() - 1].tile_vertex_buffer = create_vertex_buffer();
-            tiles[tiles.size() - 1].tile_index_buffer  = create_index_buffer();
-        }
-    }
-
-public:
-    game_map(float tile_width_, float tile_height_)
-        : tile_width(tile_width_)
-        , tile_height(tile_height_)
-    {
-        add_tile(floor_, map_tile::floor);
-        add_tile(wall, map_tile::wall);
-        add_tile(wall_top, map_tile::wall_top);
-        add_tile(wall_left, map_tile::wall_left);
-        add_tile(wall_right, map_tile::wall_right);
-        add_tile(wall_bottom, map_tile::wall_bottom);
-        add_tile(wall_top_corner_left, map_tile::wall_corner_top_left);
-        add_tile(wall_top_corner_right, map_tile::wall_corner_top_right);
-        add_tile(wall_bottom_corner_left, map_tile::wall_corner_bottom_left);
-        add_tile(wall_bottom_corner_right, map_tile::wall_corner_bottom_right);
-    }
-    void draw_vertical_line(int      start_x,
-                            int      start_y,
-                            int      length,
-                            map_tile type) final
-    {
-        auto it = find_tile(type);
-
-        if (it != tiles.end())
-        {
-            it->tile_vertex_buffer->add_vertex(
-                { static_cast<float>(start_x - 1) * tile_width,
-                  static_cast<float>(start_y - 1) * tile_height,
-                  0.f,
-                  static_cast<float>(length) });
-            it->tile_vertex_buffer->add_vertex(
-                { static_cast<float>(start_x) * tile_width,
-                  static_cast<float>(start_y - 1) * tile_height,
-                  1.f,
-                  static_cast<float>(length) });
-            it->tile_vertex_buffer->add_vertex(
-                { static_cast<float>(start_x) * tile_width,
-                  static_cast<float>(start_y + length - 1) * tile_height,
-                  1.f,
-                  0.f });
-            it->tile_vertex_buffer->add_vertex(
-                { static_cast<float>(start_x - 1) * tile_width,
-                  static_cast<float>(start_y + length - 1) * tile_height,
-                  0.f,
-                  0.f });
-            it->tile_vertex_buffer->buffer_data();
-            it->tile_index_buffer->add_indexes(static_cast<size_t>(length * 4));
-        }
-    }
-    void draw_horizontal_line(int      start_x,
-                              int      start_y,
-                              int      length,
-                              map_tile type) final
-    {
-        auto it = find_tile(type);
-
-        if (it != tiles.end())
-        {
-            it->tile_vertex_buffer->add_vertex(
-                { static_cast<float>(start_x - 1) * tile_width,
-                  static_cast<float>(start_y - 1) * tile_height,
-                  0.f,
-                  1.f });
-            it->tile_vertex_buffer->add_vertex(
-                { static_cast<float>(start_x + length - 1) * tile_width,
-                  static_cast<float>(start_y - 1) * tile_height,
-                  static_cast<float>(length),
-                  1.f });
-            it->tile_vertex_buffer->add_vertex(
-                { static_cast<float>(start_x + length - 1) * tile_width,
-                  static_cast<float>(start_y) * tile_height,
-                  static_cast<float>(length),
-                  0.f });
-            it->tile_vertex_buffer->add_vertex(
-                { static_cast<float>(start_x - 1) * tile_width,
-                  static_cast<float>(start_y) * tile_height,
-                  0.f,
-                  0.f });
-
-            it->tile_vertex_buffer->buffer_data();
-            it->tile_index_buffer->add_indexes(static_cast<size_t>(length * 4));
-        }
-    }
-    void fill_rectangle(
-        int start_x, int start_y, int width_, int height_, map_tile type) final
-    {
-        auto it = find_tile(type);
-
-        if (it != tiles.end())
-        {
-            it->tile_vertex_buffer->add_vertex(
-                { static_cast<float>(start_x - 1) * tile_width,
-                  static_cast<float>(start_y + height_ - 1) * tile_height,
-                  0.f,
-                  static_cast<float>(height_) });
-            it->tile_vertex_buffer->add_vertex(
-                { static_cast<float>(start_x + width_ - 1) * tile_width,
-                  static_cast<float>(start_y + height_ - 1) * tile_height,
-                  static_cast<float>(width_),
-                  static_cast<float>(height_) });
-            it->tile_vertex_buffer->add_vertex(
-                { static_cast<float>(start_x + width_ - 1) * tile_width,
-                  static_cast<float>(start_y - 1) * tile_height,
-                  static_cast<float>(width_),
-                  0.f });
-            it->tile_vertex_buffer->add_vertex(
-                { static_cast<float>(start_x - 1) * tile_width,
-                  static_cast<float>(start_y - 1) * tile_height,
-                  0.f,
-                  0.f });
-
-            it->tile_vertex_buffer->buffer_data();
-            it->tile_index_buffer->add_indexes(
-                static_cast<size_t>(width_ * height_ * 4));
-        }
-        else
-            std::cout << "Such tile doesn't exists" << std::endl;
-    }
-    /*void delete_tiles_horizontal(int      start_x,
-                                 int      start_y,
-                                 int      length,
-                                 map_tile type) final
-    {
-        auto tile_it = find_tile(type);
-
-        if (tile_it != tiles.end())
-        {
-            for (int i = start_x - 1; i < start_x + length - 1; i++)
-            {
-                auto vertex_it = std::find_if(
-                    tile_it->vertices.begin(),
-                    tile_it->vertices.end(),
-                    [&](const vertex_2d vertex)
-                    {
-                        return vertex.x == static_cast<float>(i) * tile_width &&
-                               vertex.y == (static_cast<float>(start_y) - 1.f) *
-                                               tile_height &&
-                               vertex.u == 0.f && vertex.v == 1.0;
-                    });
-
-                if (vertex_it != tile_it->vertices.end())
-                    tile_it->vertices.erase(vertex_it, vertex_it + 4);
-            }
-
-            tile_it->tile_vertex_buffer->buffer_data(tile_it->vertices.data(),
-                                                     tile_it->vertices.size());
-            tile_it->tile_index_buffer->delete_indexes(
-                static_cast<size_t>(length));
-        }
-    }
-    void delete_tiles_vertical(int      start_x,
+void map::draw_horizontal_line(int      start_x,
                                int      start_y,
                                int      length,
-                               map_tile type) final
-    {
-        auto tile_it = find_tile(type);
-
-        if (tile_it != tiles.end())
-        {
-            for (int i = start_y - 1; i < start_y + length - 1; i++)
-            {
-                auto vertex_it = std::find_if(
-                    tile_it->vertices.begin(),
-                    tile_it->vertices.end(),
-                    [&](const vertex_2d vertex)
-                    {
-                        return vertex.x == (static_cast<float>(start_x) - 1.f) *
-                                               tile_width &&
-                               vertex.y ==
-                                   static_cast<float>(i) * tile_height &&
-                               vertex.u == 0.f && vertex.v == 1.0;
-                    });
-
-                if (vertex_it != tile_it->vertices.end())
-                    tile_it->vertices.erase(vertex_it, vertex_it + 4);
-            }
-
-            tile_it->tile_vertex_buffer->buffer_data(tile_it->vertices.data(),
-                                                     tile_it->vertices.size());
-            tile_it->tile_index_buffer->delete_indexes(
-                static_cast<size_t>(length));
-        }
-    }*/
-    texture* get_tile(map_tile type) final
-    {
-        auto it = find_tile(type);
-
-        if (it != tiles.end())
-            return it->tile_texture;
-        else
-            std::cout << "Such tile doesn't exists" << std::endl;
-
-        return nullptr;
-    }
-    vertex_buffer* get_vertex_buffer(map_tile type) final
-    {
-        auto it = find_tile(type);
-
-        if (it != tiles.end())
-            return it->tile_vertex_buffer;
-        else
-            std::cout << "Such tile doesn't exists" << std::endl;
-
-        return nullptr;
-    }
-    index_buffer* get_index_buffer(map_tile type) final
-    {
-        auto it = find_tile(type);
-
-        if (it != tiles.end())
-            return it->tile_index_buffer;
-        else
-            std::cout << "Such tile doesn't exists" << std::endl;
-
-        return nullptr;
-    }
-};
-
-map::~map() = default;
-
-map* create_map(float tile_width, float tile_height)
+                               map_tile type)
 {
-    return new game_map(tile_width, tile_height);
+    auto it = find_tile(type);
+
+    if (it != tiles.end())
+    {
+        it->tile_vertex_buffer->add_vertex(
+            { static_cast<float>(start_x - 1) * tile_width,
+              static_cast<float>(start_y - 1) * tile_height,
+              0.f,
+              1.f });
+        it->tile_vertex_buffer->add_vertex(
+            { static_cast<float>(start_x + length - 1) * tile_width,
+              static_cast<float>(start_y - 1) * tile_height,
+              static_cast<float>(length),
+              1.f });
+        it->tile_vertex_buffer->add_vertex(
+            { static_cast<float>(start_x + length - 1) * tile_width,
+              static_cast<float>(start_y) * tile_height,
+              static_cast<float>(length),
+              0.f });
+        it->tile_vertex_buffer->add_vertex(
+            { static_cast<float>(start_x - 1) * tile_width,
+              static_cast<float>(start_y) * tile_height,
+              0.f,
+              0.f });
+
+        it->tile_vertex_buffer->buffer_data();
+        it->tile_index_buffer->add_indexes(static_cast<size_t>(length * 4));
+    }
+}
+
+void map::fill_rectangle(
+    int start_x, int start_y, int width_, int height_, map_tile type)
+{
+    auto it = find_tile(type);
+
+    if (it != tiles.end())
+    {
+        it->tile_vertex_buffer->add_vertex(
+            { static_cast<float>(start_x - 1) * tile_width,
+              static_cast<float>(start_y + height_ - 1) * tile_height,
+              0.f,
+              static_cast<float>(height_) });
+        it->tile_vertex_buffer->add_vertex(
+            { static_cast<float>(start_x + width_ - 1) * tile_width,
+              static_cast<float>(start_y + height_ - 1) * tile_height,
+              static_cast<float>(width_),
+              static_cast<float>(height_) });
+        it->tile_vertex_buffer->add_vertex(
+            { static_cast<float>(start_x + width_ - 1) * tile_width,
+              static_cast<float>(start_y - 1) * tile_height,
+              static_cast<float>(width_),
+              0.f });
+        it->tile_vertex_buffer->add_vertex(
+            { static_cast<float>(start_x - 1) * tile_width,
+              static_cast<float>(start_y - 1) * tile_height,
+              0.f,
+              0.f });
+
+        it->tile_vertex_buffer->buffer_data();
+        it->tile_index_buffer->add_indexes(
+            static_cast<size_t>(width_ * height_ * 4));
+    }
+    else
+        std::cout << "Such tile doesn't exists" << std::endl;
+}
+
+texture* map::get_tile(map_tile type)
+{
+    auto it = find_tile(type);
+
+    if (it != tiles.end())
+        return it->tile_texture;
+    else
+        std::cout << "Such tile doesn't exists" << std::endl;
+
+    return nullptr;
+}
+
+vertex_buffer* map::get_vertex_buffer(map_tile type)
+{
+    auto it = find_tile(type);
+
+    if (it != tiles.end())
+        return it->tile_vertex_buffer;
+    else
+        std::cout << "Such tile doesn't exists" << std::endl;
+
+    return nullptr;
+}
+
+index_buffer* map::get_index_buffer(map_tile type)
+{
+    auto it = find_tile(type);
+
+    if (it != tiles.end())
+        return it->tile_index_buffer;
+    else
+        std::cout << "Such tile doesn't exists" << std::endl;
+
+    return nullptr;
+}
+
+auto map::find_tile(map_tile type) -> std::vector<tile>::iterator
+{
+    return std::find_if(tiles.begin(),
+                        tiles.end(),
+                        [&](const tile tile) { return tile.type == type; });
+}
+
+void map::add_tile(texture* tile_texture, map_tile type)
+{
+    auto it = find_tile(type);
+
+    if (it != tiles.end())
+    {
+        std::cout << "This tile already exists" << std::endl;
+        return;
+    }
+    else
+    {
+        tile tile;
+        tile.type         = type;
+        tile.tile_texture = tile_texture;
+        tiles.push_back(tile);
+        tiles[tiles.size() - 1].tile_vertex_buffer = create_vertex_buffer();
+        tiles[tiles.size() - 1].tile_index_buffer  = create_index_buffer();
+    }
+}
+
+/*void delete_tiles_horizontal(int      start_x,
+                             int      start_y,
+                             int      length,
+                             map_tile type) final
+{
+    auto tile_it = find_tile(type);
+
+    if (tile_it != tiles.end())
+    {
+        for (int i = start_x - 1; i < start_x + length - 1; i++)
+        {
+            auto vertex_it = std::find_if(
+                tile_it->vertices.begin(),
+                tile_it->vertices.end(),
+                [&](const vertex_2d vertex)
+                {
+                    return vertex.x == static_cast<float>(i) * tile_width &&
+                           vertex.y == (static_cast<float>(start_y) - 1.f) *
+                                           tile_height &&
+                           vertex.u == 0.f && vertex.v == 1.0;
+                });
+
+            if (vertex_it != tile_it->vertices.end())
+                tile_it->vertices.erase(vertex_it, vertex_it + 4);
+        }
+
+        tile_it->tile_vertex_buffer->buffer_data(tile_it->vertices.data(),
+                                                 tile_it->vertices.size());
+        tile_it->tile_index_buffer->delete_indexes(
+            static_cast<size_t>(length));
+    }
+}
+void delete_tiles_vertical(int      start_x,
+                           int      start_y,
+                           int      length,
+                           map_tile type) final
+{
+    auto tile_it = find_tile(type);
+
+    if (tile_it != tiles.end())
+    {
+        for (int i = start_y - 1; i < start_y + length - 1; i++)
+        {
+            auto vertex_it = std::find_if(
+                tile_it->vertices.begin(),
+                tile_it->vertices.end(),
+                [&](const vertex_2d vertex)
+                {
+                    return vertex.x == (static_cast<float>(start_x) - 1.f) *
+                                           tile_width &&
+                           vertex.y ==
+                               static_cast<float>(i) * tile_height &&
+                           vertex.u == 0.f && vertex.v == 1.0;
+                });
+
+            if (vertex_it != tile_it->vertices.end())
+                tile_it->vertices.erase(vertex_it, vertex_it + 4);
+        }
+
+        tile_it->tile_vertex_buffer->buffer_data(tile_it->vertices.data(),
+                                                 tile_it->vertices.size());
+        tile_it->tile_index_buffer->delete_indexes(
+            static_cast<size_t>(length));
+    }
+}*/
+
+map::~map()
+{
+    for (auto& tile : tiles)
+    {
+        delete tile.tile_texture;
+        delete tile.tile_vertex_buffer;
+        delete tile.tile_index_buffer;
+    }
 }
 
 void generate_level_1(map*                 map,
@@ -350,45 +353,45 @@ void generate_level_1(map*                 map,
     map->draw_vertical_line(13, 18, 9, map_tile::wall_left);
     map->draw_vertical_line(26, 18, 9, map_tile::wall_right);
 
-    enemy* skeleton_1 = create_enemy(3,
-                                     4.f,
-                                     1500.f,
-                                     250.f,
-                                     1.75f,
-                                     game_object_state::run,
-                                     enemy_type::spearman);
+    enemy* skeleton_1 = new enemy(3,
+                                  4.f,
+                                  1500.f,
+                                  250.f,
+                                  1.75f,
+                                  game_object_state::run,
+                                  enemy_type::spearman);
     enemies.push_back(skeleton_1);
-    enemy* skeleton_2 = create_enemy(5,
-                                     7.f,
-                                     1000.f,
-                                     650.f,
-                                     1.75f,
-                                     game_object_state::run,
-                                     enemy_type::warrior);
+    enemy* skeleton_2 = new enemy(5,
+                                  7.f,
+                                  1000.f,
+                                  650.f,
+                                  1.75f,
+                                  game_object_state::run,
+                                  enemy_type::warrior);
     enemies.push_back(skeleton_2);
-    enemy* skeleton_3 = create_enemy(5,
-                                     7.f,
-                                     1500.f,
-                                     1200.f,
-                                     1.75f,
-                                     game_object_state::run,
-                                     enemy_type::warrior);
+    enemy* skeleton_3 = new enemy(5,
+                                  7.f,
+                                  1500.f,
+                                  1200.f,
+                                  1.75f,
+                                  game_object_state::run,
+                                  enemy_type::warrior);
     enemies.push_back(skeleton_3);
-    enemy* skeleton_4 = create_enemy(5,
-                                     7.f,
-                                     1000.f,
-                                     1400.f,
-                                     1.75f,
-                                     game_object_state::run,
-                                     enemy_type::warrior);
+    enemy* skeleton_4 = new enemy(5,
+                                  7.f,
+                                  1000.f,
+                                  1400.f,
+                                  1.75f,
+                                  game_object_state::run,
+                                  enemy_type::warrior);
     enemies.push_back(skeleton_4);
-    enemy* skeleton_5 = create_enemy(3,
-                                     4.f,
-                                     1200.f,
-                                     1200.f,
-                                     1.75f,
-                                     game_object_state::run,
-                                     enemy_type::spearman);
+    enemy* skeleton_5 = new enemy(3,
+                                  4.f,
+                                  1200.f,
+                                  1200.f,
+                                  1.75f,
+                                  game_object_state::run,
+                                  enemy_type::spearman);
     enemies.push_back(skeleton_5);
 }
 

@@ -22,9 +22,33 @@ struct hero_sprite_state
 
 class game_object
 {
+public:
+    game_object(int               health_,
+                float             speed_,
+                float             global_pos_x,
+                float             global_pos_y,
+                float             size_,
+                game_object_state state_);
+    bool              is_alive();
+    void              hurt();
+    void              set_state(game_object_state state_);
+    int               get_health();
+    float             get_current_pos_x();
+    float             get_current_pos_y();
+    float             get_delta_x();
+    float             get_delta_y();
+    float             get_size();
+    game_object_state get_state();
+    int               get_direction();
+    sprite*           get_sprite();
+    virtual ~game_object();
+
 protected:
+    auto find_sprite(game_object_state state_)
+        -> std::vector<hero_sprite_state>::iterator;
+    void add_sprite(sprite* game_object_sprite_, game_object_state state_);
+
     std::vector<hero_sprite_state> sprites;
-    bool                           alive        = false;
     int                            health       = 0;
     float                          speed        = 0.f;
     float                          global_pos_x = 0.f;
@@ -34,28 +58,4 @@ protected:
     float                          size         = 0.f;
     int                            direction    = 0;
     game_object_state              state        = game_object_state::idle;
-
-public:
-    game_object(int               health_,
-                float             speed_,
-                float             global_pos_x,
-                float             global_pos_y,
-                float             size_,
-                game_object_state state_);
-    virtual void              add_sprite(sprite*           game_object_sprite_,
-                                         game_object_state state) = 0;
-    virtual bool              is_alive()                          = 0;
-    virtual void              hurt()                              = 0;
-    virtual void              set_state(game_object_state state_) = 0;
-    virtual void              set_direction(int direction_)       = 0;
-    virtual int               get_health()                        = 0;
-    virtual float             get_current_pos_x()                 = 0;
-    virtual float             get_current_pos_y()                 = 0;
-    virtual float             get_delta_x()                       = 0;
-    virtual float             get_delta_y()                       = 0;
-    virtual float             get_size()                          = 0;
-    virtual game_object_state get_state()                         = 0;
-    virtual int               get_direction()                     = 0;
-    virtual sprite*           get_sprite()                        = 0;
-    virtual ~game_object();
 };

@@ -1,73 +1,85 @@
 #include "include/sprite.hxx"
 
-#include <vector>
-
-class game_sprite final : public sprite
+sprite::sprite(texture* textures_,
+               float    width_,
+               float    height_,
+               int      quantity_,
+               float    start_position_,
+               float    animation_time_)
+    : textures(textures_)
+    , width(width_)
+    , height(height_)
+    , quantity(quantity_)
+    , animation_time(animation_time_)
 {
-    texture*       textures       = nullptr;
-    vertex_buffer* vb             = nullptr;
-    float          width          = 0.f;
-    float          height         = 0.f;
-    int            quantity       = 0;
-    int            current_number = 0;
-    float          start_position = 0.f;
-    float          animation_time = 0.f;
+    start_position =
+        start_position_ / static_cast<float>(textures->get_width());
 
-public:
-    game_sprite(texture* textures_,
-                float    width_,
-                float    height_,
-                int      quantity_,
-                float    start_position_,
-                float    animation_time_)
-        : textures(textures_)
-        , width(width_)
-        , height(height_)
-        , quantity(quantity_)
-        , animation_time(animation_time_)
-    {
-        start_position =
-            start_position_ / static_cast<float>(textures->get_width());
+    vb = create_vertex_buffer();
 
-        vb = create_vertex_buffer();
+    vb->add_vertex({ -(width / 2), -(height / 2), 0.f, 1.f });
+    vb->add_vertex({ width / 2, -(height / 2), 1.f, 1.f });
+    vb->add_vertex({ width / 2, height / 2, 1.f, 0.f });
+    vb->add_vertex({ -(width / 2), height / 2, 0.f, 0.f });
+    vb->buffer_data();
+}
 
-        vb->add_vertex({ -(width / 2), -(height / 2), 0.f, 1.f });
-        vb->add_vertex({ width / 2, -(height / 2), 1.f, 1.f });
-        vb->add_vertex({ width / 2, height / 2, 1.f, 0.f });
-        vb->add_vertex({ -(width / 2), height / 2, 0.f, 0.f });
-        vb->buffer_data();
-    }
-    void next_sprite() final
-    {
-        current_number++;
-        if (current_number == quantity)
-            current_number = 0;
-    }
-    void  reset() final { current_number = 0; }
-    float get_width() final { return width; }
-    float get_height() final { return height; }
-    int   get_quantity() final { return quantity; }
-    int   get_current_number(int direction) final
-    {
-        if (direction == 1)
-            return quantity - current_number - 1;
-        return current_number;
-    }
-    float          get_start_position() final { return start_position; }
-    float          get_animation_time() final { return animation_time; }
-    texture*       get_texture() final { return textures; }
-    vertex_buffer* get_vertex_buffer() final { return vb; }
-};
-
-sprite::~sprite() = default;
-
-sprite* create_sprite(texture* textures,
-                      float    width,
-                      float    height,
-                      int      quantity,
-                      float    start_position,
-                      float    animation_time)
+void sprite::next_sprite()
 {
-    return new game_sprite(
-        textures, width, height, quantity, start_position, animation_time);
+    current_number++;
+    if (current_number == quantity)
+        current_number = 0;
+}
+
+void sprite::reset()
+{
+    current_number = 0;
+}
+
+float sprite::get_width()
+{
+    return width;
+}
+
+float sprite::get_height()
+{
+    return height;
+}
+
+int sprite::get_quantity()
+{
+    return quantity;
+}
+
+int sprite::get_current_number(int direction)
+{
+    if (direction == 1)
+        return quantity - current_number - 1;
+    return current_number;
+}
+
+float sprite::get_start_position()
+{
+    return start_position;
+}
+
+float sprite::get_animation_time()
+{
+    return animation_time;
+}
+
+texture* sprite::get_texture()
+{
+    return textures;
+}
+
+vertex_buffer* sprite::get_vertex_buffer()
+{
+    return vb;
+}
+
+sprite::~sprite()
+{
+    delete textures;
+    delete vb;
 }
