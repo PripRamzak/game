@@ -33,10 +33,8 @@ public:
     void              hurt();
     void              set_state(game_object_state state_);
     int               get_health();
-    float             get_current_pos_x();
-    float             get_current_pos_y();
-    float             get_delta_x();
-    float             get_delta_y();
+    float             get_global_pos_x();
+    float             get_global_pos_y();
     float             get_size();
     game_object_state get_state();
     int               get_direction();
@@ -54,8 +52,6 @@ protected:
     float                          speed        = 0.f;
     float                          global_pos_x = 0.f;
     float                          global_pos_y = 0.f;
-    float                          delta_x      = 0.f;
-    float                          delta_y      = 0.f;
     float                          size         = 0.f;
     int                            direction    = 0;
     game_object_state              state        = game_object_state::idle;

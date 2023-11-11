@@ -46,23 +46,23 @@ void hero::initialize()
 
 void hero::move(int dx, int dy, map* map, bool* skeleton_collision)
 {
-    float delta_x_ = static_cast<float>(dx) * speed;
-    float delta_y_ = static_cast<float>(dy) * speed;
+    float delta_x = static_cast<float>(dx) * speed;
+    float delta_y = static_cast<float>(dy) * speed;
 
     if (dx != 0 && dy != 0)
     {
-        delta_x_ /= sqrt(2.f);
-        delta_y_ /= sqrt(2.f);
+        delta_x /= sqrt(2.f);
+        delta_y /= sqrt(2.f);
     }
 
-    if (delta_y_ < 0.f && skeleton_collision[0] ||
-        delta_y_ > 0.f && skeleton_collision[1])
+    if (delta_y < 0.f && skeleton_collision[0] ||
+        delta_y > 0.f && skeleton_collision[1])
     {
         set_state(game_object_state::idle);
         return;
     }
 
-    if (delta_x_ < 0.f)
+    if (delta_x < 0.f)
     {
         direction = 1;
         if (skeleton_collision[2])
@@ -71,7 +71,7 @@ void hero::move(int dx, int dy, map* map, bool* skeleton_collision)
             return;
         }
     }
-    else if (delta_x_ > 0.f)
+    else if (delta_x > 0.f)
     {
         direction = 0;
         if (skeleton_collision[3])
@@ -81,13 +81,13 @@ void hero::move(int dx, int dy, map* map, bool* skeleton_collision)
         }
     }
 
-    delta_x += delta_x_;
-    delta_y += delta_y_;
+    global_pos_x += delta_x;
+    global_pos_y += delta_y;
 
     if (check_collision_map(map))
     {
-        delta_x -= delta_x_;
-        delta_y -= delta_y_;
+        global_pos_x -= delta_x;
+        global_pos_y -= delta_y;
         set_state(game_object_state::idle);
     }
     else
@@ -140,15 +140,15 @@ bool hero::check_collision_map(map* map)
              j++, map_tile_vertices += 4)
         {
             bool collision_x =
-                get_current_pos_x() + hero_sprite_width / 2.f * size >=
+                get_global_pos_x() + hero_sprite_width / 2.f * size >=
                     map_tile_vertices->x &&
                 (map_tile_vertices + 2)->x >=
-                    get_current_pos_x() - hero_sprite_width / 2.f * size;
+                    get_global_pos_x() - hero_sprite_width / 2.f * size;
             bool collision_y =
-                get_current_pos_y() + hero_sprite_height / 2.f * size >=
+                get_global_pos_y() + hero_sprite_height / 2.f * size >=
                     map_tile_vertices->y &&
                 (map_tile_vertices + 2)->y >=
-                    get_current_pos_y() - hero_sprite_height / 2.f * size;
+                    get_global_pos_y() - hero_sprite_height / 2.f * size;
 
             if (collision_x && collision_y)
                 return true;

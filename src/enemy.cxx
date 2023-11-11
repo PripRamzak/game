@@ -60,14 +60,14 @@ void enemy::move(game_object* hero)
 
     if (!hero_collision_x)
     {
-        if (hero->get_current_pos_x() < get_current_pos_x())
+        if (hero->get_global_pos_x() < get_global_pos_x())
         {
-            delta_x -= speed;
+            global_pos_x -= speed;
             direction = 1;
         }
         else
         {
-            delta_x += speed;
+            global_pos_x += speed;
             direction = 0;
         }
 
@@ -75,44 +75,44 @@ void enemy::move(game_object* hero)
     }
     else if (!check_hero_collision_y(hero))
     {
-        if (hero->get_current_pos_y() > get_current_pos_y())
-            delta_y += speed;
+        if (hero->get_global_pos_y() > get_global_pos_y())
+            global_pos_y += speed;
         else
-            delta_y -= speed;
+            global_pos_y -= speed;
 
         set_state(game_object_state::run);
     }
-    else if (hero->get_current_pos_y() - 3.5f > get_current_pos_y() ||
-             hero->get_current_pos_y() + 3.5f < get_current_pos_y())
+    else if (hero->get_global_pos_y() - 3.5f > get_global_pos_y() ||
+             hero->get_global_pos_y() + 3.5f < get_global_pos_y())
     {
-        if (hero->get_current_pos_x() <= get_current_pos_x())
+        if (hero->get_global_pos_x() <= get_global_pos_x())
         {
-            delta_x += speed;
+            global_pos_x += speed;
             direction = 0;
         }
         else
         {
-            delta_x -= speed;
+            global_pos_x -= speed;
             direction = 1;
         }
 
         if (!check_hero_collision_x(hero))
         {
-            if (hero->get_current_pos_x() <= get_current_pos_x())
+            if (hero->get_global_pos_x() <= get_global_pos_x())
             {
-                delta_x -= speed;
+                global_pos_x -= speed;
                 direction = 1;
             }
             else
             {
-                delta_x += speed;
+                global_pos_x += speed;
                 direction = 0;
             }
 
-            if (hero->get_current_pos_y() - 3.5f > get_current_pos_y())
-                delta_y += speed;
-            else if (hero->get_current_pos_y() + 3.5f < get_current_pos_y())
-                delta_y -= speed;
+            if (hero->get_global_pos_y() - 3.5f > get_global_pos_y())
+                global_pos_y += speed;
+            else if (hero->get_global_pos_y() + 3.5f < get_global_pos_y())
+                global_pos_y -= speed;
         }
 
         set_state(game_object_state::run);
@@ -215,15 +215,15 @@ bool enemy::check_hero_collision_x(game_object* hero)
 
     if (it != sprites.end())
     {
-        float hero_current_pos_x = hero->get_current_pos_x();
+        float hero_current_pos_x = hero->get_global_pos_x();
         float hero_size          = hero->get_size();
         float hero_width =
             hero->get_animated_sprite()->get_sprite()->get_width();
         float width = it->game_object_anim_sprite->get_sprite()->get_width();
 
         bool collision_x = hero_current_pos_x + hero_width / 2 * hero_size >=
-                               get_current_pos_x() - width / 2 * size &&
-                           get_current_pos_x() + width / 2 * size >=
+                               get_global_pos_x() - width / 2 * size &&
+                           get_global_pos_x() + width / 2 * size >=
                                hero_current_pos_x - hero_width / 2 * hero_size;
 
         if (collision_x)
@@ -239,15 +239,15 @@ bool enemy::check_hero_collision_y(game_object* hero)
 
     if (it != sprites.end())
     {
-        float hero_current_pos_y = hero->get_current_pos_y();
+        float hero_current_pos_y = hero->get_global_pos_y();
         float hero_size          = hero->get_size();
         float hero_height =
             hero->get_animated_sprite()->get_sprite()->get_height();
         float height = it->game_object_anim_sprite->get_sprite()->get_height();
 
         bool collision_y = hero_current_pos_y + hero_height / 2 * hero_size >=
-                               get_current_pos_y() - height / 2 * size &&
-                           get_current_pos_y() + height / 2 * size >=
+                               get_global_pos_y() - height / 2 * size &&
+                           get_global_pos_y() + height / 2 * size >=
                                hero_current_pos_y - hero_height / 2 * hero_size;
 
         if (collision_y)

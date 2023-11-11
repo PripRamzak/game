@@ -80,24 +80,14 @@ int game_object::get_health()
     return health;
 }
 
-float game_object::get_current_pos_x()
+float game_object::get_global_pos_x()
 {
-    return global_pos_x + delta_x;
+    return global_pos_x;
 }
 
-float game_object::get_current_pos_y()
+float game_object::get_global_pos_y()
 {
-    return global_pos_y + delta_y;
-}
-
-float game_object::get_delta_x()
-{
-    return delta_x;
-}
-
-float game_object::get_delta_y()
-{
-    return delta_y;
+    return global_pos_y;
 }
 
 float game_object::get_size()

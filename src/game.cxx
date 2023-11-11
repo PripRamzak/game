@@ -164,8 +164,8 @@ int main(int /*argc*/, char** /*argv*/)
                 warrior->get_animated_sprite()->play(frame_time_dif);
             }
 
-            camera->look_at(warrior->get_current_pos_x(),
-                            warrior->get_current_pos_y());
+            camera->look_at(warrior->get_global_pos_x(),
+                            warrior->get_global_pos_y());
 
             glm::mat4 mat_view = glm::make_mat4x4(camera->get_view());
 
@@ -235,8 +235,8 @@ int main(int /*argc*/, char** /*argv*/)
             // Objects render
 
             glm::mat4 war_mat_move{ 1 };
-            war_mat_move[3].x = warrior->get_current_pos_x();
-            war_mat_move[3].y = warrior->get_current_pos_y();
+            war_mat_move[3].x = warrior->get_global_pos_x();
+            war_mat_move[3].y = warrior->get_global_pos_y();
 
             glm::mat4 warrior_mat_result =
                 projection * mat_view * war_mat_move * warrior_mat_size;

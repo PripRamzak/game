@@ -401,7 +401,7 @@ void game_logic_level_1(map*                 map,
 {
     static bool second_room_cleaned = false;
 
-    if (hero->get_current_pos_x() > 900.f && !enemies[0]->is_spawned())
+    if (hero->get_global_pos_x() > 900.f && !enemies[0]->is_spawned())
     {
         enemies[0]->spawn();
         map->draw_vertical_line(13, 4, 4, map_tile::wall_left);
@@ -416,7 +416,7 @@ void game_logic_level_1(map*                 map,
         // map->delete_tiles_horizontal(18, 12, 4, map_tile::wall_bottom);
         second_room_cleaned = true;
     }
-    else if (hero->get_current_pos_y() > 1300.f && !enemies[2]->is_spawned())
+    else if (hero->get_global_pos_y() > 1300.f && !enemies[2]->is_spawned())
     {
         enemies[2]->spawn();
         map->draw_horizontal_line(18, 17, 4, map_tile::wall_top);
