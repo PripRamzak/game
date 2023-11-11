@@ -19,17 +19,17 @@ game_object::game_object(int               health_,
 }
 
 auto game_object::find_sprite(game_object_state state_)
-    -> std::vector<hero_sprite_state>::iterator
+    -> std::vector<anim_sprite_state>::iterator
 {
     auto it = std::find_if(sprites.begin(),
                            sprites.end(),
-                           [&](const hero_sprite_state sprite)
+                           [&](const anim_sprite_state sprite)
                            { return sprite.state == state_; });
 
     return it;
 }
 
-void game_object::add_sprite(sprite*           game_object_sprite_,
+void game_object::add_sprite(animation*        game_object_anim_sprite_,
                              game_object_state state_)
 {
     auto it = find_sprite(state_);
@@ -41,9 +41,9 @@ void game_object::add_sprite(sprite*           game_object_sprite_,
     }
     else
     {
-        hero_sprite_state sprite_;
-        sprite_.game_object_sprite = game_object_sprite_;
-        sprite_.state              = state_;
+        anim_sprite_state sprite_;
+        sprite_.game_object_anim_sprite = game_object_anim_sprite_;
+        sprite_.state                   = state_;
 
         sprites.push_back(sprite_);
     }
@@ -65,7 +65,7 @@ void game_object::set_state(game_object_state state_)
     {
         const auto it = find_sprite(state);
         if (it != sprites.end())
-            it->game_object_sprite->reset();
+            it->game_object_anim_sprite->reset();
         else
         {
             std::cout << "Such sprite doesn't exists" << std::endl;
@@ -115,12 +115,12 @@ int game_object::get_direction()
     return direction;
 }
 
-sprite* game_object::get_sprite()
+animation* game_object::get_animated_sprite()
 {
     auto it = find_sprite(state);
 
     if (it != sprites.end())
-        return it->game_object_sprite;
+        return it->game_object_anim_sprite;
     else
     {
         std::cout << "Such sprite doesn't exists" << std::endl;
@@ -131,5 +131,5 @@ sprite* game_object::get_sprite()
 game_object::~game_object()
 {
     for (auto sprite : sprites)
-        delete sprite.game_object_sprite;
+        delete sprite.game_object_anim_sprite;
 }

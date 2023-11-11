@@ -4,6 +4,7 @@
 
 #include <algorithm>
 #include <array>
+#include <chrono>
 #include <stdexcept>
 
 #include <SDL3/SDL.h>
@@ -79,6 +80,8 @@ class game_engine final : public engine
 
     std::vector<buttons> mobile_buttons;
     index_buffer*        buttons_index_buffer;
+
+    std::chrono::high_resolution_clock timer;
 
     std::basic_streambuf<char>* cout_buf = nullptr;
     std::basic_streambuf<char>* cerr_buf = nullptr;
@@ -498,7 +501,59 @@ public:
         sound_buffer->unlock_thread();
         return sound_buffer;
     }
-    void render(sprite*       sprite,
+    void render(animation*    anim_sprite,
+                index_buffer* index_buffer,
+                int           direction,
+                float*        matrix)
+    {
+        hero_program->use();
+        hero_program->set_uniform_1f(
+            "quantity", static_cast<float>(anim_sprite->get_quantity()));
+        hero_program->set_uniform_1f(
+            "number",
+            static_cast<float>(anim_sprite->get_current_number(direction)));
+        hero_program->set_uniform_1f("start_position",
+                                     anim_sprite->get_start_position());
+        hero_program->set_uniform_1f(
+            "width",
+            anim_sprite->get_sprite()->get_width() /
+                static_cast<float>(
+                    anim_sprite->get_sprite()->get_texture()->get_width()));
+        hero_program->set_uniform_1i("direction", direction);
+        hero_program->set_uniform_1i("texture", 0);
+        hero_program->set_uniform_matrix4fv("matrix", 1, GL_FALSE, matrix);
+
+        anim_sprite->get_sprite()->get_texture()->active(0);
+        anim_sprite->get_sprite()->get_texture()->bind();
+
+        anim_sprite->get_sprite()->get_vertex_buffer()->bind();
+        index_buffer->bind();
+
+        glVertexAttribPointer(0,
+                              2,
+                              GL_FLOAT,
+                              GL_FALSE,
+                              sizeof(vertex_2d),
+                              reinterpret_cast<void*>(0));
+        gl_check();
+        glEnableVertexAttribArray(0);
+        gl_check();
+
+        glVertexAttribPointer(1,
+                              2,
+                              GL_FLOAT,
+                              GL_FALSE,
+                              sizeof(vertex_2d),
+                              reinterpret_cast<void*>(2 * sizeof(float)));
+        gl_check();
+        glEnableVertexAttribArray(1);
+        gl_check();
+
+        glDrawElements(
+            GL_TRIANGLES, index_buffer->get_size(), GL_UNSIGNED_SHORT, 0);
+        gl_check();
+    }
+    /*void render(sprite*       sprite,
                 index_buffer* index_buffer,
                 int           direction,
                 float*        matrix) final
@@ -548,7 +603,7 @@ public:
         glDrawElements(
             GL_TRIANGLES, index_buffer->get_size(), GL_UNSIGNED_SHORT, 0);
         gl_check();
-    }
+    }*/
     void render(texture*       texture,
                 vertex_buffer* vertex_buffer,
                 index_buffer*  index_buffer,
@@ -650,16 +705,12 @@ public:
         glClear(GL_COLOR_BUFFER_BIT);
         gl_check();
     }
-    float get_time() final
-    {
-        std::uint32_t ms = SDL_GetTicks();
-        return ms * 0.001f;
-    }
-    int  get_window_width() final { return window_width; }
-    int  get_window_height() final { return window_height; }
-    int  get_window_width_pixels() final { return window_width_pixels; }
-    int  get_window_height_pixels() final { return window_height_pixels; }
-    bool swap_buffers() final
+    timepoint get_time() final { return timer.now(); }
+    int       get_window_width() final { return window_width; }
+    int       get_window_height() final { return window_height; }
+    int       get_window_width_pixels() final { return window_width_pixels; }
+    int       get_window_height_pixels() final { return window_height_pixels; }
+    bool      swap_buffers() final
     {
         if (SDL_GL_SwapWindow(window) != 0)
         {

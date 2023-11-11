@@ -86,24 +86,15 @@ int main(int /*argc*/, char** /*argv*/)
     sound_buffer* sound_attack =
         engine->create_sound_buffer("sound/attack.wav");
 
-    float warrior_update_time = engine->get_time();
-
     // 0 - top, 1 - bottom, 2 - left, 3 - right
     bool warrior_skeleton_collision[4]{ false };
-
-    float skeleton_update_time = engine->get_time();
 
     bool  quit                     = false;
     bool  show_menu_window         = true;
     bool  show_in_game_menu_window = false;
     event event                    = event::released;
 
-    std::chrono::high_resolution_clock timer;
-    using timepoint =
-        std::chrono::time_point<std::chrono::high_resolution_clock,
-                                std::chrono::nanoseconds>;
-
-    timepoint start = timer.now();
+    timepoint start = engine->get_time();
 
     while (!quit && warrior->is_alive())
     {
@@ -116,7 +107,7 @@ int main(int /*argc*/, char** /*argv*/)
                 break;
             }
 
-        timepoint last_frame_time = timer.now();
+        timepoint last_frame_time = engine->get_time();
 
         std::chrono::milliseconds frame_time_dif =
             std::chrono::duration_cast<std::chrono::milliseconds>(
@@ -145,7 +136,7 @@ int main(int /*argc*/, char** /*argv*/)
                 {
                     warrior->set_state(game_object_state::attack);
 
-                    if (warrior->get_sprite()->get_current_number(
+                    if (warrior->get_animated_sprite()->get_current_number(
                             warrior->get_direction()) == 2)
                         sound_attack->play(audio_properties::once);
                 }
@@ -169,6 +160,8 @@ int main(int /*argc*/, char** /*argv*/)
                         warrior->move(
                             dx, dy, dungeon_map, warrior_skeleton_collision);
                 }
+
+                warrior->get_animated_sprite()->play(frame_time_dif);
             }
 
             camera->look_at(warrior->get_current_pos_x(),
@@ -248,7 +241,7 @@ int main(int /*argc*/, char** /*argv*/)
             glm::mat4 warrior_mat_result =
                 projection * mat_view * war_mat_move * warrior_mat_size;
 
-            engine->render(warrior->get_sprite(),
+            engine->render(warrior->get_animated_sprite(),
                            solo_objects_index_buffer,
                            warrior->get_direction(),
                            &warrior_mat_result[0][0]);
@@ -384,13 +377,6 @@ int main(int /*argc*/, char** /*argv*/)
 
             if (!show_in_game_menu_window)
             {
-                if (engine->get_time() - warrior_update_time >
-                    warrior->get_sprite()->get_animation_time())
-                {
-                    warrior->get_sprite()->next_sprite();
-                    warrior_update_time = engine->get_time();
-                }
-
 #ifdef __ANDROID__
                 engine->render_buttons(&to_ndc_coordinates[0][0]);
 #endif

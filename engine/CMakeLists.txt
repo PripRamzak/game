@@ -1,6 +1,8 @@
 add_library(engine SHARED
         src/engine.cxx
         include/engine.hxx
+        include/animation.hxx
+        src/animation.cxx
         include/buttons.hxx
         src/event.cxx
         include/event.hxx

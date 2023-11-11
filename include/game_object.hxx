@@ -1,7 +1,7 @@
 #pragma once
 
+#include "engine/include/animation.hxx"
 #include "engine/include/geometry.hxx"
-#include "engine/include/sprite.hxx"
 #include "engine/include/vertex_buffer.hxx"
 
 #include <vector>
@@ -14,9 +14,9 @@ enum class game_object_state
     run_n_attack
 };
 
-struct hero_sprite_state
+struct anim_sprite_state
 {
-    sprite*           game_object_sprite = nullptr;
+    animation*        game_object_anim_sprite = nullptr;
     game_object_state state;
 };
 
@@ -40,15 +40,16 @@ public:
     float             get_size();
     game_object_state get_state();
     int               get_direction();
-    sprite*           get_sprite();
+    animation*        get_animated_sprite();
     virtual ~game_object();
 
 protected:
     auto find_sprite(game_object_state state_)
-        -> std::vector<hero_sprite_state>::iterator;
-    void add_sprite(sprite* game_object_sprite_, game_object_state state_);
+        -> std::vector<anim_sprite_state>::iterator;
+    void add_sprite(animation*        game_object_anim_sprite_,
+                    game_object_state state_);
 
-    std::vector<hero_sprite_state> sprites;
+    std::vector<anim_sprite_state> sprites;
     int                            health       = 0;
     float                          speed        = 0.f;
     float                          global_pos_x = 0.f;

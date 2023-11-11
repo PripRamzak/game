@@ -5,9 +5,14 @@
 static texture* warrior_idle_sprite_sheet   = nullptr;
 static texture* warrior_run_sprite_sheet    = nullptr;
 static texture* warrior_attack_sprite_sheet = nullptr;
-static sprite*  warrior_idle                = nullptr;
-static sprite*  warrior_run                 = nullptr;
-static sprite*  warrior_attack              = nullptr;
+
+static sprite* warrior_idle_sprite   = nullptr;
+static sprite* warrior_run_sprite    = nullptr;
+static sprite* warrior_attack_sprite = nullptr;
+
+static animation* warrior_idle   = nullptr;
+static animation* warrior_run    = nullptr;
+static animation* warrior_attack = nullptr;
 
 hero::hero(int               health,
            float             speed,
@@ -24,15 +29,19 @@ hero::hero(int               health,
 
 void hero::initialize()
 {
+    using namespace std::chrono_literals;
+
     warrior_idle_sprite_sheet   = create_texture("img/warrior_idle.png");
     warrior_run_sprite_sheet    = create_texture("img/warrior_run.png");
     warrior_attack_sprite_sheet = create_texture("img/warrior_attack.png");
-    warrior_idle =
-        new sprite(warrior_idle_sprite_sheet, 48.f, 48.f, 6, 24.f, 0.15f);
-    warrior_run =
-        new sprite(warrior_run_sprite_sheet, 48.f, 48.f, 6, 24.f, 0.15f);
-    warrior_attack =
-        new sprite(warrior_attack_sprite_sheet, 86.f, 48.f, 4, 6.f, 0.25f);
+
+    warrior_idle_sprite   = new sprite(warrior_idle_sprite_sheet, 48.f, 48.f);
+    warrior_run_sprite    = new sprite(warrior_run_sprite_sheet, 48.f, 48.f);
+    warrior_attack_sprite = new sprite(warrior_attack_sprite_sheet, 86.f, 48.f);
+
+    warrior_idle   = new animation(warrior_idle_sprite, 6, 24.f, 150ms);
+    warrior_run    = new animation(warrior_run_sprite, 6, 24.f, 150ms);
+    warrior_attack = new animation(warrior_attack_sprite, 4, 6.f, 250ms);
 }
 
 void hero::move(int dx, int dy, map* map, bool* skeleton_collision)
@@ -89,7 +98,7 @@ void hero::attack(game_object* enemy, bool skeleton_collision)
 {
     auto it = find_sprite(state);
     int  sprite_current_number =
-        it->game_object_sprite->get_current_number(direction);
+        it->game_object_anim_sprite->get_current_number(direction);
 
     if (sprite_current_number == 0 && direction == 0 ||
         sprite_current_number == 3 && direction == 1)
@@ -122,8 +131,10 @@ bool hero::check_collision_map(map* map)
             map->get_vertex_buffer(type[i])->data();
         const size_t map_tile_vertices_num =
             map->get_vertex_buffer(type[i])->size();
-        float hero_sprite_height = it->game_object_sprite->get_height();
-        float hero_sprite_width  = it->game_object_sprite->get_width();
+        float hero_sprite_height =
+            it->game_object_anim_sprite->get_sprite()->get_height();
+        float hero_sprite_width =
+            it->game_object_anim_sprite->get_sprite()->get_width();
 
         for (size_t j = 0; j < map_tile_vertices_num / 4;
              j++, map_tile_vertices += 4)
