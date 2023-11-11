@@ -506,6 +506,9 @@ public:
                 int           direction,
                 float*        matrix)
     {
+        sprite*  sprite_  = anim_sprite->get_sprite();
+        texture* texture_ = sprite_->get_texture();
+
         hero_program->use();
         hero_program->set_uniform_1f(
             "quantity", static_cast<float>(anim_sprite->get_quantity()));
@@ -516,17 +519,15 @@ public:
                                      anim_sprite->get_start_position());
         hero_program->set_uniform_1f(
             "width",
-            anim_sprite->get_sprite()->get_width() /
-                static_cast<float>(
-                    anim_sprite->get_sprite()->get_texture()->get_width()));
+            sprite_->get_width() / static_cast<float>(texture_->get_width()));
         hero_program->set_uniform_1i("direction", direction);
         hero_program->set_uniform_1i("texture", 0);
         hero_program->set_uniform_matrix4fv("matrix", 1, GL_FALSE, matrix);
 
-        anim_sprite->get_sprite()->get_texture()->active(0);
-        anim_sprite->get_sprite()->get_texture()->bind();
+        texture_->active(0);
+        texture_->bind();
 
-        anim_sprite->get_sprite()->get_vertex_buffer()->bind();
+        sprite_->get_vertex_buffer()->bind();
         index_buffer->bind();
 
         glVertexAttribPointer(0,
