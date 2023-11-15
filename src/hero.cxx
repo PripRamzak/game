@@ -2,17 +2,11 @@
 
 #include <cmath>
 
-static texture* warrior_idle_sprite_sheet   = nullptr;
-static texture* warrior_run_sprite_sheet    = nullptr;
-static texture* warrior_attack_sprite_sheet = nullptr;
+static animation* warrior_idle_anim   = nullptr;
+static animation* warrior_run_anim    = nullptr;
+static animation* warrior_attack_anim = nullptr;
 
-static sprite* warrior_idle_sprite   = nullptr;
-static sprite* warrior_run_sprite    = nullptr;
-static sprite* warrior_attack_sprite = nullptr;
-
-static animation* warrior_idle   = nullptr;
-static animation* warrior_run    = nullptr;
-static animation* warrior_attack = nullptr;
+static bool hero_init = false;
 
 hero::hero(int               health,
            float             speed,
@@ -22,26 +16,40 @@ hero::hero(int               health,
            game_object_state state)
     : game_object(health, speed, global_pos_x, global_pos_y, size, state)
 {
-    add_sprite(warrior_idle, game_object_state::idle);
-    add_sprite(warrior_run, game_object_state::run);
-    add_sprite(warrior_attack, game_object_state::attack);
+    add_sprite(warrior_idle_anim, game_object_state::idle);
+    add_sprite(warrior_run_anim, game_object_state::run);
+    add_sprite(warrior_attack_anim, game_object_state::attack);
 }
 
 void hero::initialize()
 {
     using namespace std::chrono_literals;
 
-    warrior_idle_sprite_sheet   = create_texture("img/warrior_idle.png");
-    warrior_run_sprite_sheet    = create_texture("img/warrior_run.png");
-    warrior_attack_sprite_sheet = create_texture("img/warrior_attack.png");
+    if (!hero_init)
+    {
+        texture* warrior_idle_sprite_sheet =
+            create_texture("img/warrior_idle.png");
+        texture* warrior_run_sprite_sheet =
+            create_texture("img/warrior_run.png");
+        texture* warrior_attack_sprite_sheet =
+            create_texture("img/warrior_attack.png");
 
-    warrior_idle_sprite   = new sprite(warrior_idle_sprite_sheet, 48.f, 48.f);
-    warrior_run_sprite    = new sprite(warrior_run_sprite_sheet, 48.f, 48.f);
-    warrior_attack_sprite = new sprite(warrior_attack_sprite_sheet, 86.f, 48.f);
+        sprite* warrior_idle_sprite =
+            new sprite(warrior_idle_sprite_sheet, 48.f, 48.f);
+        sprite* warrior_run_sprite =
+            new sprite(warrior_run_sprite_sheet, 48.f, 48.f);
+        sprite* warrior_attack_sprite =
+            new sprite(warrior_attack_sprite_sheet, 86.f, 48.f);
 
-    warrior_idle   = new animation(warrior_idle_sprite, 6, 24.f, 150ms);
-    warrior_run    = new animation(warrior_run_sprite, 6, 24.f, 150ms);
-    warrior_attack = new animation(warrior_attack_sprite, 4, 6.f, 250ms);
+        warrior_idle_anim = new animation(warrior_idle_sprite, 6, 24.f, 150ms);
+        warrior_run_anim  = new animation(warrior_run_sprite, 6, 24.f, 150ms);
+        warrior_attack_anim =
+            new animation(warrior_attack_sprite, 4, 6.f, 250ms);
+
+        hero_init = true;
+    }
+    else
+        std::cout << "Hero already inited!" << std::endl;
 }
 
 void hero::move(int dx, int dy, map* map, bool* skeleton_collision)

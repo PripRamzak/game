@@ -1,25 +1,16 @@
 #include "include/enemy.hxx"
 
-static texture* skeleton_warrior_idle_sprite_sheet    = nullptr;
-static texture* skeleton_warrior_run_sprite_sheet     = nullptr;
-static texture* skeleton_warrior_attack_sprite_sheet  = nullptr;
-static texture* skeleton_spearman_idle_sprite_sheet   = nullptr;
-static texture* skeleton_spearman_run_sprite_sheet    = nullptr;
-static texture* skeleton_spearman_attack_sprite_sheet = nullptr;
+#include <iostream>
 
-static sprite* skeleton_warrior_idle_sprite    = nullptr;
-static sprite* skeleton_warrior_run_sprite     = nullptr;
-static sprite* skeleton_warrior_attack_sprite  = nullptr;
-static sprite* skeleton_spearman_idle_sprite   = nullptr;
-static sprite* skeleton_spearman_run_sprite    = nullptr;
-static sprite* skeleton_spearman_attack_sprite = nullptr;
+static animation* skeleton_warrior_idle_anim   = nullptr;
+static animation* skeleton_warrior_run_anim    = nullptr;
+static animation* skeleton_warrior_attack_anim = nullptr;
 
-static animation* skeleton_warrior_idle    = nullptr;
-static animation* skeleton_warrior_run     = nullptr;
-static animation* skeleton_warrior_attack  = nullptr;
-static animation* skeleton_spearman_idle   = nullptr;
-static animation* skeleton_spearman_run    = nullptr;
-static animation* skeleton_spearman_attack = nullptr;
+static animation* skeleton_spearman_idle_anim   = nullptr;
+static animation* skeleton_spearman_run_anim    = nullptr;
+static animation* skeleton_spearman_attack_anim = nullptr;
+
+static bool enemy_init = false;
 
 enemy::enemy(int               health,
              float             speed,
@@ -32,16 +23,70 @@ enemy::enemy(int               health,
 {
     if (type == enemy_type::warrior)
     {
-        add_sprite(skeleton_warrior_idle, game_object_state::idle);
-        add_sprite(skeleton_warrior_run, game_object_state::run);
-        add_sprite(skeleton_warrior_attack, game_object_state::attack);
+        add_sprite(skeleton_warrior_idle_anim, game_object_state::idle);
+        add_sprite(skeleton_warrior_run_anim, game_object_state::run);
+        add_sprite(skeleton_warrior_attack_anim, game_object_state::attack);
     }
     else
     {
-        add_sprite(skeleton_spearman_idle, game_object_state::idle);
-        add_sprite(skeleton_spearman_run, game_object_state::run);
-        add_sprite(skeleton_spearman_attack, game_object_state::attack);
+        add_sprite(skeleton_spearman_idle_anim, game_object_state::idle);
+        add_sprite(skeleton_spearman_run_anim, game_object_state::run);
+        add_sprite(skeleton_spearman_attack_anim, game_object_state::attack);
     }
+}
+
+void enemy::initialize()
+{
+    using namespace std::chrono_literals;
+
+    if (!enemy_init)
+    {
+        texture* skeleton_warrior_idle_sprite_sheet =
+            create_texture("img/skeleton_warrior_idle.png");
+        texture* skeleton_warrior_run_sprite_sheet =
+            create_texture("img/skeleton_warrior_run.png");
+        texture* skeleton_warrior_attack_sprite_sheet =
+            create_texture("img/skeleton_warrior_attack.png");
+
+        sprite* skeleton_warrior_idle_sprite =
+            new sprite(skeleton_warrior_idle_sprite_sheet, 64.f, 64.f);
+        sprite* skeleton_warrior_run_sprite =
+            new sprite(skeleton_warrior_run_sprite_sheet, 74.f, 64.f);
+        sprite* skeleton_warrior_attack_sprite =
+            new sprite(skeleton_warrior_attack_sprite_sheet, 96.f, 64.f);
+
+        skeleton_warrior_idle_anim =
+            new animation(skeleton_warrior_idle_sprite, 7, 32.f, 150ms);
+        skeleton_warrior_run_anim =
+            new animation(skeleton_warrior_run_sprite, 8, 32.f, 150ms);
+        skeleton_warrior_attack_anim =
+            new animation(skeleton_warrior_attack_sprite, 4, 16.f, 200ms);
+
+        texture* skeleton_spearman_idle_sprite_sheet =
+            create_texture("img/skeleton_spearman_idle.png");
+        texture* skeleton_spearman_run_sprite_sheet =
+            create_texture("img/skeleton_spearman_run.png");
+        texture* skeleton_spearman_attack_sprite_sheet =
+            create_texture("img/skeleton_spearman_attack.png");
+
+        sprite* skeleton_spearman_idle_sprite =
+            new sprite(skeleton_spearman_idle_sprite_sheet, 64.f, 64.f);
+        sprite* skeleton_spearman_run_sprite =
+            new sprite(skeleton_spearman_run_sprite_sheet, 88.f, 64.f);
+        sprite* skeleton_spearman_attack_sprite =
+            new sprite(skeleton_spearman_attack_sprite_sheet, 128.f, 64.f);
+
+        skeleton_spearman_idle_anim =
+            new animation(skeleton_spearman_idle_sprite, 7, 32.f, 200ms);
+        skeleton_spearman_run_anim =
+            new animation(skeleton_spearman_run_sprite, 6, 20.f, 150ms);
+        skeleton_spearman_attack_anim =
+            new animation(skeleton_spearman_attack_sprite, 4, 0.f, 250ms);
+
+        enemy_init = true;
+    }
+    else
+        std::cout << "Enemy already init!" << std::endl;
 }
 
 void enemy::spawn()
@@ -130,53 +175,6 @@ void enemy::move(game_object* hero)
     }
     else
         set_state(game_object_state::idle);
-}
-
-void enemy::initialize()
-{
-    using namespace std::chrono_literals;
-
-    skeleton_warrior_idle_sprite_sheet =
-        create_texture("img/skeleton_warrior_idle.png");
-    skeleton_warrior_run_sprite_sheet =
-        create_texture("img/skeleton_warrior_run.png");
-    skeleton_warrior_attack_sprite_sheet =
-        create_texture("img/skeleton_warrior_attack.png");
-
-    skeleton_warrior_idle_sprite =
-        new sprite(skeleton_warrior_idle_sprite_sheet, 64.f, 64.f);
-    skeleton_warrior_run_sprite =
-        new sprite(skeleton_warrior_run_sprite_sheet, 74.f, 64.f);
-    skeleton_warrior_attack_sprite =
-        new sprite(skeleton_warrior_attack_sprite_sheet, 96.f, 64.f);
-
-    skeleton_warrior_idle =
-        new animation(skeleton_warrior_idle_sprite, 7, 32.f, 150ms);
-    skeleton_warrior_run =
-        new animation(skeleton_warrior_run_sprite, 8, 32.f, 150ms);
-    skeleton_warrior_attack =
-        new animation(skeleton_warrior_attack_sprite, 4, 16.f, 200ms);
-
-    skeleton_spearman_idle_sprite_sheet =
-        create_texture("img/skeleton_spearman_idle.png");
-    skeleton_spearman_run_sprite_sheet =
-        create_texture("img/skeleton_spearman_run.png");
-    skeleton_spearman_attack_sprite_sheet =
-        create_texture("img/skeleton_spearman_attack.png");
-
-    skeleton_spearman_idle_sprite =
-        new sprite(skeleton_spearman_idle_sprite_sheet, 64.f, 64.f);
-    skeleton_spearman_run_sprite =
-        new sprite(skeleton_spearman_run_sprite_sheet, 88.f, 64.f);
-    skeleton_spearman_attack_sprite =
-        new sprite(skeleton_spearman_attack_sprite_sheet, 128.f, 64.f);
-
-    skeleton_spearman_idle =
-        new animation(skeleton_spearman_idle_sprite, 7, 32.f, 200ms);
-    skeleton_spearman_run =
-        new animation(skeleton_spearman_run_sprite, 6, 20.f, 150ms);
-    skeleton_spearman_attack =
-        new animation(skeleton_spearman_attack_sprite, 4, 0.f, 250ms);
 }
 
 void enemy::attack(game_object* hero)
