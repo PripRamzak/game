@@ -11,6 +11,8 @@ enum class game_object_state
     idle,
     run,
     attack,
+    jump,
+    fall,
     run_n_attack
 };
 

@@ -11,13 +11,17 @@ public:
          float             global_pos_x,
          float             global_pos_y,
          float             size,
-         game_object_state state);
+         game_object_state state,
+         float             jump_height_);
     static void initialize();
-    void        move(int dx, int dy, map* map, bool* skeleton_collision);
+    void        move(int dx, int dy, map* map);
+    void        jump(float jump_dt);
     void        attack(game_object* enemy, bool skeleton_collision);
-    bool        check_collision_map(map* map);
+    bool        check_collision_map(map* map, map_tile type);
     ~hero();
 
 private:
-    bool attacked = false;
+    bool  attacked       = false;
+    float jump_height    = 0.f;
+    float jump_height_dt = 0.f;
 };

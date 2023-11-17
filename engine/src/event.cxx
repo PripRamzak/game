@@ -33,12 +33,13 @@ struct bind
     event            event_;
 };
 
-std::array<bind, 6> key_bindings = {
+std::array<bind, 7> key_bindings = {
     { { SDLK_w, "Up", key::up, event::released },
       { SDLK_s, "Down", key::down, event::released },
       { SDLK_a, "Left", key::left, event::released },
       { SDLK_d, "Right", key::right, event::released },
-      { SDLK_SPACE, "Attack", key::attack, event::released },
+      { SDLK_SPACE, "Jump", key::jump, event::released },
+      { SDLK_j, "Attack", key::attack, event::released },
       { SDLK_ESCAPE, "Menu", key::menu, event::released } }
 };
 

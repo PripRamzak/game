@@ -16,6 +16,7 @@ enum class key
     left,
     right,
     attack,
+    jump,
     menu
 };
 

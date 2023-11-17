@@ -42,7 +42,7 @@ int main(int /*argc*/, char** /*argv*/)
 
     hero::initialize();
     hero* warrior =
-        new hero(4, 10.f, 300.f, 300.f, 2.f, game_object_state::idle);
+        new hero(4, 10.f, 300.f, 300.f, 2.f, game_object_state::idle, 200.f);
 
     glm::mat4 warrior_mat_size =
         glm::scale(glm::mat4{ 1 },
@@ -87,7 +87,7 @@ int main(int /*argc*/, char** /*argv*/)
         engine->create_sound_buffer("sound/attack.wav");
 
     // 0 - top, 1 - bottom, 2 - left, 3 - right
-    bool warrior_skeleton_collision[4]{ false };
+    // bool warrior_skeleton_collision[4]{ false };
 
     bool  quit                     = false;
     bool  show_menu_window         = true;
@@ -140,15 +140,24 @@ int main(int /*argc*/, char** /*argv*/)
                             warrior->get_direction()) == 2)
                         sound_attack->play(audio_properties::once);
                 }
+                else if (engine->check_key(key::jump) &&
+                         warrior->get_state() != game_object_state::jump &&
+                         warrior->get_state() != game_object_state::fall)
+                    warrior->set_state(game_object_state::jump);
                 else
                 {
                     int dx = 0;
                     int dy = 0;
 
-                    if (engine->check_key(key::up))
+                    if (warrior->get_state() == game_object_state::jump)
+                    {
                         dy--;
-                    if (engine->check_key(key::down))
+                        warrior->jump(static_cast<float>(dy));
+                    }
+                    else if (!warrior->check_collision_map(
+                                 dungeon_map, map_tile::wall_bottom))
                         dy++;
+
                     if (engine->check_key(key::left))
                         dx--;
                     if (engine->check_key(key::right))
@@ -157,8 +166,7 @@ int main(int /*argc*/, char** /*argv*/)
                     if (dx == 0 && dy == 0)
                         warrior->set_state(game_object_state::idle);
                     else
-                        warrior->move(
-                            dx, dy, dungeon_map, warrior_skeleton_collision);
+                        warrior->move(dx, dy, dungeon_map);
                 }
 
                 warrior->get_animated_sprite()->play(frame_time_dif);
@@ -234,9 +242,11 @@ int main(int /*argc*/, char** /*argv*/)
 
             // Objects render
 
-            glm::mat4 war_mat_move{ 1 };
-            war_mat_move[3].x = warrior->get_global_pos_x();
-            war_mat_move[3].y = warrior->get_global_pos_y();
+            glm::mat4 war_mat_move =
+                glm::translate(glm::mat4{ 1 },
+                               glm::vec3(warrior->get_global_pos_x(),
+                                         warrior->get_global_pos_y(),
+                                         0.f));
 
             glm::mat4 warrior_mat_result =
                 projection * mat_view * war_mat_move * warrior_mat_size;

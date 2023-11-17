@@ -1,10 +1,13 @@
 #include "include/hero.hxx"
 
+#include <algorithm>
 #include <cmath>
 
 static animation* warrior_idle_anim   = nullptr;
 static animation* warrior_run_anim    = nullptr;
 static animation* warrior_attack_anim = nullptr;
+static animation* warrior_jump_anim   = nullptr;
+static animation* warrior_fall_anim   = nullptr;
 
 static bool hero_init = false;
 
@@ -13,12 +16,16 @@ hero::hero(int               health,
            float             global_pos_x,
            float             global_pos_y,
            float             size,
-           game_object_state state)
+           game_object_state state,
+           float             jump_height_)
     : game_object(health, speed, global_pos_x, global_pos_y, size, state)
+    , jump_height(jump_height_)
 {
     add_sprite(warrior_idle_anim, game_object_state::idle);
     add_sprite(warrior_run_anim, game_object_state::run);
     add_sprite(warrior_attack_anim, game_object_state::attack);
+    add_sprite(warrior_jump_anim, game_object_state::jump);
+    add_sprite(warrior_fall_anim, game_object_state::fall);
 }
 
 void hero::initialize()
@@ -33,6 +40,8 @@ void hero::initialize()
             create_texture("img/warrior_run.png");
         texture* warrior_attack_sprite_sheet =
             create_texture("img/warrior_attack.png");
+        texture* warrior_jump_texture =
+            create_texture("img/warrior_jump_n_fall.png");
 
         sprite* warrior_idle_sprite =
             new sprite(warrior_idle_sprite_sheet, 48.f, 48.f);
@@ -40,11 +49,15 @@ void hero::initialize()
             new sprite(warrior_run_sprite_sheet, 48.f, 48.f);
         sprite* warrior_attack_sprite =
             new sprite(warrior_attack_sprite_sheet, 86.f, 48.f);
+        sprite* warrior_jump_sprite =
+            new sprite(warrior_jump_texture, 48.f, 48.f);
 
         warrior_idle_anim = new animation(warrior_idle_sprite, 6, 24.f, 150ms);
         warrior_run_anim  = new animation(warrior_run_sprite, 6, 24.f, 150ms);
         warrior_attack_anim =
             new animation(warrior_attack_sprite, 4, 6.f, 250ms);
+        warrior_jump_anim = new animation(warrior_jump_sprite, 1, 0.f, 250ms);
+        warrior_fall_anim = new animation(warrior_jump_sprite, 1, 0.f, 250ms);
 
         hero_init = true;
     }
@@ -52,7 +65,7 @@ void hero::initialize()
         std::cout << "Hero already inited!" << std::endl;
 }
 
-void hero::move(int dx, int dy, map* map, bool* skeleton_collision)
+void hero::move(int dx, int dy, map* map)
 {
     float delta_x = static_cast<float>(dx) * speed;
     float delta_y = static_cast<float>(dy) * speed;
@@ -63,43 +76,77 @@ void hero::move(int dx, int dy, map* map, bool* skeleton_collision)
         delta_y /= sqrt(2.f);
     }
 
-    if (delta_y < 0.f && skeleton_collision[0] ||
-        delta_y > 0.f && skeleton_collision[1])
-    {
-        set_state(game_object_state::idle);
-        return;
-    }
+    global_pos_x += delta_x;
+    global_pos_y += delta_y;
 
     if (delta_x < 0.f)
     {
         direction = 1;
-        if (skeleton_collision[2])
+        if (check_collision_map(map, map_tile::wall_left))
         {
-            set_state(game_object_state::idle);
+            global_pos_x -= delta_x;
+
+            if (state == game_object_state::jump ||
+                state == game_object_state::fall)
+                set_state(game_object_state::fall);
+            else
+                set_state(game_object_state::idle);
             return;
         }
     }
     else if (delta_x > 0.f)
     {
         direction = 0;
-        if (skeleton_collision[3])
+        if (check_collision_map(map, map_tile::wall_right))
         {
-            set_state(game_object_state::idle);
+            global_pos_x -= delta_x;
+
+            if (state == game_object_state::jump ||
+                state == game_object_state::fall)
+                set_state(game_object_state::fall);
+            else
+                set_state(game_object_state::idle);
             return;
         }
     }
 
-    global_pos_x += delta_x;
-    global_pos_y += delta_y;
-
-    if (check_collision_map(map))
+    if (delta_y > 0.f)
     {
-        global_pos_x -= delta_x;
-        global_pos_y -= delta_y;
-        set_state(game_object_state::idle);
+        if (check_collision_map(map, map_tile::wall_bottom))
+        {
+            global_pos_y -= delta_y;
+
+            set_state(game_object_state::idle);
+            return;
+        }
+        else
+            set_state(game_object_state::fall);
     }
-    else
+
+    if (delta_y < 0.f)
+        if (check_collision_map(map, map_tile::wall_top))
+        {
+            global_pos_y -= delta_y;
+
+            set_state(game_object_state::fall);
+            return;
+        }
+
+    if (state != game_object_state::jump && state != game_object_state::fall)
         set_state(game_object_state::run);
+}
+
+void hero::jump(float jump_dt)
+{
+    set_state(game_object_state::jump);
+
+    jump_height_dt -= jump_dt * speed;
+
+    if (jump_height_dt >= jump_height)
+    {
+        set_state(game_object_state::fall);
+        jump_height_dt = 0.f;
+    }
 }
 
 void hero::attack(game_object* enemy, bool skeleton_collision)
@@ -124,43 +171,29 @@ void hero::attack(game_object* enemy, bool skeleton_collision)
     }
 }
 
-bool hero::check_collision_map(map* map)
+bool hero::check_collision_map(map* map, map_tile type)
 {
-    auto it = find_sprite(state);
+    const vertex_2d* map_tile_vertices = map->get_vertex_buffer(type)->data();
+    const size_t map_tile_vertices_num = map->get_vertex_buffer(type)->size();
 
-    map_tile type[] = { map_tile::wall_top,
-                        map_tile::wall_bottom,
-                        map_tile::wall_left,
-                        map_tile::wall_right };
+    vertex_2d* hero_vertices =
+        get_animated_sprite()->get_sprite()->get_vertex_buffer()->data();
 
-    for (int i = 0; i < 4; i++)
+    for (size_t j = 0; j < map_tile_vertices_num / 4;
+         j++, map_tile_vertices += 4)
     {
-        const vertex_2d* map_tile_vertices =
-            map->get_vertex_buffer(type[i])->data();
-        const size_t map_tile_vertices_num =
-            map->get_vertex_buffer(type[i])->size();
-        float hero_sprite_height =
-            it->game_object_anim_sprite->get_sprite()->get_height();
-        float hero_sprite_width =
-            it->game_object_anim_sprite->get_sprite()->get_width();
+        bool collision_x = get_global_pos_x() + (hero_vertices + 2)->x * size >=
+                               map_tile_vertices->x &&
+                           (map_tile_vertices + 2)->x >=
+                               get_global_pos_x() + hero_vertices->x * size;
 
-        for (size_t j = 0; j < map_tile_vertices_num / 4;
-             j++, map_tile_vertices += 4)
-        {
-            bool collision_x =
-                get_global_pos_x() + hero_sprite_width / 2.f * size >=
-                    map_tile_vertices->x &&
-                (map_tile_vertices + 2)->x >=
-                    get_global_pos_x() - hero_sprite_width / 2.f * size;
-            bool collision_y =
-                get_global_pos_y() + hero_sprite_height / 2.f * size >=
-                    map_tile_vertices->y &&
-                (map_tile_vertices + 2)->y >=
-                    get_global_pos_y() - hero_sprite_height / 2.f * size;
+        bool collision_y = get_global_pos_y() + (hero_vertices + 2)->y * size >=
+                               map_tile_vertices->y &&
+                           (map_tile_vertices + 2)->y >=
+                               get_global_pos_y() + hero_vertices->y * size;
 
-            if (collision_x && collision_y)
-                return true;
-        }
+        if (collision_x && collision_y)
+            return true;
     }
 
     return false;
