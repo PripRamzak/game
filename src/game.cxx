@@ -42,7 +42,7 @@ int main(int /*argc*/, char** /*argv*/)
 
     hero::initialize();
     hero* warrior =
-        new hero(4, 10.f, 300.f, 300.f, 2.f, game_object_state::idle, 200.f);
+        new hero(4, 10.f, 300.f, 300.f, 2.f, game_object_state::idle, 400.f);
 
     glm::mat4 warrior_mat_size =
         glm::scale(glm::mat4{ 1 },
@@ -132,7 +132,9 @@ int main(int /*argc*/, char** /*argv*/)
 
             if (!show_in_game_menu_window)
             {
-                if (engine->check_key(key::attack))
+                if (engine->check_key(key::attack) &&
+                    warrior->get_state() != game_object_state::jump &&
+                    warrior->get_state() != game_object_state::fall)
                 {
                     warrior->set_state(game_object_state::attack);
 
@@ -276,47 +278,9 @@ int main(int /*argc*/, char** /*argv*/)
                             enemy->check_hero_collision_x(warrior) &&
                             enemy->check_hero_collision_y(warrior);
 
-                        if (skeleton_warrior_collision &&
-                            warrior->get_current_pos_y() -
-                                    warrior->get_sprite()->get_height() / 2 *
-                                        warrior->get_size() <
-                                enemy->get_current_pos_y() +
-                                    enemy->get_sprite()->get_height() / 2 *
-                                        enemy->get_size() &&
-                            warrior->get_current_pos_y() -
-                                    warrior->get_sprite()->get_height() / 2 *
-                                        warrior->get_size() >
-                                enemy->get_current_pos_y() +
-                                    enemy->get_sprite()->get_height() / 2 *
-                                        enemy->get_size() -
-                                    10.f)
-                            warrior_skeleton_collision[0] = true;
-                        if (skeleton_warrior_collision &&
-                            warrior->get_current_pos_y() +
-                                    warrior->get_sprite()->get_height() / 2 *
-                                        warrior->get_size() >
-                                enemy->get_current_pos_y() -
-                                    enemy->get_sprite()->get_height() / 2 *
-                                        enemy->get_size() &&
-                            warrior->get_current_pos_y() +
-                                    warrior->get_sprite()->get_height() / 2 *
-                                        warrior->get_size() <
-                                enemy->get_current_pos_y() -
-                                    enemy->get_sprite()->get_height() / 2 *
-                                        enemy->get_size() +
-                                    10.f)
-                            warrior_skeleton_collision[1] = true;
-                        if (skeleton_warrior_collision &&
-                            warrior->get_current_pos_x() >
-                                enemy->get_current_pos_x())
-                            warrior_skeleton_collision[2] = true;
-                        if (skeleton_warrior_collision &&
-                            warrior->get_current_pos_x() <
-                                enemy->get_current_pos_x())
-                            warrior_skeleton_collision[3] = true;
-
-                        if (warrior->get_state() == game_object_state::attack)
-                            warrior->attack(enemy, skeleton_warrior_collision);
+                        if (warrior->get_state() ==
+            game_object_state::attack) warrior->attack(enemy,
+            skeleton_warrior_collision);
                     }
 
                     glm::mat4 skeleton_mat_size{ 1 };
