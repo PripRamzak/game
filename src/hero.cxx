@@ -76,7 +76,6 @@ void hero::move(int dx, int dy, map* map)
         delta_y /= sqrt(2.f);
     }
 
-    global_pos_x += delta_x;
     global_pos_y += delta_y;
 
     if (delta_y > 0.f)
@@ -95,6 +94,8 @@ void hero::move(int dx, int dy, map* map)
             set_state(game_object_state::fall);
             jump_height_dt = 0.f;
         }
+
+    global_pos_x += delta_x;
 
     if (delta_x < 0.f)
     {
@@ -117,10 +118,11 @@ void hero::move(int dx, int dy, map* map)
         direction = 0;
         if (check_collision_map_x_axis(map, map_tile::wall_right))
         {
-            if (state == game_object_state::jump ||
+            /*if (state == game_object_state::jump ||
                 state == game_object_state::fall)
-                set_state(game_object_state::fall);
-            else
+                set_state(game_object_state::fall);*/
+            if (state != game_object_state::jump &&
+                state != game_object_state::fall)
             {
                 set_state(game_object_state::idle);
                 return;

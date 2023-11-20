@@ -156,7 +156,7 @@ int main(int /*argc*/, char** /*argv*/)
                         dy--;
                         warrior->jump(static_cast<float>(dy));
                     }
-                    else if (!warrior->check_collision_map(
+                    else if (!warrior->check_collision_map_y_axis(
                                  dungeon_map, map_tile::wall_bottom))
                         dy++;
 
