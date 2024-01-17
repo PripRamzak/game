@@ -8,14 +8,13 @@
 
 #include <vector>
 
-enum class map_tile
+enum class map_tile_type
 {
-    floor,
     wall,
-    wall_top,
-    wall_left,
-    wall_right,
-    wall_bottom,
+    brick_top,
+    brick_bottom,
+    brick_left,
+    brick_right,
     wall_corner_top_left,
     wall_corner_top_right,
     wall_corner_bottom_left,
@@ -23,29 +22,21 @@ enum class map_tile
     coin
 };
 
-struct tile
-{
-    texture*       tile_texture;
-    map_tile       type;
-    vertex_buffer* tile_vertex_buffer;
-    index_buffer*  tile_index_buffer;
-};
-
 class map
 {
 public:
     map(float tile_width_, float tile_height_);
     static void initialize();
-    void        draw_vertical_line(int      start_x,
-                                   int      start_y,
-                                   int      length,
-                                   map_tile type);
-    void        draw_horizontal_line(int      start_x,
-                                     int      start_y,
-                                     int      length,
-                                     map_tile type);
+    void        draw_vertical_line(int           start_x,
+                                   int           start_y,
+                                   int           length,
+                                   map_tile_type type);
+    void        draw_horizontal_line(int           start_x,
+                                     int           start_y,
+                                     int           length,
+                                     map_tile_type type);
     void        fill_rectangle(
-               int start_x, int start_y, int width_, int height_, map_tile type);
+               int start_x, int start_y, int width_, int height_, map_tile_type type);
     /*virtual void           delete_tiles_horizontal(int      start_x,
                                                    int      start_y,
                                                    int      length,
@@ -54,15 +45,34 @@ public:
                                                  int      start_y,
                                                  int      length,
                                                  map_tile type)           = 0;*/
-    texture*       get_tile(map_tile type);
-    vertex_buffer* get_vertex_buffer(map_tile type);
-    index_buffer*  get_index_buffer(map_tile type);
+    texture*       get_tileset();
+    vertex_buffer* get_vertex_buffer(map_tile_type type);
+    index_buffer*  get_index_buffer(map_tile_type type);
+    float*         get_tile_min_uv(map_tile_type type);
+    float*         get_tile_max_uv(map_tile_type type);
     ~map();
 
 private:
-    void add_tile(texture* tile_texture, map_tile type);
-    auto find_tile(map_tile type) -> std::vector<tile>::iterator;
+    struct tile
+    {
+        map_tile_type  type;
+        vertex_buffer* tile_vertex_buffer;
+        index_buffer*  tile_index_buffer;
+        float          min_uv[2];
+        float          max_uv[2];
 
+        tile(map_tile_type type,
+             float         min_u,
+             float         max_u,
+             float         min_v,
+             float         max_v);
+    };
+
+    void add_tile(
+        map_tile_type type, float min_u, float max_u, float min_v, float max_v);
+    auto find_tile(map_tile_type type) -> std::vector<tile>::iterator;
+
+    texture*          tileset = nullptr;
     std::vector<tile> tiles;
     float             tile_width  = 0;
     float             tile_height = 0;

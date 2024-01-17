@@ -42,7 +42,7 @@ int main(int /*argc*/, char** /*argv*/)
 
     hero::initialize();
     hero* warrior =
-        new hero(4, 10.f, 300.f, 300.f, 2.f, game_object_state::idle, 400.f);
+        new hero(4, 10.f, 300.f, 300.f, 2.f, game_object_state::idle, 300.f);
 
     glm::mat4 warrior_mat_size =
         glm::scale(glm::mat4{ 1 },
@@ -148,17 +148,17 @@ int main(int /*argc*/, char** /*argv*/)
                     warrior->set_state(game_object_state::jump);
                 else
                 {
-                    int dx = 0;
-                    int dy = 0;
+                    float dx = 0.f;
+                    float dy = 0.f;
 
                     if (warrior->get_state() == game_object_state::jump)
                     {
-                        dy--;
-                        warrior->jump(static_cast<float>(dy));
+                        dy -= 1.5;
+                        warrior->jump();
                     }
                     else if (!warrior->check_collision_map_y_axis(
-                                 dungeon_map, map_tile::wall_bottom))
-                        dy++;
+                                 dungeon_map, map_tile_type::brick_bottom))
+                        dy += 1.5;
 
                     if (engine->check_key(key::left))
                         dx--;
@@ -183,38 +183,42 @@ int main(int /*argc*/, char** /*argv*/)
 
             glm::mat4 map_mat_result = projection * mat_view;
 
-            engine->render(dungeon_map->get_tile(map_tile::floor),
-                           dungeon_map->get_vertex_buffer(map_tile::floor),
-                           dungeon_map->get_index_buffer(map_tile::floor),
-                           &map_mat_result[0][0]);
-
-            engine->render(dungeon_map->get_tile(map_tile::wall),
-                           dungeon_map->get_vertex_buffer(map_tile::wall),
-                           dungeon_map->get_index_buffer(map_tile::wall),
-                           &map_mat_result[0][0]);
-
-            engine->render(dungeon_map->get_tile(map_tile::wall_top),
-                           dungeon_map->get_vertex_buffer(map_tile::wall_top),
-                           dungeon_map->get_index_buffer(map_tile::wall_top),
-                           &map_mat_result[0][0]);
-
+            engine->render(dungeon_map->get_tileset(),
+                           dungeon_map->get_vertex_buffer(map_tile_type::wall),
+                           dungeon_map->get_index_buffer(map_tile_type::wall),
+                           &map_mat_result[0][0],
+                           dungeon_map->get_tile_min_uv(map_tile_type::wall),
+                           dungeon_map->get_tile_max_uv(map_tile_type::wall));
             engine->render(
-                dungeon_map->get_tile(map_tile::wall_bottom),
-                dungeon_map->get_vertex_buffer(map_tile::wall_bottom),
-                dungeon_map->get_index_buffer(map_tile::wall_bottom),
-                &map_mat_result[0][0]);
-
-            engine->render(dungeon_map->get_tile(map_tile::wall_left),
-                           dungeon_map->get_vertex_buffer(map_tile::wall_left),
-                           dungeon_map->get_index_buffer(map_tile::wall_left),
-                           &map_mat_result[0][0]);
-
-            engine->render(dungeon_map->get_tile(map_tile::wall_right),
-                           dungeon_map->get_vertex_buffer(map_tile::wall_right),
-                           dungeon_map->get_index_buffer(map_tile::wall_right),
-                           &map_mat_result[0][0]);
-
+                dungeon_map->get_tileset(),
+                dungeon_map->get_vertex_buffer(map_tile_type::brick_top),
+                dungeon_map->get_index_buffer(map_tile_type::brick_top),
+                &map_mat_result[0][0],
+                dungeon_map->get_tile_min_uv(map_tile_type::brick_top),
+                dungeon_map->get_tile_max_uv(map_tile_type::brick_top));
             engine->render(
+                dungeon_map->get_tileset(),
+                dungeon_map->get_vertex_buffer(map_tile_type::brick_bottom),
+                dungeon_map->get_index_buffer(map_tile_type::brick_bottom),
+                &map_mat_result[0][0],
+                dungeon_map->get_tile_min_uv(map_tile_type::brick_bottom),
+                dungeon_map->get_tile_max_uv(map_tile_type::brick_bottom));
+            engine->render(
+                dungeon_map->get_tileset(),
+                dungeon_map->get_vertex_buffer(map_tile_type::brick_left),
+                dungeon_map->get_index_buffer(map_tile_type::brick_left),
+                &map_mat_result[0][0],
+                dungeon_map->get_tile_min_uv(map_tile_type::brick_left),
+                dungeon_map->get_tile_max_uv(map_tile_type::brick_left));
+            engine->render(
+                dungeon_map->get_tileset(),
+                dungeon_map->get_vertex_buffer(map_tile_type::brick_right),
+                dungeon_map->get_index_buffer(map_tile_type::brick_right),
+                &map_mat_result[0][0],
+                dungeon_map->get_tile_min_uv(map_tile_type::brick_right),
+                dungeon_map->get_tile_max_uv(map_tile_type::brick_right));
+
+            /*engine->render(
                 dungeon_map->get_tile(map_tile::wall_corner_top_left),
                 dungeon_map->get_vertex_buffer(map_tile::wall_corner_top_left),
                 dungeon_map->get_index_buffer(map_tile::wall_corner_top_left),
@@ -240,7 +244,7 @@ int main(int /*argc*/, char** /*argv*/)
                     map_tile::wall_corner_bottom_right),
                 dungeon_map->get_index_buffer(
                     map_tile::wall_corner_bottom_right),
-                &map_mat_result[0][0]);
+                &map_mat_result[0][0]);*/
 
             // Objects render
 
@@ -343,11 +347,11 @@ int main(int /*argc*/, char** /*argv*/)
                     health[1]->set_texture(0);
             }
 
-            for (auto heart : health)
-                engine->render(heart->get_texture(),
+            /*for (auto heart : health)
+                engine->render(heart->get_tileset(),
                                heart->get_vertex_buffer(),
                                solo_objects_index_buffer,
-                               &projection[0][0]);
+                               &projection[0][0]);*/
 
             if (!show_in_game_menu_window)
             {

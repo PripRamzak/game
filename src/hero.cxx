@@ -65,10 +65,10 @@ void hero::initialize()
         std::cout << "Hero already inited!" << std::endl;
 }
 
-void hero::move(int dx, int dy, map* map)
+void hero::move(float dx, float dy, map* map)
 {
-    float delta_x = static_cast<float>(dx) * speed;
-    float delta_y = static_cast<float>(dy) * speed;
+    float delta_x = dx * speed;
+    float delta_y = dy * speed;
 
     if (dx != 0 && dy != 0)
     {
@@ -80,7 +80,7 @@ void hero::move(int dx, int dy, map* map)
 
     if (delta_y > 0.f)
     {
-        if (check_collision_map_y_axis(map, map_tile::wall_bottom))
+        if (check_collision_map_y_axis(map, map_tile_type::brick_bottom))
         {
             set_state(game_object_state::idle);
             return;
@@ -89,7 +89,7 @@ void hero::move(int dx, int dy, map* map)
             set_state(game_object_state::fall);
     }
     else if (delta_y < 0.f)
-        if (check_collision_map_y_axis(map, map_tile::wall_top))
+        if (check_collision_map_y_axis(map, map_tile_type::brick_top))
         {
             set_state(game_object_state::fall);
             jump_height_dt = 0.f;
@@ -100,7 +100,7 @@ void hero::move(int dx, int dy, map* map)
     if (delta_x < 0.f)
     {
         direction = 1;
-        if (check_collision_map_x_axis(map, map_tile::wall_left))
+        if (check_collision_map_x_axis(map, map_tile_type::brick_left))
         {
             /*if (state == game_object_state::jump ||
                 state == game_object_state::fall)
@@ -116,7 +116,7 @@ void hero::move(int dx, int dy, map* map)
     else if (delta_x > 0.f)
     {
         direction = 0;
-        if (check_collision_map_x_axis(map, map_tile::wall_right))
+        if (check_collision_map_x_axis(map, map_tile_type::brick_right))
         {
             /*if (state == game_object_state::jump ||
                 state == game_object_state::fall)
@@ -134,11 +134,13 @@ void hero::move(int dx, int dy, map* map)
         set_state(game_object_state::run);
 }
 
-void hero::jump(float jump_dt)
+void hero::jump()
 {
     set_state(game_object_state::jump);
 
-    jump_height_dt -= jump_dt * speed;
+    std::cout << jump_height_dt << std::endl;
+
+    jump_height_dt += 1.5 * speed;
 
     if (jump_height_dt >= jump_height)
     {
@@ -169,7 +171,7 @@ void hero::attack(game_object* enemy, bool skeleton_collision)
     }
 }
 
-bool hero::check_collision_map(map* map, map_tile type)
+bool hero::check_collision_map(map* map, map_tile_type type)
 {
     const vertex_2d* map_tile_vertices = map->get_vertex_buffer(type)->data();
     const size_t map_tile_vertices_num = map->get_vertex_buffer(type)->size();
@@ -196,21 +198,21 @@ bool hero::check_collision_map(map* map, map_tile type)
         {
             switch (type)
             {
-                case map_tile::wall_left:
+                case map_tile_type::brick_left:
                     global_pos_x -= global_pos_x + hero_vertices->x * size -
                                     (map_tile_vertices + 2)->x;
                     break;
-                case map_tile::wall_right:
+                case map_tile_type::brick_right:
                     global_pos_x -= global_pos_x +
                                     (hero_vertices + 2)->x * size -
                                     map_tile_vertices->x;
                     break;
-                case map_tile::wall_bottom:
+                case map_tile_type::brick_bottom:
                     global_pos_y -= global_pos_y +
                                     (hero_vertices + 2)->y * size -
                                     map_tile_vertices->y;
                     break;
-                case map_tile::wall_top:
+                case map_tile_type::brick_top:
                     global_pos_y -= global_pos_y + hero_vertices->y * size -
                                     (map_tile_vertices + 2)->y;
                     break;
@@ -222,7 +224,7 @@ bool hero::check_collision_map(map* map, map_tile type)
     return false;
 }
 
-bool hero::check_collision_map_x_axis(map* map, map_tile type)
+bool hero::check_collision_map_x_axis(map* map, map_tile_type type)
 {
     const vertex_2d* map_tile_vertices = map->get_vertex_buffer(type)->data();
     const size_t map_tile_vertices_num = map->get_vertex_buffer(type)->size();
@@ -249,12 +251,12 @@ bool hero::check_collision_map_x_axis(map* map, map_tile type)
         {
             switch (type)
             {
-                case map_tile::wall_left:
+                case map_tile_type::brick_left:
                     global_pos_x -= global_pos_x + hero_vertices->x * size -
                                     (map_tile_vertices + 2)->x;
                     std::cout << "left" << std::endl;
                     break;
-                case map_tile::wall_right:
+                case map_tile_type::brick_right:
                     global_pos_x -= global_pos_x +
                                     (hero_vertices + 2)->x * size -
                                     map_tile_vertices->x;
@@ -268,7 +270,7 @@ bool hero::check_collision_map_x_axis(map* map, map_tile type)
     return false;
 }
 
-bool hero::check_collision_map_y_axis(map* map, map_tile type)
+bool hero::check_collision_map_y_axis(map* map, map_tile_type type)
 {
     const vertex_2d* map_tile_vertices = map->get_vertex_buffer(type)->data();
     const size_t map_tile_vertices_num = map->get_vertex_buffer(type)->size();
@@ -295,13 +297,13 @@ bool hero::check_collision_map_y_axis(map* map, map_tile type)
         {
             switch (type)
             {
-                case map_tile::wall_bottom:
+                case map_tile_type::brick_bottom:
                     global_pos_y -= global_pos_y +
                                     (hero_vertices + 2)->y * size -
                                     map_tile_vertices->y;
                     std::cout << "bot" << std::endl;
                     break;
-                case map_tile::wall_top:
+                case map_tile_type::brick_top:
                     global_pos_y -= global_pos_y + hero_vertices->y * size -
                                     (map_tile_vertices + 2)->y;
                     std::cout << "top" << std::endl;

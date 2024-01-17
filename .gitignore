@@ -1,6 +1,7 @@
 cmake-build-debug/
 .idea/
 .vscode/
+TODO.txt
 imgui.ini
 build/
 win-build/

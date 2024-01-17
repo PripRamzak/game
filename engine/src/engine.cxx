@@ -576,7 +576,7 @@ public:
         hero_program->set_uniform_matrix4fv("matrix", 1, GL_FALSE, matrix);
 
         sprite->get_texture()->active(0);
-        sprite->get_texture()->bind();
+        sprite->get_tileset()->bind();
 
         sprite->get_vertex_buffer()->bind();
         index_buffer->bind();
@@ -608,12 +608,15 @@ public:
     void render(texture*       texture,
                 vertex_buffer* vertex_buffer,
                 index_buffer*  index_buffer,
-                float*         matrix_first_value) final
+                float*         min_uv,
+                float*         max_uv,
+                float*         matrix) final
     {
         map_program->use();
         map_program->set_uniform_1i("texture", 0);
-        map_program->set_uniform_matrix4fv(
-            "matrix", 1, GL_FALSE, matrix_first_value);
+        map_program->set_uniform_2fv("min_uv", 1, min_uv);
+        map_program->set_uniform_2fv("max_uv", 1, max_uv);
+        map_program->set_uniform_matrix4fv("matrix", 1, GL_FALSE, matrix);
 
         texture->active(0);
         texture->bind();
@@ -645,14 +648,14 @@ public:
             GL_TRIANGLES, index_buffer->get_size(), GL_UNSIGNED_SHORT, 0);
         gl_check();
     }
-    void render_buttons(float* matrix) final
+    /*void render_buttons(float* matrix) final
     {
         for (auto button : mobile_buttons)
             render(button.texture_,
                    button.vertex_buffer_,
                    buttons_index_buffer,
                    matrix);
-    }
+    }*/
     bool render_gui(bool& show_menu_window, gui_type type) final
     {
         ImGui_ImplOpenGL3_NewFrame();

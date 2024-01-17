@@ -6,52 +6,63 @@
 
 #include <glm/matrix.hpp>
 
-static texture* floor_                   = nullptr;
-static texture* wall                     = nullptr;
-static texture* wall_top                 = nullptr;
-static texture* wall_left                = nullptr;
-static texture* wall_right               = nullptr;
-static texture* wall_bottom              = nullptr;
-static texture* wall_top_corner_left     = nullptr;
-static texture* wall_top_corner_right    = nullptr;
-static texture* wall_bottom_corner_left  = nullptr;
-static texture* wall_bottom_corner_right = nullptr;
+static texture* dungeon = nullptr;
 
 void map::initialize()
 {
-    floor_                  = create_texture("img/floor.png");
-    wall                    = create_texture("img/wall.png");
-    wall_top                = create_texture("img/wall_top.png");
-    wall_left               = create_texture("img/wall_left.png");
-    wall_right              = create_texture("img/wall_right.png");
-    wall_bottom             = create_texture("img/wall_bottom.png");
-    wall_top_corner_left    = create_texture("img/wall_corner_top_left.png");
-    wall_top_corner_right   = create_texture("img/wall_corner_top_right.png");
-    wall_bottom_corner_left = create_texture("img/wall_corner_bottom_left.png");
-    wall_bottom_corner_right =
-        create_texture("img/wall_corner_bottom_right.png");
+    dungeon = create_texture("img/dungeon.png");
 }
 
 map::map(float tile_width_, float tile_height_)
     : tile_width(tile_width_)
     , tile_height(tile_height_)
 {
-    add_tile(floor_, map_tile::floor);
-    add_tile(wall, map_tile::wall);
-    add_tile(wall_top, map_tile::wall_top);
-    add_tile(wall_left, map_tile::wall_left);
-    add_tile(wall_right, map_tile::wall_right);
-    add_tile(wall_bottom, map_tile::wall_bottom);
-    add_tile(wall_top_corner_left, map_tile::wall_corner_top_left);
-    add_tile(wall_top_corner_right, map_tile::wall_corner_top_right);
-    add_tile(wall_bottom_corner_left, map_tile::wall_corner_bottom_left);
-    add_tile(wall_bottom_corner_right, map_tile::wall_corner_bottom_right);
+    tileset = dungeon;
+
+    add_tile(map_tile_type::wall,
+             32.f / 240.f,
+             48.0 / 240.0,
+             1.0 - 48.0 / 288.0,
+             1.0 - 32.0 / 288.0);
+    add_tile(map_tile_type::brick_top,
+             32.f / 240.f,
+             48.0 / 240.0,
+             1.0 - 64.0 / 288.0,
+             1.0 - 48.0 / 288.0);
+    add_tile(map_tile_type::brick_bottom,
+             32.f / 240.f,
+             48.0 / 240.0,
+             1.0 - 32.0 / 288.0,
+             1.0 - 16.0 / 288.0);
+    add_tile(map_tile_type::brick_left,
+             48.f / 240.f,
+             64.0 / 240.0,
+             1.0 - 48.0 / 288.0,
+             1.0 - 32.0 / 288.0);
+    add_tile(map_tile_type::brick_right,
+             16.f / 240.f,
+             32.0 / 240.0,
+             1.0 - 48.0 / 288.0,
+             1.0 - 32.0 / 288.0);
+
+    /*add_tile(
+        wall_top_corner_left, map_tile_type::wall_corner_top_left, 0.f, 0.f);
+    add_tile(
+        wall_top_corner_right, map_tile_type::wall_corner_top_right, 0.f, 0.f);
+    add_tile(wall_bottom_corner_left,
+             map_tile_type::wall_corner_bottom_left,
+             0.f,
+             0.f);
+    add_tile(wall_bottom_corner_right,
+             map_tile_type::wall_corner_bottom_right,
+             0.f,
+             0.f);*/
 }
 
-void map::draw_vertical_line(int      start_x,
-                             int      start_y,
-                             int      length,
-                             map_tile type)
+void map::draw_vertical_line(int           start_x,
+                             int           start_y,
+                             int           length,
+                             map_tile_type type)
 {
     auto it = find_tile(type);
 
@@ -78,14 +89,14 @@ void map::draw_vertical_line(int      start_x,
               0.f,
               0.f });
         it->tile_vertex_buffer->buffer_data();
-        it->tile_index_buffer->add_indexes(static_cast<size_t>(length * 4));
+        it->tile_index_buffer->add_indexes(static_cast<size_t>(4));
     }
 }
 
-void map::draw_horizontal_line(int      start_x,
-                               int      start_y,
-                               int      length,
-                               map_tile type)
+void map::draw_horizontal_line(int           start_x,
+                               int           start_y,
+                               int           length,
+                               map_tile_type type)
 {
     auto it = find_tile(type);
 
@@ -113,12 +124,12 @@ void map::draw_horizontal_line(int      start_x,
               0.f });
 
         it->tile_vertex_buffer->buffer_data();
-        it->tile_index_buffer->add_indexes(static_cast<size_t>(length * 4));
+        it->tile_index_buffer->add_indexes(static_cast<size_t>(4));
     }
 }
 
 void map::fill_rectangle(
-    int start_x, int start_y, int width_, int height_, map_tile type)
+    int start_x, int start_y, int width_, int height_, map_tile_type type)
 {
     auto it = find_tile(type);
 
@@ -146,26 +157,18 @@ void map::fill_rectangle(
               0.f });
 
         it->tile_vertex_buffer->buffer_data();
-        it->tile_index_buffer->add_indexes(
-            static_cast<size_t>(width_ * height_ * 4));
+        it->tile_index_buffer->add_indexes(static_cast<size_t>(4));
     }
     else
         std::cout << "Such tile doesn't exists" << std::endl;
 }
 
-texture* map::get_tile(map_tile type)
+texture* map::get_tileset()
 {
-    auto it = find_tile(type);
-
-    if (it != tiles.end())
-        return it->tile_texture;
-    else
-        std::cout << "Such tile doesn't exists" << std::endl;
-
-    return nullptr;
+    return tileset;
 }
 
-vertex_buffer* map::get_vertex_buffer(map_tile type)
+vertex_buffer* map::get_vertex_buffer(map_tile_type type)
 {
     auto it = find_tile(type);
 
@@ -177,7 +180,7 @@ vertex_buffer* map::get_vertex_buffer(map_tile type)
     return nullptr;
 }
 
-index_buffer* map::get_index_buffer(map_tile type)
+index_buffer* map::get_index_buffer(map_tile_type type)
 {
     auto it = find_tile(type);
 
@@ -189,14 +192,52 @@ index_buffer* map::get_index_buffer(map_tile type)
     return nullptr;
 }
 
-auto map::find_tile(map_tile type) -> std::vector<tile>::iterator
+float* map::get_tile_min_uv(map_tile_type type)
+{
+    auto it = find_tile(type);
+
+    if (it != tiles.end())
+        return it->min_uv;
+    else
+        std::cout << "Such tile doesn't exists" << std::endl;
+
+    return nullptr;
+}
+
+float* map::get_tile_max_uv(map_tile_type type)
+{
+    auto it = find_tile(type);
+
+    if (it != tiles.end())
+        return it->max_uv;
+    else
+        std::cout << "Such tile doesn't exists" << std::endl;
+
+    return nullptr;
+}
+
+map::tile::tile(
+    map_tile_type type, float min_u, float max_u, float min_v, float max_v)
+    : type(type)
+{
+    min_uv[0] = min_u;
+    min_uv[1] = min_v;
+    max_uv[0] = max_u;
+    max_uv[1] = max_v;
+
+    tile_vertex_buffer = create_vertex_buffer();
+    tile_index_buffer  = create_index_buffer();
+}
+
+auto map::find_tile(map_tile_type type) -> std::vector<tile>::iterator
 {
     return std::find_if(tiles.begin(),
                         tiles.end(),
                         [&](const tile tile) { return tile.type == type; });
 }
 
-void map::add_tile(texture* tile_texture, map_tile type)
+void map::add_tile(
+    map_tile_type type, float min_u, float max_u, float min_v, float max_v)
 {
     auto it = find_tile(type);
 
@@ -207,12 +248,8 @@ void map::add_tile(texture* tile_texture, map_tile type)
     }
     else
     {
-        tile tile;
-        tile.type         = type;
-        tile.tile_texture = tile_texture;
+        tile tile = { type, min_u, max_u, min_v, max_v };
         tiles.push_back(tile);
-        tiles[tiles.size() - 1].tile_vertex_buffer = create_vertex_buffer();
-        tiles[tiles.size() - 1].tile_index_buffer  = create_index_buffer();
     }
 }
 
@@ -284,9 +321,9 @@ void delete_tiles_vertical(int      start_x,
 
 map::~map()
 {
+    delete tileset;
     for (auto& tile : tiles)
     {
-        delete tile.tile_texture;
         delete tile.tile_vertex_buffer;
         delete tile.tile_index_buffer;
     }
@@ -297,22 +334,23 @@ void generate_level_1(map*                 map,
                       float                window_width,
                       float                window_height)
 {
+    map->draw_horizontal_line(4, 9, 5, map_tile_type::brick_bottom);
+
     // first room
-    map->fill_rectangle(4, 4, 6, 5, map_tile::floor);
-    map->draw_horizontal_line(4, 3, 6, map_tile::wall);
-    map->draw_horizontal_line(4, 2, 6, map_tile::wall_top);
-    map->draw_horizontal_line(3, 2, 1, map_tile::wall_corner_top_left);
-    map->draw_horizontal_line(10, 2, 1, map_tile::wall_corner_top_right);
-    map->draw_horizontal_line(4, 9, 6, map_tile::wall);
-    map->draw_horizontal_line(4, 9, 6, map_tile::wall_bottom);
-    map->draw_horizontal_line(3, 9, 1, map_tile::wall_corner_bottom_left);
-    map->draw_horizontal_line(10, 9, 1, map_tile::wall_corner_bottom_right);
-    map->draw_vertical_line(3, 3, 6, map_tile::wall_left);
-    map->draw_vertical_line(10, 3, 1, map_tile::wall_right);
-    map->draw_vertical_line(10, 8, 1, map_tile::wall_right);
+    map->fill_rectangle(4, 4, 6, 5, map_tile_type::wall);
+    map->draw_horizontal_line(4, 2, 6, map_tile_type::brick_top);
+    // map->draw_horizontal_line(3, 2, 1, map_tile::wall_corner_top_left);
+    // map->draw_horizontal_line(10, 2, 1, map_tile::wall_corner_top_right);
+    map->draw_horizontal_line(4, 9, 6, map_tile_type::brick_bottom);
+    // map->draw_horizontal_line(3, 9, 1,
+    // map_tile_type::wall_corner_bottom_left); map->draw_horizontal_line(10, 9,
+    // 1, map_tile::wall_corner_bottom_right);
+    map->draw_vertical_line(3, 3, 6, map_tile_type::brick_left);
+    map->draw_vertical_line(10, 3, 1, map_tile_type::brick_right);
+    map->draw_vertical_line(10, 8, 1, map_tile_type::brick_right);
 
     // hall from first room to second
-    map->fill_rectangle(10, 5, 4, 3, map_tile::floor);
+    /*map->fill_rectangle(10, 5, 4, 3, map_tile::floor);
     map->draw_horizontal_line(10, 4, 4, map_tile::wall);
     map->draw_horizontal_line(10, 3, 4, map_tile::wall_top);
     map->draw_horizontal_line(10, 8, 4, map_tile::wall);
@@ -392,7 +430,7 @@ void generate_level_1(map*                 map,
                                   1.75f,
                                   game_object_state::run,
                                   enemy_type::spearman);
-    enemies.push_back(skeleton_5);
+    enemies.push_back(skeleton_5);*/
 }
 
 void game_logic_level_1(map*                 map,
@@ -404,7 +442,7 @@ void game_logic_level_1(map*                 map,
     if (hero->get_global_pos_x() > 900.f && !enemies[0]->is_spawned())
     {
         enemies[0]->spawn();
-        map->draw_vertical_line(13, 4, 4, map_tile::wall_left);
+        map->draw_vertical_line(13, 4, 4, map_tile_type::brick_left);
     }
     else if (!enemies[0]->is_alive() && enemies[0]->is_spawned() &&
              !enemies[1]->is_spawned())
@@ -419,8 +457,8 @@ void game_logic_level_1(map*                 map,
     else if (hero->get_global_pos_y() > 1300.f && !enemies[2]->is_spawned())
     {
         enemies[2]->spawn();
-        map->draw_horizontal_line(18, 17, 4, map_tile::wall_top);
-        map->draw_horizontal_line(18, 18, 4, map_tile::wall);
+        map->draw_horizontal_line(18, 17, 4, map_tile_type::brick_top);
+        map->draw_horizontal_line(18, 18, 4, map_tile_type::wall);
     }
     else if (!enemies[2]->is_alive() && enemies[2]->is_spawned() &&
              !enemies[3]->is_spawned())
