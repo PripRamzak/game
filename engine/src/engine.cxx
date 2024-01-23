@@ -483,8 +483,7 @@ public:
                     event = event::turn_off;
                     return true;
                 case SDL_EVENT_MOUSE_MOTION:
-                    std::cout << "mouse motion " << std::endl;
-                    break;
+                    return true;
                 default:
                     break;
             }
