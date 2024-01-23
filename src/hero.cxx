@@ -1,7 +1,6 @@
 #include "include/hero.hxx"
 
 #include <algorithm>
-#include <cmath>
 
 static animation* warrior_idle_anim   = nullptr;
 static animation* warrior_run_anim    = nullptr;
@@ -17,9 +16,11 @@ hero::hero(int               health,
            float             global_pos_y,
            float             size,
            game_object_state state,
-           float             jump_height_)
+           float             jump_force,
+           float             jump_height)
     : game_object(health, speed, global_pos_x, global_pos_y, size, state)
-    , jump_height(jump_height_)
+    , jump_height(jump_height)
+    , jump_force(jump_force)
 {
     add_sprite(warrior_idle_anim, game_object_state::idle);
     add_sprite(warrior_run_anim, game_object_state::run);
@@ -40,8 +41,8 @@ void hero::initialize()
             create_texture("img/warrior_run.png");
         texture* warrior_attack_sprite_sheet =
             create_texture("img/warrior_attack.png");
-        texture* warrior_jump_texture =
-            create_texture("img/warrior_jump_n_fall.png");
+        texture* warrior_jump_texture = create_texture("img/warrior_jump.png");
+        texture* warrior_fall_texture = create_texture("img/warrior_fall.png");
 
         sprite* warrior_idle_sprite =
             new sprite(warrior_idle_sprite_sheet, 48.f, 48.f);
@@ -51,13 +52,15 @@ void hero::initialize()
             new sprite(warrior_attack_sprite_sheet, 86.f, 48.f);
         sprite* warrior_jump_sprite =
             new sprite(warrior_jump_texture, 48.f, 48.f);
+        sprite* warrior_fall_sprite =
+            new sprite(warrior_fall_texture, 48.f, 48.f);
 
         warrior_idle_anim = new animation(warrior_idle_sprite, 6, 24.f, 150ms);
         warrior_run_anim  = new animation(warrior_run_sprite, 6, 24.f, 150ms);
         warrior_attack_anim =
             new animation(warrior_attack_sprite, 4, 6.f, 250ms);
         warrior_jump_anim = new animation(warrior_jump_sprite, 1, 0.f, 250ms);
-        warrior_fall_anim = new animation(warrior_jump_sprite, 1, 0.f, 250ms);
+        warrior_fall_anim = new animation(warrior_fall_sprite, 1, 0.f, 250ms);
 
         hero_init = true;
     }
@@ -69,12 +72,6 @@ void hero::move(float dx, float dy, map* map)
 {
     float delta_x = dx * speed;
     float delta_y = dy * speed;
-
-    if (dx != 0 && dy != 0)
-    {
-        delta_x /= sqrt(2.f);
-        delta_y /= sqrt(2.f);
-    }
 
     global_pos_y += delta_y;
 
@@ -102,9 +99,6 @@ void hero::move(float dx, float dy, map* map)
         direction = 1;
         if (check_collision_map_x_axis(map, map_tile_type::brick_left))
         {
-            /*if (state == game_object_state::jump ||
-                state == game_object_state::fall)
-                set_state(game_object_state::fall);*/
             if (state != game_object_state::jump &&
                 state != game_object_state::fall)
             {
@@ -118,9 +112,6 @@ void hero::move(float dx, float dy, map* map)
         direction = 0;
         if (check_collision_map_x_axis(map, map_tile_type::brick_right))
         {
-            /*if (state == game_object_state::jump ||
-                state == game_object_state::fall)
-                set_state(game_object_state::fall);*/
             if (state != game_object_state::jump &&
                 state != game_object_state::fall)
             {
@@ -140,7 +131,7 @@ void hero::jump()
 
     std::cout << jump_height_dt << std::endl;
 
-    jump_height_dt += 1.5 * speed;
+    jump_height_dt += jump_force;
 
     if (jump_height_dt >= jump_height)
     {
@@ -254,13 +245,11 @@ bool hero::check_collision_map_x_axis(map* map, map_tile_type type)
                 case map_tile_type::brick_left:
                     global_pos_x -= global_pos_x + hero_vertices->x * size -
                                     (map_tile_vertices + 2)->x;
-                    std::cout << "left" << std::endl;
                     break;
                 case map_tile_type::brick_right:
                     global_pos_x -= global_pos_x +
                                     (hero_vertices + 2)->x * size -
                                     map_tile_vertices->x;
-                    std::cout << "right" << std::endl;
                     break;
             }
             return true;
@@ -301,12 +290,10 @@ bool hero::check_collision_map_y_axis(map* map, map_tile_type type)
                     global_pos_y -= global_pos_y +
                                     (hero_vertices + 2)->y * size -
                                     map_tile_vertices->y;
-                    std::cout << "bot" << std::endl;
                     break;
                 case map_tile_type::brick_top:
                     global_pos_y -= global_pos_y + hero_vertices->y * size -
                                     (map_tile_vertices + 2)->y;
-                    std::cout << "top" << std::endl;
                     break;
             }
             return true;

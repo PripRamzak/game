@@ -41,8 +41,8 @@ int main(int /*argc*/, char** /*argv*/)
     // Warrior creating
 
     hero::initialize();
-    hero* warrior =
-        new hero(4, 10.f, 300.f, 300.f, 2.f, game_object_state::idle, 300.f);
+    hero* warrior = new hero(
+        4, 10.f, 300.f, 300.f, 2.f, game_object_state::idle, 12.f, 300.f);
 
     glm::mat4 warrior_mat_size =
         glm::scale(glm::mat4{ 1 },
@@ -153,12 +153,14 @@ int main(int /*argc*/, char** /*argv*/)
 
                     if (warrior->get_state() == game_object_state::jump)
                     {
-                        dy -= 1.5;
+                        dy--;
                         warrior->jump();
                     }
+                    else if (warrior->get_state() == game_object_state::fall)
+                        dy++;
                     else if (!warrior->check_collision_map_y_axis(
                                  dungeon_map, map_tile_type::brick_bottom))
-                        dy += 1.5;
+                        dy++;
 
                     if (engine->check_key(key::left))
                         dx--;

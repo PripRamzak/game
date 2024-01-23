@@ -12,7 +12,8 @@ public:
          float             global_pos_y,
          float             size,
          game_object_state state,
-         float             jump_height_);
+         float             jump_force,
+         float             jump_height);
     static void initialize();
     void        move(float dx, float dy, map* map);
     void        jump();
@@ -24,6 +25,7 @@ public:
 
 private:
     bool  attacked       = false;
+    float jump_force     = 0.f;
     float jump_height    = 0.f;
     float jump_height_dt = 0.f;
 };
