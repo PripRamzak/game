@@ -23,15 +23,17 @@ enemy::enemy(int               health,
 {
     if (type == enemy_type::warrior)
     {
-        add_sprite(skeleton_warrior_idle_anim, game_object_state::idle);
-        add_sprite(skeleton_warrior_run_anim, game_object_state::run);
-        add_sprite(skeleton_warrior_attack_anim, game_object_state::attack);
+        sprites.emplace(game_object_state::idle, skeleton_warrior_idle_anim);
+        sprites.emplace(game_object_state::run, skeleton_warrior_run_anim);
+        sprites.emplace(game_object_state::attack,
+                        skeleton_warrior_attack_anim);
     }
     else
     {
-        add_sprite(skeleton_spearman_idle_anim, game_object_state::idle);
-        add_sprite(skeleton_spearman_run_anim, game_object_state::run);
-        add_sprite(skeleton_spearman_attack_anim, game_object_state::attack);
+        sprites.emplace(game_object_state::idle, skeleton_spearman_idle_anim);
+        sprites.emplace(game_object_state::run, skeleton_spearman_run_anim);
+        sprites.emplace(game_object_state::attack,
+                        skeleton_spearman_attack_anim);
     }
 }
 
@@ -164,10 +166,9 @@ void enemy::move(game_object* hero)
     }
     else if (state == game_object_state::idle)
     {
-        auto it = find_sprite(state);
-        int  sprite_current_number =
-            it->game_object_anim_sprite->get_current_number(direction);
-        int sprite_quantity = it->game_object_anim_sprite->get_quantity();
+        animation* curr_anim      = sprites[state];
+        int sprite_current_number = curr_anim->get_current_number(direction);
+        int sprite_quantity       = curr_anim->get_quantity();
 
         if (sprite_current_number == sprite_quantity - 1 && direction == 0 ||
             sprite_current_number == 0 && direction == 1)
@@ -179,10 +180,9 @@ void enemy::move(game_object* hero)
 
 void enemy::attack(game_object* hero)
 {
-    auto it = find_sprite(state);
-    int  sprite_current_number =
-        it->game_object_anim_sprite->get_current_number(direction);
-    int sprite_quantity = it->game_object_anim_sprite->get_quantity();
+    animation* curr_anim             = sprites[state];
+    int        sprite_current_number = curr_anim->get_current_number(direction);
+    int        sprite_quantity       = curr_anim->get_quantity();
 
     // End of attack
 
@@ -209,48 +209,35 @@ void enemy::attack(game_object* hero)
 
 bool enemy::check_hero_collision_x(game_object* hero)
 {
-    auto it = find_sprite(state);
+    float hero_current_pos_x = hero->get_global_pos_x();
+    float hero_size          = hero->get_size();
+    float hero_width = hero->get_animated_sprite()->get_sprite()->get_width();
+    float width      = sprites[state]->get_sprite()->get_width();
 
-    if (it != sprites.end())
-    {
-        float hero_current_pos_x = hero->get_global_pos_x();
-        float hero_size          = hero->get_size();
-        float hero_width =
-            hero->get_animated_sprite()->get_sprite()->get_width();
-        float width = it->game_object_anim_sprite->get_sprite()->get_width();
-
-        bool collision_x = hero_current_pos_x + hero_width / 2 * hero_size >=
-                               get_global_pos_x() - width / 2 * size &&
-                           get_global_pos_x() + width / 2 * size >=
-                               hero_current_pos_x - hero_width / 2 * hero_size;
-
-        if (collision_x)
-            return true;
-    }
+    bool collision_x = hero_current_pos_x + hero_width / 2 * hero_size >=
+                           get_global_pos_x() - width / 2 * size &&
+                       get_global_pos_x() + width / 2 * size >=
+                           hero_current_pos_x - hero_width / 2 * hero_size;
+    if (collision_x)
+        return true;
 
     return false;
 }
 
 bool enemy::check_hero_collision_y(game_object* hero)
 {
-    auto it = find_sprite(state);
+    float hero_current_pos_y = hero->get_global_pos_y();
+    float hero_size          = hero->get_size();
+    float hero_height = hero->get_animated_sprite()->get_sprite()->get_height();
+    float height      = sprites[state]->get_sprite()->get_height();
 
-    if (it != sprites.end())
-    {
-        float hero_current_pos_y = hero->get_global_pos_y();
-        float hero_size          = hero->get_size();
-        float hero_height =
-            hero->get_animated_sprite()->get_sprite()->get_height();
-        float height = it->game_object_anim_sprite->get_sprite()->get_height();
+    bool collision_y = hero_current_pos_y + hero_height / 2 * hero_size >=
+                           get_global_pos_y() - height / 2 * size &&
+                       get_global_pos_y() + height / 2 * size >=
+                           hero_current_pos_y - hero_height / 2 * hero_size;
 
-        bool collision_y = hero_current_pos_y + hero_height / 2 * hero_size >=
-                               get_global_pos_y() - height / 2 * size &&
-                           get_global_pos_y() + height / 2 * size >=
-                               hero_current_pos_y - hero_height / 2 * hero_size;
-
-        if (collision_y)
-            return true;
-    }
+    if (collision_y)
+        return true;
 
     return false;
 }

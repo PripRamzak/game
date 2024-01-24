@@ -6,7 +6,7 @@
 #include "engine/include/vertex_buffer.hxx"
 #include "include/enemy.hxx"
 
-#include <vector>
+#include <unordered_map>
 
 enum class map_tile_type
 {
@@ -55,27 +55,19 @@ public:
 private:
     struct tile
     {
-        map_tile_type  type;
         vertex_buffer* tile_vertex_buffer;
         index_buffer*  tile_index_buffer;
         float          min_uv[2];
         float          max_uv[2];
 
-        tile(map_tile_type type,
-             float         min_u,
-             float         max_u,
-             float         min_v,
-             float         max_v);
+        tile();
+        tile(float min_u, float max_u, float min_v, float max_v);
     };
 
-    void add_tile(
-        map_tile_type type, float min_u, float max_u, float min_v, float max_v);
-    auto find_tile(map_tile_type type) -> std::vector<tile>::iterator;
-
-    texture*          tileset = nullptr;
-    std::vector<tile> tiles;
-    float             tile_width  = 0;
-    float             tile_height = 0;
+    texture*                                tileset = nullptr;
+    std::unordered_map<map_tile_type, tile> tiles;
+    float                                   tile_width  = 0;
+    float                                   tile_height = 0;
 };
 
 void generate_level_1(map*                 map,

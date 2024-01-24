@@ -22,11 +22,11 @@ hero::hero(int               health,
     , jump_height(jump_height)
     , jump_force(jump_force)
 {
-    add_sprite(warrior_idle_anim, game_object_state::idle);
-    add_sprite(warrior_run_anim, game_object_state::run);
-    add_sprite(warrior_attack_anim, game_object_state::attack);
-    add_sprite(warrior_jump_anim, game_object_state::jump);
-    add_sprite(warrior_fall_anim, game_object_state::fall);
+    sprites.emplace(game_object_state::idle, warrior_idle_anim);
+    sprites.emplace(game_object_state::run, warrior_run_anim);
+    sprites.emplace(game_object_state::attack, warrior_attack_anim);
+    sprites.emplace(game_object_state::jump, warrior_jump_anim);
+    sprites.emplace(game_object_state::fall, warrior_fall_anim);
 }
 
 void hero::initialize()
@@ -142,9 +142,7 @@ void hero::jump()
 
 void hero::attack(game_object* enemy, bool skeleton_collision)
 {
-    auto it = find_sprite(state);
-    int  sprite_current_number =
-        it->game_object_anim_sprite->get_current_number(direction);
+    int sprite_current_number = sprites[state]->get_current_number(direction);
 
     if (sprite_current_number == 0 && direction == 0 ||
         sprite_current_number == 3 && direction == 1)

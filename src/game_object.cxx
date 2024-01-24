@@ -18,37 +18,6 @@ game_object::game_object(int               health_,
 {
 }
 
-auto game_object::find_sprite(game_object_state state_)
-    -> std::vector<anim_sprite_state>::iterator
-{
-    auto it = std::find_if(sprites.begin(),
-                           sprites.end(),
-                           [&](const anim_sprite_state sprite)
-                           { return sprite.state == state_; });
-
-    return it;
-}
-
-void game_object::add_sprite(animation*        game_object_anim_sprite_,
-                             game_object_state state_)
-{
-    auto it = find_sprite(state_);
-
-    if (it != sprites.end())
-    {
-        std::cout << "This tile already exists" << std::endl;
-        return;
-    }
-    else
-    {
-        anim_sprite_state sprite_;
-        sprite_.game_object_anim_sprite = game_object_anim_sprite_;
-        sprite_.state                   = state_;
-
-        sprites.push_back(sprite_);
-    }
-}
-
 bool game_object::is_alive()
 {
     return health > 0 ? true : false;
@@ -62,16 +31,7 @@ void game_object::hurt()
 void game_object::set_state(game_object_state state_)
 {
     if (state != state_)
-    {
-        const auto it = find_sprite(state);
-        if (it != sprites.end())
-            it->game_object_anim_sprite->reset();
-        else
-        {
-            std::cout << "Such sprite doesn't exists" << std::endl;
-            return;
-        }
-    }
+        sprites[state_]->reset();
     state = state_;
 }
 
@@ -107,19 +67,11 @@ int game_object::get_direction()
 
 animation* game_object::get_animated_sprite()
 {
-    auto it = find_sprite(state);
-
-    if (it != sprites.end())
-        return it->game_object_anim_sprite;
-    else
-    {
-        std::cout << "Such sprite doesn't exists" << std::endl;
-        return nullptr;
-    }
+    return sprites[state];
 }
 
 game_object::~game_object()
 {
     for (auto sprite : sprites)
-        delete sprite.game_object_anim_sprite;
+        delete sprite.second;
 }

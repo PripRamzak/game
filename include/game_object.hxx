@@ -4,7 +4,7 @@
 #include "engine/include/geometry.hxx"
 #include "engine/include/vertex_buffer.hxx"
 
-#include <vector>
+#include <unordered_map>
 
 enum class game_object_state
 {
@@ -14,12 +14,6 @@ enum class game_object_state
     jump,
     fall,
     run_n_attack
-};
-
-struct anim_sprite_state
-{
-    animation*        game_object_anim_sprite = nullptr;
-    game_object_state state;
 };
 
 class game_object
@@ -44,17 +38,12 @@ public:
     virtual ~game_object();
 
 protected:
-    auto find_sprite(game_object_state state_)
-        -> std::vector<anim_sprite_state>::iterator;
-    void add_sprite(animation*        game_object_anim_sprite_,
-                    game_object_state state_);
-
-    std::vector<anim_sprite_state> sprites;
-    int                            health       = 0;
-    float                          speed        = 0.f;
-    float                          global_pos_x = 0.f;
-    float                          global_pos_y = 0.f;
-    float                          size         = 0.f;
-    int                            direction    = 0;
-    game_object_state              state        = game_object_state::idle;
+    std::unordered_map<game_object_state, animation*> sprites;
+    int                                               health       = 0;
+    float                                             speed        = 0.f;
+    float                                             global_pos_x = 0.f;
+    float                                             global_pos_y = 0.f;
+    float                                             size         = 0.f;
+    int                                               direction    = 0;
+    game_object_state state = game_object_state::idle;
 };
