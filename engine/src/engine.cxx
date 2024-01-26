@@ -342,7 +342,7 @@ public:
         gl_check();
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         gl_check();
-        glClearColor(0.1f, 0.1f, 0.1f, 0.f);
+        glClearColor(24.f / 255.f, 20.f / 255.f, 37.f / 255.f, 0.f);
         gl_check();
 
         SDL_GetWindowSizeInPixels(

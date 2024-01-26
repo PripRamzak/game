@@ -42,7 +42,7 @@ int main(int /*argc*/, char** /*argv*/)
 
     hero::initialize();
     hero* warrior = new hero(
-        4, 10.f, 300.f, 300.f, 2.f, game_object_state::idle, 12.f, 300.f);
+        4, 10.f, 300.f, 550.f, 2.f, game_object_state::idle, 12.f, 300.f);
 
     glm::mat4 warrior_mat_size =
         glm::scale(glm::mat4{ 1 },
@@ -56,8 +56,7 @@ int main(int /*argc*/, char** /*argv*/)
     // Map creating
 
     map::initialize();
-    map* dungeon_map = new map(64.f, 64.f);
-    generate_level_1(dungeon_map, enemies, window_width, window_height);
+    map* dungeon_map = new map(64.f, 64.f, "data/level_1.txt");
 
     // Interface
 
@@ -185,12 +184,12 @@ int main(int /*argc*/, char** /*argv*/)
 
             glm::mat4 map_mat_result = projection * mat_view;
 
-            engine->render(dungeon_map->get_tileset(),
+            /*engine->render(dungeon_map->get_tileset(),
                            dungeon_map->get_vertex_buffer(map_tile_type::wall),
                            dungeon_map->get_index_buffer(map_tile_type::wall),
                            dungeon_map->get_tile_min_uv(map_tile_type::wall),
                            dungeon_map->get_tile_max_uv(map_tile_type::wall),
-                           &map_mat_result[0][0]);
+                           &map_mat_result[0][0]);*/
             engine->render(
                 dungeon_map->get_tileset(),
                 dungeon_map->get_vertex_buffer(map_tile_type::brick_top),
@@ -219,34 +218,37 @@ int main(int /*argc*/, char** /*argv*/)
                 dungeon_map->get_tile_min_uv(map_tile_type::brick_right),
                 dungeon_map->get_tile_max_uv(map_tile_type::brick_right),
                 &map_mat_result[0][0]);
-
-            /*engine->render(
-                dungeon_map->get_tile(map_tile::wall_corner_top_left),
-                dungeon_map->get_vertex_buffer(map_tile::wall_corner_top_left),
-                dungeon_map->get_index_buffer(map_tile::wall_corner_top_left),
-                &map_mat_result[0][0]);
-
             engine->render(
-                dungeon_map->get_tile(map_tile::wall_corner_top_right),
-                dungeon_map->get_vertex_buffer(map_tile::wall_corner_top_right),
-                dungeon_map->get_index_buffer(map_tile::wall_corner_top_right),
+                dungeon_map->get_tileset(),
+                dungeon_map->get_vertex_buffer(map_tile_type::brick_top_left),
+                dungeon_map->get_index_buffer(map_tile_type::brick_top_left),
+                dungeon_map->get_tile_min_uv(map_tile_type::brick_top_left),
+                dungeon_map->get_tile_max_uv(map_tile_type::brick_top_left),
                 &map_mat_result[0][0]);
-
             engine->render(
-                dungeon_map->get_tile(map_tile::wall_corner_bottom_left),
+                dungeon_map->get_tileset(),
+                dungeon_map->get_vertex_buffer(map_tile_type::brick_top_right),
+                dungeon_map->get_index_buffer(map_tile_type::brick_top_right),
+                dungeon_map->get_tile_min_uv(map_tile_type::brick_top_right),
+                dungeon_map->get_tile_max_uv(map_tile_type::brick_top_right),
+                &map_mat_result[0][0]);
+            engine->render(
+                dungeon_map->get_tileset(),
                 dungeon_map->get_vertex_buffer(
-                    map_tile::wall_corner_bottom_left),
-                dungeon_map->get_index_buffer(
-                    map_tile::wall_corner_bottom_left),
+                    map_tile_type::brick_bottom_left),
+                dungeon_map->get_index_buffer(map_tile_type::brick_bottom_left),
+                dungeon_map->get_tile_min_uv(map_tile_type::brick_bottom_left),
+                dungeon_map->get_tile_max_uv(map_tile_type::brick_bottom_left),
                 &map_mat_result[0][0]);
-
             engine->render(
-                dungeon_map->get_tile(map_tile::wall_corner_bottom_right),
+                dungeon_map->get_tileset(),
                 dungeon_map->get_vertex_buffer(
-                    map_tile::wall_corner_bottom_right),
+                    map_tile_type::brick_bottom_right),
                 dungeon_map->get_index_buffer(
-                    map_tile::wall_corner_bottom_right),
-                &map_mat_result[0][0]);*/
+                    map_tile_type::brick_bottom_right),
+                dungeon_map->get_tile_min_uv(map_tile_type::brick_bottom_right),
+                dungeon_map->get_tile_max_uv(map_tile_type::brick_bottom_right),
+                &map_mat_result[0][0]);
 
             // Objects render
 

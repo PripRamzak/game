@@ -10,33 +10,28 @@
 
 enum class map_tile_type
 {
-    wall,
     brick_top,
     brick_bottom,
     brick_left,
     brick_right,
-    wall_corner_top_left,
-    wall_corner_top_right,
-    wall_corner_bottom_left,
-    wall_corner_bottom_right,
+    brick_top_left,
+    brick_top_right,
+    brick_bottom_left,
+    brick_bottom_right,
+    plate_top_left,
+    plate_top_right,
+    plate_bottom_left,
+    plate_bottom_right,
     coin
 };
+
+std::istream& operator>>(std::istream& is, map_tile_type& type);
 
 class map
 {
 public:
-    map(float tile_width_, float tile_height_);
+    map(float tile_width_, float tile_height_, std::string file_path);
     static void initialize();
-    void        draw_vertical_line(int           start_x,
-                                   int           start_y,
-                                   int           length,
-                                   map_tile_type type);
-    void        draw_horizontal_line(int           start_x,
-                                     int           start_y,
-                                     int           length,
-                                     map_tile_type type);
-    void        fill_rectangle(
-               int start_x, int start_y, int width_, int height_, map_tile_type type);
     /*virtual void           delete_tiles_horizontal(int      start_x,
                                                    int      start_y,
                                                    int      length,
@@ -64,16 +59,26 @@ private:
         tile(float min_u, float max_u, float min_v, float max_v);
     };
 
+    void draw_vertical_line(float         start_x,
+                            float         start_y,
+                            int           length,
+                            map_tile_type type);
+    void draw_horizontal_line(float         start_x,
+                              float         start_y,
+                              int           length,
+                              map_tile_type type);
+    void fill_rectangle(float         start_x,
+                        float         start_y,
+                        int           width,
+                        int           height,
+                        map_tile_type type);
+
     texture*                                tileset = nullptr;
     std::unordered_map<map_tile_type, tile> tiles;
     float                                   tile_width  = 0;
     float                                   tile_height = 0;
 };
 
-void generate_level_1(map*                 map,
-                      std::vector<enemy*>& enemies,
-                      float                window_width,
-                      float                window_height);
 void game_logic_level_1(map*                 map,
                         game_object*         hero,
                         std::vector<enemy*>& enemies);
