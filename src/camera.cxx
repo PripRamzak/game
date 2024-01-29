@@ -20,8 +20,8 @@ public:
     }
     void look_at(float pos_x, float pos_y) final
     {
-        position = glm::vec3(pos_x - width, pos_y - height, 2.f);
-        target   = glm::vec3(pos_x - width, pos_y - height, 0.f);
+        position = glm::vec3(pos_x - width, pos_y - height * 1.25f, 2.f);
+        target   = glm::vec3(pos_x - width, pos_y - height * 1.25f, 0.f);
         view     = glm::lookAt(position, target, up);
     }
     float* get_view() final { return &view[0][0]; }
