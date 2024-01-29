@@ -1,6 +1,5 @@
 #include "include/map.hxx"
 #include "engine/include/memory_buf.hxx"
-#include "include/enemy.hxx"
 
 #include <algorithm>
 #include <iostream>
@@ -53,16 +52,16 @@ map::map(float tile_width_, float tile_height_, std::string file_path)
         80.f / 240.f, 96.f / 240.f, 240.f / 288.f, 256.f / 288.f
     };
     tile plate_top_left = {
-        48.f / 240.f, 64.f / 240.f, 192.f / 288.f, 208.f / 288.f
+        48.f / 240.f, 64.f / 240.f, 160.f / 288.f, 172.f / 288.f
     };
     tile plate_top_right = {
-        16.f / 240.f, 32.f / 240.f, 192.f / 288.f, 208.f / 288.f
-    };
-    tile plate_bottom_left = {
         16.f / 240.f, 32.f / 240.f, 160.f / 288.f, 172.f / 288.f
     };
+    tile plate_bottom_left = {
+        48.f / 240.f, 64.f / 240.f, 192.f / 288.f, 208.f / 288.f
+    };
     tile plate_bottom_right = {
-        48.f / 240.f, 64.f / 240.f, 160.f / 288.f, 172.f / 288.f
+        16.f / 240.f, 32.f / 240.f, 192.f / 288.f, 208.f / 288.f
     };
 
     tiles.emplace(map_tile_type::brick_top, brick_top);
@@ -291,6 +290,7 @@ map::~map()
     }
 }
 
+/*
 void game_logic_level_1(map*                 map,
                         game_object*         hero,
                         std::vector<enemy*>& enemies)
@@ -323,4 +323,4 @@ void game_logic_level_1(map*                 map,
     else if (!enemies[3]->is_alive() && enemies[3]->is_spawned() &&
              !enemies[4]->is_spawned())
         enemies[4]->spawn();
-}
+}*/
