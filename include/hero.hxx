@@ -18,9 +18,6 @@ public:
     void        move(float dx, float dy, map* map);
     void        jump();
     void        attack(game_object* enemy, bool skeleton_collision);
-    bool        check_collision_map(map* map, map_tile_type type);
-    bool        check_collision_map_x_axis(map* map, map_tile_type type);
-    bool        check_collision_map_y_axis(map* map, map_tile_type type);
     ~hero();
 
 private:

@@ -65,7 +65,7 @@ int game_object::get_direction()
     return direction;
 }
 
-animation* game_object::get_animated_sprite()
+animation* game_object::get_animation()
 {
     return sprites[state];
 }

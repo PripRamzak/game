@@ -4,7 +4,6 @@
 #include "engine/include/index_buffer.hxx"
 #include "engine/include/texture.hxx"
 #include "engine/include/vertex_buffer.hxx"
-#include "include/enemy.hxx"
 
 #include <unordered_map>
 
@@ -79,6 +78,7 @@ private:
     float                                   tile_height = 0;
 };
 
+/*
 void game_logic_level_1(map*                 map,
                         game_object*         hero,
-                        std::vector<enemy*>& enemies);
+                        std::vector<enemy*>& enemies);*/

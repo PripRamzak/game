@@ -31,6 +31,8 @@ target_sources(game PRIVATE
         src/game.cxx
         src/camera.cxx
         include/camera.hxx
+        include/collision.hxx
+        src/collision.cxx
         src/enemy.cxx
         include/enemy.hxx
         src/game_object.cxx

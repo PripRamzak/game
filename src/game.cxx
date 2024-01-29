@@ -42,7 +42,7 @@ int main(int /*argc*/, char** /*argv*/)
 
     hero::initialize();
     hero* warrior = new hero(
-        4, 10.f, 300.f, 550.f, 2.f, game_object_state::idle, 12.f, 300.f);
+        4, 10.f, 300.f, 464.f, 2.f, game_object_state::idle, 12.f, 300.f);
 
     glm::mat4 warrior_mat_size =
         glm::scale(glm::mat4{ 1 },
@@ -137,7 +137,7 @@ int main(int /*argc*/, char** /*argv*/)
                 {
                     warrior->set_state(game_object_state::attack);
 
-                    if (warrior->get_animated_sprite()->get_current_number(
+                    if (warrior->get_animation()->get_current_number(
                             warrior->get_direction()) == 2)
                         sound_attack->play(audio_properties::once);
                 }
@@ -157,9 +157,6 @@ int main(int /*argc*/, char** /*argv*/)
                     }
                     else if (warrior->get_state() == game_object_state::fall)
                         dy++;
-                    else if (!warrior->check_collision_map_y_axis(
-                                 dungeon_map, map_tile_type::brick_bottom))
-                        dy++;
 
                     if (engine->check_key(key::left))
                         dx--;
@@ -172,7 +169,7 @@ int main(int /*argc*/, char** /*argv*/)
                         warrior->move(dx, dy, dungeon_map);
                 }
 
-                warrior->get_animated_sprite()->play(frame_time_dif);
+                warrior->get_animation()->play(frame_time_dif);
             }
 
             camera->look_at(warrior->get_global_pos_x(),
@@ -249,6 +246,15 @@ int main(int /*argc*/, char** /*argv*/)
                 dungeon_map->get_tile_min_uv(map_tile_type::brick_bottom_right),
                 dungeon_map->get_tile_max_uv(map_tile_type::brick_bottom_right),
                 &map_mat_result[0][0]);
+            engine->render(
+                dungeon_map->get_tileset(),
+                dungeon_map->get_vertex_buffer(
+                    map_tile_type::plate_bottom_right),
+                dungeon_map->get_index_buffer(
+                    map_tile_type::plate_bottom_right),
+                dungeon_map->get_tile_min_uv(map_tile_type::plate_bottom_right),
+                dungeon_map->get_tile_max_uv(map_tile_type::plate_bottom_right),
+                &map_mat_result[0][0]);
 
             // Objects render
 
@@ -261,7 +267,7 @@ int main(int /*argc*/, char** /*argv*/)
             glm::mat4 warrior_mat_result =
                 projection * mat_view * war_mat_move * warrior_mat_size;
 
-            engine->render(warrior->get_animated_sprite(),
+            engine->render(warrior->get_animation(),
                            solo_objects_index_buffer,
                            warrior->get_direction(),
                            &warrior_mat_result[0][0]);

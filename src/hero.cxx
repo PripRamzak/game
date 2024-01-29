@@ -73,31 +73,13 @@ void hero::move(float dx, float dy, map* map)
     float delta_x = dx * speed;
     float delta_y = dy * speed;
 
-    global_pos_y += delta_y;
-
-    if (delta_y > 0.f)
-    {
-        if (check_collision_map_y_axis(map, map_tile_type::brick_bottom))
-        {
-            set_state(game_object_state::idle);
-            return;
-        }
-        else
-            set_state(game_object_state::fall);
-    }
-    else if (delta_y < 0.f)
-        if (check_collision_map_y_axis(map, map_tile_type::brick_top))
-        {
-            set_state(game_object_state::fall);
-            jump_height_dt = 0.f;
-        }
-
     global_pos_x += delta_x;
 
     if (delta_x < 0.f)
     {
         direction = 1;
-        if (check_collision_map_x_axis(map, map_tile_type::brick_left))
+        if (collision::map_with_game_object(
+                map, this, collision::direction::left))
         {
             if (state != game_object_state::jump &&
                 state != game_object_state::fall)
@@ -110,7 +92,8 @@ void hero::move(float dx, float dy, map* map)
     else if (delta_x > 0.f)
     {
         direction = 0;
-        if (check_collision_map_x_axis(map, map_tile_type::brick_right))
+        if (collision::map_with_game_object(
+                map, this, collision::direction::right))
         {
             if (state != game_object_state::jump &&
                 state != game_object_state::fall)
@@ -120,6 +103,34 @@ void hero::move(float dx, float dy, map* map)
             }
         }
     }
+
+    global_pos_y += delta_y;
+
+    if (state != game_object_state::jump && state != game_object_state::fall &&
+        !collision::map_with_game_object(map, this, collision::direction::down))
+    {
+        set_state(game_object_state::fall);
+        delta_y += speed;
+    }
+
+    if (delta_y > 0.f)
+    {
+        if (collision::map_with_game_object(
+                map, this, collision::direction::down))
+        {
+            set_state(game_object_state::idle);
+            return;
+        }
+        else
+            set_state(game_object_state::fall);
+    }
+    else if (delta_y < 0.f)
+        if (collision::map_with_game_object(
+                map, this, collision::direction::up))
+        {
+            set_state(game_object_state::fall);
+            jump_height_dt = 0.f;
+        }
 
     if (state != game_object_state::jump && state != game_object_state::fall)
         set_state(game_object_state::run);
@@ -158,147 +169,6 @@ void hero::attack(game_object* enemy, bool skeleton_collision)
         if (skeleton_collision && direction != enemy->get_direction())
             enemy->hurt();
     }
-}
-
-bool hero::check_collision_map(map* map, map_tile_type type)
-{
-    const vertex_2d* map_tile_vertices = map->get_vertex_buffer(type)->data();
-    const size_t map_tile_vertices_num = map->get_vertex_buffer(type)->size();
-
-    vertex_2d* hero_vertices =
-        get_animated_sprite()->get_sprite()->get_vertex_buffer()->data();
-
-    for (size_t j = 0; j < map_tile_vertices_num / 4;
-         j++, map_tile_vertices += 4)
-    {
-        bool collision_x_right = global_pos_x + (hero_vertices + 2)->x * size >=
-                                 map_tile_vertices->x;
-        bool collision_x_left = (map_tile_vertices + 2)->x >=
-                                global_pos_x + hero_vertices->x * size;
-        bool collision_y_top = (map_tile_vertices + 2)->y >=
-                               global_pos_y + hero_vertices->y * size;
-        bool collision_y_bot = global_pos_y + (hero_vertices + 2)->y * size >=
-                               map_tile_vertices->y;
-
-        bool collision_x = collision_x_left && collision_x_right;
-        bool collision_y = collision_y_top && collision_y_bot;
-
-        if (collision_x && collision_y)
-        {
-            switch (type)
-            {
-                case map_tile_type::brick_left:
-                    global_pos_x -= global_pos_x + hero_vertices->x * size -
-                                    (map_tile_vertices + 2)->x;
-                    break;
-                case map_tile_type::brick_right:
-                    global_pos_x -= global_pos_x +
-                                    (hero_vertices + 2)->x * size -
-                                    map_tile_vertices->x;
-                    break;
-                case map_tile_type::brick_bottom:
-                    global_pos_y -= global_pos_y +
-                                    (hero_vertices + 2)->y * size -
-                                    map_tile_vertices->y;
-                    break;
-                case map_tile_type::brick_top:
-                    global_pos_y -= global_pos_y + hero_vertices->y * size -
-                                    (map_tile_vertices + 2)->y;
-                    break;
-            }
-            return true;
-        }
-    }
-
-    return false;
-}
-
-bool hero::check_collision_map_x_axis(map* map, map_tile_type type)
-{
-    const vertex_2d* map_tile_vertices = map->get_vertex_buffer(type)->data();
-    const size_t map_tile_vertices_num = map->get_vertex_buffer(type)->size();
-
-    vertex_2d* hero_vertices =
-        get_animated_sprite()->get_sprite()->get_vertex_buffer()->data();
-
-    for (size_t j = 0; j < map_tile_vertices_num / 4;
-         j++, map_tile_vertices += 4)
-    {
-        bool collision_x_right = global_pos_x + (hero_vertices + 2)->x * size >=
-                                 map_tile_vertices->x;
-        bool collision_x_left = (map_tile_vertices + 2)->x >=
-                                global_pos_x + hero_vertices->x * size;
-        bool collision_y_top =
-            (map_tile_vertices + 2)->y > global_pos_y + hero_vertices->y * size;
-        bool collision_y_bot =
-            global_pos_y + (hero_vertices + 2)->y * size > map_tile_vertices->y;
-
-        bool collision_x = collision_x_left && collision_x_right;
-        bool collision_y = collision_y_top && collision_y_bot;
-
-        if (collision_x && collision_y)
-        {
-            switch (type)
-            {
-                case map_tile_type::brick_left:
-                    global_pos_x -= global_pos_x + hero_vertices->x * size -
-                                    (map_tile_vertices + 2)->x;
-                    break;
-                case map_tile_type::brick_right:
-                    global_pos_x -= global_pos_x +
-                                    (hero_vertices + 2)->x * size -
-                                    map_tile_vertices->x;
-                    break;
-            }
-            return true;
-        }
-    }
-
-    return false;
-}
-
-bool hero::check_collision_map_y_axis(map* map, map_tile_type type)
-{
-    const vertex_2d* map_tile_vertices = map->get_vertex_buffer(type)->data();
-    const size_t map_tile_vertices_num = map->get_vertex_buffer(type)->size();
-
-    vertex_2d* hero_vertices =
-        get_animated_sprite()->get_sprite()->get_vertex_buffer()->data();
-
-    for (size_t j = 0; j < map_tile_vertices_num / 4;
-         j++, map_tile_vertices += 4)
-    {
-        bool collision_x_right =
-            global_pos_x + (hero_vertices + 2)->x * size > map_tile_vertices->x;
-        bool collision_x_left =
-            (map_tile_vertices + 2)->x > global_pos_x + hero_vertices->x * size;
-        bool collision_y_top = (map_tile_vertices + 2)->y >=
-                               global_pos_y + hero_vertices->y * size;
-        bool collision_y_bot = global_pos_y + (hero_vertices + 2)->y * size >=
-                               map_tile_vertices->y;
-
-        bool collision_x = collision_x_left && collision_x_right;
-        bool collision_y = collision_y_top && collision_y_bot;
-
-        if (collision_x && collision_y)
-        {
-            switch (type)
-            {
-                case map_tile_type::brick_bottom:
-                    global_pos_y -= global_pos_y +
-                                    (hero_vertices + 2)->y * size -
-                                    map_tile_vertices->y;
-                    break;
-                case map_tile_type::brick_top:
-                    global_pos_y -= global_pos_y + hero_vertices->y * size -
-                                    (map_tile_vertices + 2)->y;
-                    break;
-            }
-            return true;
-        }
-    }
-
-    return false;
 }
 
 hero::~hero() = default;

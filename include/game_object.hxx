@@ -1,5 +1,6 @@
 #pragma once
 
+#include "collision.hxx"
 #include "engine/include/animation.hxx"
 #include "engine/include/geometry.hxx"
 #include "engine/include/vertex_buffer.hxx"
@@ -34,8 +35,12 @@ public:
     float             get_size();
     game_object_state get_state();
     int               get_direction();
-    animation*        get_animated_sprite();
+    animation*        get_animation();
     virtual ~game_object();
+
+    friend bool collision::map_with_game_object(map*         map,
+                                                game_object* game_object,
+                                                collision::direction direction);
 
 protected:
     std::unordered_map<game_object_state, animation*> sprites;
