@@ -55,10 +55,10 @@ void hero::initialize()
         sprite* warrior_fall_sprite =
             new sprite(warrior_fall_texture, 48.f, 48.f);
 
-        warrior_idle_anim = new animation(warrior_idle_sprite, 6, 24.f, 150ms);
-        warrior_run_anim  = new animation(warrior_run_sprite, 6, 24.f, 150ms);
+        warrior_idle_anim = new animation(warrior_idle_sprite, 6, 24.f, 100ms);
+        warrior_run_anim  = new animation(warrior_run_sprite, 6, 24.f, 100ms);
         warrior_attack_anim =
-            new animation(warrior_attack_sprite, 4, 6.f, 250ms);
+            new animation(warrior_attack_sprite, 4, 6.f, 125ms);
         warrior_jump_anim = new animation(warrior_jump_sprite, 1, 0.f, 250ms);
         warrior_fall_anim = new animation(warrior_fall_sprite, 1, 0.f, 250ms);
 
@@ -151,24 +151,21 @@ void hero::jump()
     }
 }
 
-void hero::attack(game_object* enemy, bool skeleton_collision)
+void hero::attack(game_object* enemy)
 {
-    int sprite_current_number = sprites[state]->get_current_frame_number();
+    animation* attack_anim         = sprites[state];
+    int        anim_current_number = attack_anim->get_current_frame_number();
+    int        anim_quantity       = attack_anim->get_quantity();
 
-    if (sprite_current_number == 0 && direction == 0 ||
-        sprite_current_number == 3 && direction == 1)
-        attacked = false;
-
-    // Hit moment
-
-    if ((sprite_current_number == 2 && direction == 0 ||
-         sprite_current_number == 1 && direction == 1) &&
-        !attacked)
+    if (!attacked && anim_current_number == anim_quantity - 1)
     {
-        attacked = true;
-        if (skeleton_collision && direction != enemy->get_direction())
+        if (collision::game_object_with_game_object(this, enemy))
             enemy->hurt();
+        attacked = true;
     }
+
+    if (attacked && anim_current_number == 0)
+        attacked = false;
 }
 
 hero::~hero() = default;

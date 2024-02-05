@@ -142,14 +142,13 @@ void enemy::move(game_object* hero, std::chrono::milliseconds delta_time)
         patrol_direction = patrol_direction == 0 ? 1 : 0;
         direction        = patrol_direction;
     }
-    else if (state != game_object_state::attack)
+    else
     {
         set_state(game_object_state::run);
         direction = patrol_direction;
     }
 
     if (state == game_object_state::run)
-    {
         if (direction == 0)
         {
             global_pos_x += speed;
@@ -160,7 +159,6 @@ void enemy::move(game_object* hero, std::chrono::milliseconds delta_time)
             global_pos_x -= speed;
             patrol_area_dt -= speed;
         }
-    }
 }
 
 void enemy::attack(game_object* hero, std::chrono::milliseconds delta_time)
@@ -180,10 +178,16 @@ void enemy::attack(game_object* hero, std::chrono::milliseconds delta_time)
     int        anim_current_number = attack_anim->get_current_frame_number();
     int        anim_quantity       = attack_anim->get_quantity();
 
-    if (anim_current_number == anim_quantity - 1)
+    if (!attacked && anim_current_number == anim_quantity - 1)
     {
         if (collision::game_object_with_game_object(this, hero))
             hero->hurt();
+        attacked = true;
+    }
+
+    if (attacked && anim_current_number == 0)
+    {
+        attacked = false;
         set_state(game_object_state::idle);
     }
 }

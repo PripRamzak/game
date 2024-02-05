@@ -32,6 +32,7 @@ private:
     int                       patrol_direction = 0;
     float                     patrol_area      = 0.f;
     float                     patrol_area_dt   = 0.f;
+    bool                      attacked         = false;
     std::chrono::milliseconds patrol_time;
     std::chrono::milliseconds patrol_time_dt;
     std::chrono::milliseconds attack_delay;

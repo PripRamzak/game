@@ -58,9 +58,9 @@ int main(int /*argc*/, char** /*argv*/)
                             5.f,
                             800.f,
                             450.f,
-                            1.5f,
+                            2.f,
                             game_object_state::idle,
-                            enemy_type::warrior,
+                            enemy_type::spearman,
                             400.f,
                             2000ms,
                             1000ms);
@@ -99,9 +99,6 @@ int main(int /*argc*/, char** /*argv*/)
     music->play(audio_properties::looped);
     sound_buffer* sound_attack =
         engine->create_sound_buffer("sound/attack.wav");
-
-    // 0 - top, 1 - bottom, 2 - left, 3 - right
-    // bool warrior_skeleton_collision[4]{ false };
 
     bool  quit                     = false;
     bool  show_menu_window         = true;
@@ -184,10 +181,15 @@ int main(int /*argc*/, char** /*argv*/)
                         warrior->move(dx, dy, dungeon_map);
                 }
 
+                if (warrior->get_state() == game_object_state::attack)
+                    warrior->attack(skel);
                 warrior->get_animation()->play(frame_time_dif);
 
-                skel->move(warrior, frame_time_dif);
-                skel->get_animation()->play(frame_time_dif);
+                if (skel->is_alive())
+                {
+                    skel->move(warrior, frame_time_dif);
+                    skel->get_animation()->play(frame_time_dif);
+                }
             }
 
             camera->look_at(warrior->get_global_pos_x(),
@@ -276,18 +278,22 @@ int main(int /*argc*/, char** /*argv*/)
 
             // Objects render
 
-            glm::mat4 skel_translate = glm::translate(
-                glm::mat4{ 1 },
-                glm::vec3{
-                    skel->get_global_pos_x(), skel->get_global_pos_y(), 0.f });
+            if (skel->is_alive())
+            {
+                glm::mat4 skel_translate =
+                    glm::translate(glm::mat4{ 1 },
+                                   glm::vec3{ skel->get_global_pos_x(),
+                                              skel->get_global_pos_y(),
+                                              0.f });
 
-            glm::mat4 skel_mvp =
-                projection * view * skel_translate * warrior_scale;
+                glm::mat4 skel_mvp =
+                    projection * view * skel_translate * skel_scale;
 
-            engine->render(skel->get_animation(),
-                           solo_objects_index_buffer,
-                           skel->get_direction(),
-                           &skel_mvp[0][0]);
+                engine->render(skel->get_animation(),
+                               solo_objects_index_buffer,
+                               skel->get_direction(),
+                               &skel_mvp[0][0]);
+            }
 
             glm::mat4 warrior_translate =
                 glm::translate(glm::mat4{ 1 },
@@ -302,70 +308,6 @@ int main(int /*argc*/, char** /*argv*/)
                            solo_objects_index_buffer,
                            warrior->get_direction(),
                            &warrior_mvp[0][0]);
-
-            /*warrior_skeleton_collision[0] = false;
-            warrior_skeleton_collision[1] = false;
-            warrior_skeleton_collision[2] = false;
-            warrior_skeleton_collision[3] = false;
-
-            for (auto enemy : enemies)
-            {
-                if (enemy->is_alive())
-                {
-                    if (!show_in_game_menu_window)
-                    {
-                        if (enemy->get_state() != game_object_state::attack)
-                            enemy->move(warrior);
-                        else
-                            enemy->attack(warrior);
-
-                        bool skeleton_warrior_collision =
-                            enemy->check_hero_collision_x(warrior) &&
-                            enemy->check_hero_collision_y(warrior);
-
-                        if (warrior->get_state() ==
-            game_object_state::attack) warrior->attack(enemy,
-            skeleton_warrior_collision);
-                    }
-
-                    glm::mat4 skeleton_mat_size{ 1 };
-                    skeleton_mat_size[0].x = skeleton_mat_size[1].y =
-                        enemy->get_size();
-
-                    glm::mat4 skeleton_mat_move{ 1 };
-                    skeleton_mat_move[3].x =
-                        enemy->get_move_x() / window_width * 2.f;
-                    skeleton_mat_move[3].y =
-                        enemy->get_move_y() / window_height * -2.f;
-
-                    glm::mat4 skeleton_mat_result =
-                        view * skeleton_mat_move * skeleton_mat_size *
-                        to_ndc_coordinates;
-
-                    engine->render(enemy->get_vertex_buffer(),
-                                   solo_objects_index_buffer,
-                                   enemy->get_sprite(),
-                                   enemy->get_direction(),
-                                   &skeleton_mat_result[0][0]);
-
-                    if (!show_in_game_menu_window)
-                    {
-                        if (engine->get_time() - skeleton_update_time >
-                            enemy->get_sprite()->get_animation_time())
-                        {
-                            enemy->get_sprite()->next_sprite();
-                            skeleton_update_time = engine->get_time();
-                        }
-
-                        if (enemy->get_state() == game_object_state::idle &&
-                            engine->get_time() - skeleton_update_time > 1.f)
-                        {
-                            enemy->set_state(game_object_state::attack);
-                            skeleton_update_time = engine->get_time();
-                        }
-                    }
-                }
-            }*/
 
             switch (warrior->get_health())
             {

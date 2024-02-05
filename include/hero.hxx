@@ -17,7 +17,7 @@ public:
     static void initialize();
     void        move(float dx, float dy, map* map);
     void        jump();
-    void        attack(game_object* enemy, bool skeleton_collision);
+    void        attack(game_object* enemy);
     ~hero();
 
 private:
