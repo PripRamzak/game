@@ -153,7 +153,7 @@ void hero::jump()
 
 void hero::attack(game_object* enemy, bool skeleton_collision)
 {
-    int sprite_current_number = sprites[state]->get_current_number(direction);
+    int sprite_current_number = sprites[state]->get_current_frame_number();
 
     if (sprite_current_number == 0 && direction == 0 ||
         sprite_current_number == 3 && direction == 1)

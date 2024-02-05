@@ -39,10 +39,8 @@ int animation::get_quantity()
     return frame_quantity;
 }
 
-int animation::get_current_number(int direction)
+int animation::get_current_frame_number()
 {
-    if (direction == 1)
-        return frame_quantity - current_frame_number - 1;
     return current_frame_number;
 }
 

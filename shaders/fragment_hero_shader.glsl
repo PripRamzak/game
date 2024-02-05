@@ -12,9 +12,12 @@ uniform sampler2D texture;
 
 void main()
 {
-    float new_u = start_position + width * out_texture_coordinates.x + number / quantity;
+    float new_u;
     if (direction == 1)
-    new_u = 1.0 - new_u;
+    new_u = 1.0 - (start_position + width * out_texture_coordinates.x + (quantity - number - 1.0) / quantity);
+    else
+    new_u = start_position + width * out_texture_coordinates.x + number / quantity;
+
 
     vec2 new_texture_coordinates = vec2(new_u, out_texture_coordinates.y);
     gl_FragColor = texture2D(texture, new_texture_coordinates);

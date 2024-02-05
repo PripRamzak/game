@@ -14,7 +14,7 @@ public:
     void    play(std::chrono::milliseconds delta_time_);
     void    reset();
     int     get_quantity();
-    int     get_current_number(int direction);
+    int     get_current_frame_number();
     float   get_start_position();
     sprite* get_sprite();
     ~animation();

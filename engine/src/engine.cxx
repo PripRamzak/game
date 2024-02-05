@@ -513,7 +513,7 @@ public:
             "quantity", static_cast<float>(anim_sprite->get_quantity()));
         hero_program->set_uniform_1f(
             "number",
-            static_cast<float>(anim_sprite->get_current_number(direction)));
+            static_cast<float>(anim_sprite->get_current_frame_number()));
         hero_program->set_uniform_1f("start_position",
                                      anim_sprite->get_start_position());
         hero_program->set_uniform_1f(
@@ -563,7 +563,7 @@ public:
             "quantity", static_cast<float>(sprite->get_quantity()));
         hero_program->set_uniform_1f(
             "number",
-            static_cast<float>(sprite->get_current_number(direction)));
+            static_cast<float>(sprite->get_current_frame_number(direction)));
         hero_program->set_uniform_1f("start_position",
                                      sprite->get_start_position());
         hero_program->set_uniform_1f(
