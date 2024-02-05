@@ -38,20 +38,35 @@ int main(int /*argc*/, char** /*argv*/)
     index_buffer* solo_objects_index_buffer = create_index_buffer();
     solo_objects_index_buffer->add_indexes(static_cast<size_t>(4));
 
+    using namespace std::chrono_literals;
+
     // Warrior creating
 
     hero::initialize();
     hero* warrior = new hero(
         4, 10.f, 300.f, 464.f, 2.f, game_object_state::idle, 12.f, 300.f);
 
-    glm::mat4 warrior_mat_size =
+    glm::mat4 warrior_scale =
         glm::scale(glm::mat4{ 1 },
                    glm::vec3{ warrior->get_size(), warrior->get_size(), 1.f });
 
     // Skeleton creating
 
     enemy::initialize();
-    std::vector<enemy*> enemies;
+    // std::vector<enemy*> enemies;
+    enemy* skel = new enemy(4,
+                            5.f,
+                            800.f,
+                            450.f,
+                            1.5f,
+                            game_object_state::idle,
+                            enemy_type::warrior,
+                            400.f,
+                            2000ms,
+                            1000ms);
+
+    glm::mat4 skel_scale = glm::scale(
+        glm::mat4{ 1 }, glm::vec3{ skel->get_size(), skel->get_size(), 1.f });
 
     // Map creating
 
@@ -137,8 +152,8 @@ int main(int /*argc*/, char** /*argv*/)
                 {
                     warrior->set_state(game_object_state::attack);
 
-                    if (warrior->get_animation()->get_current_number(
-                            warrior->get_direction()) == 2)
+                    if (warrior->get_animation()->get_current_frame_number() ==
+                        2)
                         sound_attack->play(audio_properties::once);
                 }
                 else if (engine->check_key(key::jump) &&
@@ -170,65 +185,68 @@ int main(int /*argc*/, char** /*argv*/)
                 }
 
                 warrior->get_animation()->play(frame_time_dif);
+
+                skel->move(warrior, frame_time_dif);
+                skel->get_animation()->play(frame_time_dif);
             }
 
             camera->look_at(warrior->get_global_pos_x(),
                             warrior->get_global_pos_y());
 
-            glm::mat4 mat_view = glm::make_mat4x4(camera->get_view());
+            glm::mat4 view = glm::make_mat4x4(camera->get_view());
 
             // Map render
 
-            glm::mat4 map_mat_result = projection * mat_view;
+            glm::mat4 map_mvp = projection * view;
 
             /*engine->render(dungeon_map->get_tileset(),
                            dungeon_map->get_vertex_buffer(map_tile_type::wall),
                            dungeon_map->get_index_buffer(map_tile_type::wall),
                            dungeon_map->get_tile_min_uv(map_tile_type::wall),
                            dungeon_map->get_tile_max_uv(map_tile_type::wall),
-                           &map_mat_result[0][0]);*/
+                           &map_mvp[0][0]);*/
             engine->render(
                 dungeon_map->get_tileset(),
                 dungeon_map->get_vertex_buffer(map_tile_type::brick_top),
                 dungeon_map->get_index_buffer(map_tile_type::brick_top),
                 dungeon_map->get_tile_min_uv(map_tile_type::brick_top),
                 dungeon_map->get_tile_max_uv(map_tile_type::brick_top),
-                &map_mat_result[0][0]);
+                &map_mvp[0][0]);
             engine->render(
                 dungeon_map->get_tileset(),
                 dungeon_map->get_vertex_buffer(map_tile_type::brick_bottom),
                 dungeon_map->get_index_buffer(map_tile_type::brick_bottom),
                 dungeon_map->get_tile_min_uv(map_tile_type::brick_bottom),
                 dungeon_map->get_tile_max_uv(map_tile_type::brick_bottom),
-                &map_mat_result[0][0]);
+                &map_mvp[0][0]);
             engine->render(
                 dungeon_map->get_tileset(),
                 dungeon_map->get_vertex_buffer(map_tile_type::brick_left),
                 dungeon_map->get_index_buffer(map_tile_type::brick_left),
                 dungeon_map->get_tile_min_uv(map_tile_type::brick_left),
                 dungeon_map->get_tile_max_uv(map_tile_type::brick_left),
-                &map_mat_result[0][0]);
+                &map_mvp[0][0]);
             engine->render(
                 dungeon_map->get_tileset(),
                 dungeon_map->get_vertex_buffer(map_tile_type::brick_right),
                 dungeon_map->get_index_buffer(map_tile_type::brick_right),
                 dungeon_map->get_tile_min_uv(map_tile_type::brick_right),
                 dungeon_map->get_tile_max_uv(map_tile_type::brick_right),
-                &map_mat_result[0][0]);
+                &map_mvp[0][0]);
             engine->render(
                 dungeon_map->get_tileset(),
                 dungeon_map->get_vertex_buffer(map_tile_type::brick_top_left),
                 dungeon_map->get_index_buffer(map_tile_type::brick_top_left),
                 dungeon_map->get_tile_min_uv(map_tile_type::brick_top_left),
                 dungeon_map->get_tile_max_uv(map_tile_type::brick_top_left),
-                &map_mat_result[0][0]);
+                &map_mvp[0][0]);
             engine->render(
                 dungeon_map->get_tileset(),
                 dungeon_map->get_vertex_buffer(map_tile_type::brick_top_right),
                 dungeon_map->get_index_buffer(map_tile_type::brick_top_right),
                 dungeon_map->get_tile_min_uv(map_tile_type::brick_top_right),
                 dungeon_map->get_tile_max_uv(map_tile_type::brick_top_right),
-                &map_mat_result[0][0]);
+                &map_mvp[0][0]);
             engine->render(
                 dungeon_map->get_tileset(),
                 dungeon_map->get_vertex_buffer(
@@ -236,7 +254,7 @@ int main(int /*argc*/, char** /*argv*/)
                 dungeon_map->get_index_buffer(map_tile_type::brick_bottom_left),
                 dungeon_map->get_tile_min_uv(map_tile_type::brick_bottom_left),
                 dungeon_map->get_tile_max_uv(map_tile_type::brick_bottom_left),
-                &map_mat_result[0][0]);
+                &map_mvp[0][0]);
             engine->render(
                 dungeon_map->get_tileset(),
                 dungeon_map->get_vertex_buffer(
@@ -245,7 +263,7 @@ int main(int /*argc*/, char** /*argv*/)
                     map_tile_type::brick_bottom_right),
                 dungeon_map->get_tile_min_uv(map_tile_type::brick_bottom_right),
                 dungeon_map->get_tile_max_uv(map_tile_type::brick_bottom_right),
-                &map_mat_result[0][0]);
+                &map_mvp[0][0]);
             engine->render(
                 dungeon_map->get_tileset(),
                 dungeon_map->get_vertex_buffer(
@@ -254,23 +272,36 @@ int main(int /*argc*/, char** /*argv*/)
                     map_tile_type::plate_bottom_right),
                 dungeon_map->get_tile_min_uv(map_tile_type::plate_bottom_right),
                 dungeon_map->get_tile_max_uv(map_tile_type::plate_bottom_right),
-                &map_mat_result[0][0]);
+                &map_mvp[0][0]);
 
             // Objects render
 
-            glm::mat4 war_mat_move =
-                glm::translate(glm::mat4{ 1 },
-                               glm::vec3(warrior->get_global_pos_x(),
-                                         warrior->get_global_pos_y(),
-                                         0.f));
+            glm::mat4 skel_translate = glm::translate(
+                glm::mat4{ 1 },
+                glm::vec3{
+                    skel->get_global_pos_x(), skel->get_global_pos_y(), 0.f });
 
-            glm::mat4 warrior_mat_result =
-                projection * mat_view * war_mat_move * warrior_mat_size;
+            glm::mat4 skel_mvp =
+                projection * view * skel_translate * warrior_scale;
+
+            engine->render(skel->get_animation(),
+                           solo_objects_index_buffer,
+                           skel->get_direction(),
+                           &skel_mvp[0][0]);
+
+            glm::mat4 warrior_translate =
+                glm::translate(glm::mat4{ 1 },
+                               glm::vec3{ warrior->get_global_pos_x(),
+                                          warrior->get_global_pos_y(),
+                                          0.f });
+
+            glm::mat4 warrior_mvp =
+                projection * view * warrior_translate * warrior_scale;
 
             engine->render(warrior->get_animation(),
                            solo_objects_index_buffer,
                            warrior->get_direction(),
-                           &warrior_mat_result[0][0]);
+                           &warrior_mvp[0][0]);
 
             /*warrior_skeleton_collision[0] = false;
             warrior_skeleton_collision[1] = false;
@@ -308,7 +339,7 @@ int main(int /*argc*/, char** /*argv*/)
                         enemy->get_move_y() / window_height * -2.f;
 
                     glm::mat4 skeleton_mat_result =
-                        mat_view * skeleton_mat_move * skeleton_mat_size *
+                        view * skeleton_mat_move * skeleton_mat_size *
                         to_ndc_coordinates;
 
                     engine->render(enemy->get_vertex_buffer(),

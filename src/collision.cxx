@@ -120,4 +120,45 @@ bool map_with_game_object(map*         map,
 
     return false;
 }
+
+bool game_object_with_game_object(game_object* game_object1,
+                                  game_object* game_object2)
+{
+    const vertex_2d* game_object1_vertices = game_object1->get_animation()
+                                                 ->get_sprite()
+                                                 ->get_vertex_buffer()
+                                                 ->data();
+    const vertex_2d* game_object2_vertices = game_object2->get_animation()
+                                                 ->get_sprite()
+                                                 ->get_vertex_buffer()
+                                                 ->data();
+
+    bool collision_x =
+        game_object1->global_pos_x +
+                (game_object1_vertices + 2)->x * game_object1->size >
+            game_object2->global_pos_x +
+                game_object2_vertices->x * game_object2->size &&
+        game_object2->global_pos_x +
+                (game_object2_vertices + 2)->x * game_object2->size >
+            game_object1->global_pos_x +
+                game_object1_vertices->x * game_object1->size;
+    bool collision_y =
+        game_object1->global_pos_y +
+                (game_object1_vertices + 2)->y * game_object1->size >
+            game_object2->global_pos_y +
+                game_object2_vertices->y * game_object2->size &&
+        game_object2->global_pos_y +
+                (game_object2_vertices + 2)->y * game_object2->size >
+            game_object1->global_pos_y +
+                game_object1_vertices->y * game_object1->size;
+    bool collision = collision_x && collision_y;
+
+    if (collision)
+        std::cout << "yes" << std::endl;
+    else
+        std::cout << "no" << std::endl;
+
+    return collision;
+}
+
 } // namespace collision

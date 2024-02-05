@@ -41,6 +41,8 @@ public:
     friend bool collision::map_with_game_object(map*         map,
                                                 game_object* game_object,
                                                 collision::direction direction);
+    friend bool collision::game_object_with_game_object(
+        game_object* game_object_1, game_object* game_object_2);
 
 protected:
     std::unordered_map<game_object_state, animation*> sprites;
