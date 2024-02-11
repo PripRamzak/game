@@ -1,20 +1,19 @@
 #include "include/game_object.hxx"
 
 #include <algorithm>
-#include <iostream>
 
-game_object::game_object(int               health_,
-                         float             speed_,
-                         float             global_pos_x_,
-                         float             global_pos_y_,
-                         float             size_,
-                         game_object_state state_)
-    : health(health_)
-    , speed(speed_)
-    , global_pos_x(global_pos_x_)
-    , global_pos_y(global_pos_y_)
-    , size(size_)
-    , state(state_)
+game_object::game_object(int               health,
+                         float             speed,
+                         float             global_pos_x,
+                         float             global_pos_y,
+                         float             size,
+                         game_object_state state)
+    : health(health)
+    , speed(speed)
+    , global_pos_x(global_pos_x)
+    , global_pos_y(global_pos_y)
+    , size(size)
+    , state(state)
 {
 }
 

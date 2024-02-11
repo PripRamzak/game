@@ -54,16 +54,17 @@ int main(int /*argc*/, char** /*argv*/)
 
     enemy::initialize();
     // std::vector<enemy*> enemies;
-    enemy* skel = new enemy(4,
-                            5.f,
-                            800.f,
-                            450.f,
-                            2.f,
-                            game_object_state::idle,
-                            enemy_type::spearman,
-                            400.f,
-                            2000ms,
-                            1000ms);
+    enemy* skel = new skeleton_spearman(4,
+                                        5.f,
+                                        800.f,
+                                        450.f,
+                                        2.f,
+                                        game_object_state::idle,
+                                        2000ms,
+                                        400.f,
+                                        1000ms);
+    /*enemy* skel = new skeleton_warrior(
+        4, 5.f, 800.f, 450.f, 2.f, game_object_state::idle, 2000ms, 600.f);*/
 
     glm::mat4 skel_scale = glm::scale(
         glm::mat4{ 1 }, glm::vec3{ skel->get_size(), skel->get_size(), 1.f });
@@ -186,10 +187,7 @@ int main(int /*argc*/, char** /*argv*/)
                 warrior->get_animation()->play(frame_time_dif);
 
                 if (skel->is_alive())
-                {
-                    skel->move(warrior, frame_time_dif);
-                    skel->get_animation()->play(frame_time_dif);
-                }
+                    skel->update(warrior, frame_time_dif);
             }
 
             camera->look_at(warrior->get_global_pos_x(),
@@ -341,8 +339,6 @@ int main(int /*argc*/, char** /*argv*/)
 #ifdef __ANDROID__
                 engine->render_buttons(&to_ndc_coordinates[0][0]);
 #endif
-
-                // game_logic_level_1(dungeon_map, warrior, enemies);
             }
             else if (engine->render_gui(show_in_game_menu_window,
                                         gui_type::menu))

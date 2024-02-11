@@ -20,12 +20,12 @@ enum class game_object_state
 class game_object
 {
 public:
-    game_object(int               health_,
-                float             speed_,
+    game_object(int               health,
+                float             speed,
                 float             global_pos_x,
                 float             global_pos_y,
-                float             size_,
-                game_object_state state_);
+                float             size,
+                game_object_state state);
     bool              is_alive();
     void              hurt();
     void              set_state(game_object_state state_);
