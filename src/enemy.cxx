@@ -63,7 +63,7 @@ void enemy::initialize()
             create_texture("img/skeleton_spearman_attack.png");
 
         sprite* skeleton_spearman_idle_sprite =
-            new sprite(skeleton_spearman_idle_sprite_sheet, 64.f, 64.f);
+            new sprite(skeleton_spearman_idle_sprite_sheet, 64.f, 82.f);
         sprite* skeleton_spearman_run_sprite =
             new sprite(skeleton_spearman_run_sprite_sheet, 88.f, 64.f);
         sprite* skeleton_spearman_attack_sprite =

@@ -57,9 +57,9 @@ int main(int /*argc*/, char** /*argv*/)
     enemy* skel = new skeleton_spearman(4,
                                         5.f,
                                         800.f,
-                                        450.f,
+                                        448.f,
                                         2.f,
-                                        game_object_state::idle,
+                                        game_object_state::run,
                                         2000ms,
                                         400.f,
                                         1000ms);

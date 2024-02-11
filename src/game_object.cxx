@@ -30,7 +30,14 @@ void game_object::hurt()
 void game_object::set_state(game_object_state state_)
 {
     if (state != state_)
+    {
+        if (sprites[state]->get_sprite()->get_height() !=
+            sprites[state_]->get_sprite()->get_height())
+            global_pos_y += (sprites[state]->get_sprite()->get_height() -
+                             sprites[state_]->get_sprite()->get_height()) *
+                            size / 2;
         sprites[state_]->reset();
+    }
     state = state_;
 }
 
