@@ -55,12 +55,11 @@ void hero::initialize()
         sprite* warrior_fall_sprite =
             new sprite(warrior_fall_texture, 48.f, 48.f);
 
-        warrior_idle_anim = new animation(warrior_idle_sprite, 6, 24.f, 100ms);
-        warrior_run_anim  = new animation(warrior_run_sprite, 6, 24.f, 100ms);
-        warrior_attack_anim =
-            new animation(warrior_attack_sprite, 4, 6.f, 125ms);
-        warrior_jump_anim = new animation(warrior_jump_sprite, 1, 0.f, 250ms);
-        warrior_fall_anim = new animation(warrior_fall_sprite, 1, 0.f, 250ms);
+        warrior_idle_anim   = new animation(warrior_idle_sprite, 6, 100ms);
+        warrior_run_anim    = new animation(warrior_run_sprite, 6, 100ms);
+        warrior_attack_anim = new animation(warrior_attack_sprite, 4, 125ms);
+        warrior_jump_anim   = new animation(warrior_jump_sprite, 1, 250ms);
+        warrior_fall_anim   = new animation(warrior_fall_sprite, 1, 250ms);
 
         hero_init = true;
     }
@@ -155,7 +154,7 @@ void hero::attack(game_object* enemy)
 {
     animation* attack_anim         = sprites[state];
     int        anim_current_number = attack_anim->get_current_frame_number();
-    int        anim_quantity       = attack_anim->get_quantity();
+    int        anim_quantity       = attack_anim->get_frames_quantity();
 
     if (!attacked && anim_current_number == anim_quantity - 1)
     {

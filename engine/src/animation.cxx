@@ -3,15 +3,13 @@
 using namespace std::chrono_literals;
 
 animation::animation(sprite*                   sprite,
-                     int                       frame_quantity_,
-                     float                     start_position_,
-                     std::chrono::milliseconds animation_time_)
+                     int                       frame_quantity,
+                     std::chrono::milliseconds animation_time)
     : anim_sprite(sprite)
-    , frame_quantity(frame_quantity_)
-    , animation_time(animation_time_)
+    , frames_quantity(frame_quantity)
+    , animation_time(animation_time)
     , delta_time(0ms)
 {
-    start_position = start_position_ / sprite->get_texture()->get_width();
 }
 
 void animation::play(std::chrono::milliseconds delta_time_)
@@ -21,7 +19,7 @@ void animation::play(std::chrono::milliseconds delta_time_)
     if (delta_time >= animation_time)
     {
         current_frame_number++;
-        if (current_frame_number == frame_quantity)
+        if (current_frame_number == frames_quantity)
             current_frame_number = 0;
 
         delta_time -= animation_time;
@@ -34,19 +32,14 @@ void animation::reset()
     delta_time           = 0ms;
 }
 
-int animation::get_quantity()
+int animation::get_frames_quantity()
 {
-    return frame_quantity;
+    return frames_quantity;
 }
 
 int animation::get_current_frame_number()
 {
     return current_frame_number;
-}
-
-float animation::get_start_position()
-{
-    return start_position;
 }
 
 sprite* animation::get_sprite()

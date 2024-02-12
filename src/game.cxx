@@ -55,14 +55,14 @@ int main(int /*argc*/, char** /*argv*/)
     enemy::initialize();
     // std::vector<enemy*> enemies;
     enemy* skel = new skeleton_spearman(4,
-                                        5.f,
+                                        4.f,
                                         800.f,
-                                        448.f,
+                                        418.f,
                                         2.f,
-                                        game_object_state::run,
+                                        game_object_state::walk,
                                         2000ms,
                                         400.f,
-                                        1000ms);
+                                        2000ms);
     /*enemy* skel = new skeleton_warrior(
         4, 5.f, 800.f, 450.f, 2.f, game_object_state::idle, 2000ms, 600.f);*/
 

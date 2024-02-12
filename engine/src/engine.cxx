@@ -510,12 +510,10 @@ public:
 
         hero_program->use();
         hero_program->set_uniform_1f(
-            "quantity", static_cast<float>(anim_sprite->get_quantity()));
+            "quantity", static_cast<float>(anim_sprite->get_frames_quantity()));
         hero_program->set_uniform_1f(
             "number",
             static_cast<float>(anim_sprite->get_current_frame_number()));
-        hero_program->set_uniform_1f("start_position",
-                                     anim_sprite->get_start_position());
         hero_program->set_uniform_1f(
             "width",
             sprite_->get_width() / static_cast<float>(texture_->get_width()));
@@ -560,7 +558,7 @@ public:
     {
         hero_program->use();
         hero_program->set_uniform_1f(
-            "quantity", static_cast<float>(sprite->get_quantity()));
+            "quantity", static_cast<float>(sprite->get_frames_quantity()));
         hero_program->set_uniform_1f(
             "number",
             static_cast<float>(sprite->get_current_frame_number(direction)));

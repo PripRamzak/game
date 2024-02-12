@@ -5,7 +5,6 @@ varying vec2 out_texture_coordinates;
 
 uniform float quantity;
 uniform float number;
-uniform float start_position;
 uniform float width;
 uniform int direction;
 uniform sampler2D texture;
@@ -14,9 +13,9 @@ void main()
 {
     float new_u;
     if (direction == 1)
-    new_u = 1.0 - (start_position + width * out_texture_coordinates.x + (quantity - number - 1.0) / quantity);
+    new_u = 1.0 - (width * out_texture_coordinates.x + (quantity - number - 1.0) / quantity);
     else
-    new_u = start_position + width * out_texture_coordinates.x + number / quantity;
+    new_u = width * out_texture_coordinates.x + number / quantity;
 
 
     vec2 new_texture_coordinates = vec2(new_u, out_texture_coordinates.y);
