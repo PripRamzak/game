@@ -133,11 +133,15 @@ skeleton_warrior::skeleton_warrior(int                       health,
                                    float                     global_pos_x,
                                    float                     global_pos_y,
                                    float                     size,
-                                   game_object_state         state,
                                    std::chrono::milliseconds attack_delay,
                                    float                     agro_area)
-    : enemy(
-          health, speed, global_pos_x, global_pos_y, size, state, attack_delay)
+    : enemy(health,
+            speed,
+            global_pos_x,
+            global_pos_y,
+            size,
+            game_object_state::idle,
+            attack_delay)
     , agro_area(agro_area)
 {
     sprites.emplace(game_object_state::idle, skeleton_warrior_idle_anim);
@@ -150,12 +154,16 @@ skeleton_spearman::skeleton_spearman(int                       health,
                                      float                     global_pos_x,
                                      float                     global_pos_y,
                                      float                     size,
-                                     game_object_state         state,
                                      std::chrono::milliseconds attack_delay,
                                      float                     patrol_area,
                                      std::chrono::milliseconds patrol_time)
-    : enemy(
-          health, speed, global_pos_x, global_pos_y, size, state, attack_delay)
+    : enemy(health,
+            speed,
+            global_pos_x,
+            global_pos_y,
+            size,
+            game_object_state::walk,
+            attack_delay)
     , patrol_area(patrol_area)
     , patrol_area_dt(patrol_area / 2.f)
     , patrol_time(patrol_time)

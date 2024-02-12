@@ -10,15 +10,19 @@ static animation* warrior_fall_anim   = nullptr;
 
 static bool hero_init = false;
 
-hero::hero(int               health,
-           float             speed,
-           float             global_pos_x,
-           float             global_pos_y,
-           float             size,
-           game_object_state state,
-           float             jump_force,
-           float             jump_height)
-    : game_object(health, speed, global_pos_x, global_pos_y, size, state)
+hero::hero(int   health,
+           float speed,
+           float global_pos_x,
+           float global_pos_y,
+           float size,
+           float jump_force,
+           float jump_height)
+    : game_object(health,
+                  speed,
+                  global_pos_x,
+                  global_pos_y,
+                  size,
+                  game_object_state::idle)
     , jump_height(jump_height)
     , jump_force(jump_force)
 {

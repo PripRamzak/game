@@ -36,7 +36,6 @@ public:
                      float                     global_pos_x,
                      float                     global_pos_y,
                      float                     size,
-                     game_object_state         state,
                      std::chrono::milliseconds attack_delay,
                      float                     agro_area);
     void update(game_object*              hero,
@@ -55,7 +54,6 @@ public:
                       float                     global_pos_x,
                       float                     global_pos_y,
                       float                     size,
-                      game_object_state         state,
                       std::chrono::milliseconds attack_delay,
                       float                     patrol_area,
                       std::chrono::milliseconds patrol_time);
