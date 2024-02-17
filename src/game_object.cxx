@@ -2,16 +2,14 @@
 
 #include <algorithm>
 
-game_object::game_object(int               health,
+game_object::game_object(transform2d       global_pos,
+                         int               health,
                          float             speed,
-                         float             global_pos_x,
-                         float             global_pos_y,
                          float             size,
                          game_object_state state)
-    : health(health)
+    : global_pos(global_pos)
+    , health(health)
     , speed(speed)
-    , global_pos_x(global_pos_x)
-    , global_pos_y(global_pos_y)
     , size(size)
     , state(state)
 {
@@ -33,7 +31,7 @@ void game_object::set_state(game_object_state state_)
     {
         if (sprites[state]->get_sprite()->get_height() !=
             sprites[state_]->get_sprite()->get_height())
-            global_pos_y += (sprites[state]->get_sprite()->get_height() -
+            global_pos.y += (sprites[state]->get_sprite()->get_height() -
                              sprites[state_]->get_sprite()->get_height()) *
                             size / 2;
         sprites[state_]->reset();
@@ -41,19 +39,14 @@ void game_object::set_state(game_object_state state_)
     state = state_;
 }
 
+transform2d game_object::get_global_pos()
+{
+    return global_pos;
+}
+
 int game_object::get_health()
 {
     return health;
-}
-
-float game_object::get_global_pos_x()
-{
-    return global_pos_x;
-}
-
-float game_object::get_global_pos_y()
-{
-    return global_pos_y;
 }
 
 float game_object::get_size()

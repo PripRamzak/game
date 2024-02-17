@@ -10,19 +10,13 @@ static animation* warrior_fall_anim   = nullptr;
 
 static bool hero_init = false;
 
-hero::hero(int   health,
-           float speed,
-           float global_pos_x,
-           float global_pos_y,
-           float size,
-           float jump_force,
-           float jump_height)
-    : game_object(health,
-                  speed,
-                  global_pos_x,
-                  global_pos_y,
-                  size,
-                  game_object_state::idle)
+hero::hero(transform2d global_pos,
+           int         health,
+           float       speed,
+           float       size,
+           float       jump_force,
+           float       jump_height)
+    : game_object(global_pos, health, speed, size, game_object_state::idle)
     , jump_height(jump_height)
     , jump_force(jump_force)
 {
@@ -76,7 +70,7 @@ void hero::move(float dx, float dy, map* map)
     float delta_x = dx * speed;
     float delta_y = dy * speed;
 
-    global_pos_x += delta_x;
+    global_pos.x += delta_x;
 
     if (delta_x < 0.f)
     {
@@ -107,14 +101,14 @@ void hero::move(float dx, float dy, map* map)
         }
     }
 
-    global_pos_y += delta_y;
-
     if (state != game_object_state::jump && state != game_object_state::fall &&
         !collision::map_with_game_object(map, this, collision::direction::down))
     {
         set_state(game_object_state::fall);
         delta_y += speed;
     }
+
+    global_pos.y += delta_y;
 
     if (delta_y > 0.f)
     {

@@ -15,14 +15,13 @@ static animation* skeleton_spearman_attack_anim = nullptr;
 
 static bool enemy_init = false;
 
-enemy::enemy(int                       health,
+enemy::enemy(transform2d               global_pos,
+             int                       health,
              float                     speed,
-             float                     global_pos_x,
-             float                     global_pos_y,
              float                     size,
              game_object_state         state,
              std::chrono::milliseconds attack_delay)
-    : game_object(health, speed, global_pos_x, global_pos_y, size, state)
+    : game_object(global_pos, health, speed, size, state)
     , attack_delay(attack_delay)
     , attack_delay_dt(0ms)
 {
@@ -96,9 +95,9 @@ void enemy::move()
 {
     set_state(game_object_state::run);
     if (direction == 0)
-        global_pos_x += speed;
+        global_pos.x += speed;
     else
-        global_pos_x -= speed;
+        global_pos.x -= speed;
 }
 
 void enemy::attack(game_object* hero, std::chrono::milliseconds delta_time)
@@ -128,17 +127,15 @@ void enemy::attack(game_object* hero, std::chrono::milliseconds delta_time)
 
 enemy::~enemy() = default;
 
-skeleton_warrior::skeleton_warrior(int                       health,
+skeleton_warrior::skeleton_warrior(transform2d               global_pos,
+                                   int                       health,
                                    float                     speed,
-                                   float                     global_pos_x,
-                                   float                     global_pos_y,
                                    float                     size,
                                    std::chrono::milliseconds attack_delay,
                                    float                     agro_area)
-    : enemy(health,
+    : enemy(global_pos,
+            health,
             speed,
-            global_pos_x,
-            global_pos_y,
             size,
             game_object_state::idle,
             attack_delay)
@@ -149,18 +146,16 @@ skeleton_warrior::skeleton_warrior(int                       health,
     sprites.emplace(game_object_state::attack, skeleton_warrior_attack_anim);
 }
 
-skeleton_spearman::skeleton_spearman(int                       health,
+skeleton_spearman::skeleton_spearman(transform2d               global_pos,
+                                     int                       health,
                                      float                     speed,
-                                     float                     global_pos_x,
-                                     float                     global_pos_y,
                                      float                     size,
                                      std::chrono::milliseconds attack_delay,
                                      float                     patrol_area,
                                      std::chrono::milliseconds patrol_time)
-    : enemy(health,
+    : enemy(global_pos,
+            health,
             speed,
-            global_pos_x,
-            global_pos_y,
             size,
             game_object_state::walk,
             attack_delay)
@@ -179,7 +174,7 @@ void skeleton_warrior::update(game_object*              hero,
 {
     if (agro)
     {
-        direction = global_pos_x < hero->get_global_pos_x() ? 0 : 1;
+        direction = global_pos.x < hero->get_global_pos().x ? 0 : 1;
         if (collision::game_object_with_game_object(this, hero) ||
             state == game_object_state::attack)
             attack(hero, delta_time);
@@ -189,8 +184,8 @@ void skeleton_warrior::update(game_object*              hero,
             attack_delay_dt = 0ms;
         }
     }
-    else if (global_pos_x - agro_area / 2.f <= hero->get_global_pos_x() &&
-             global_pos_x + agro_area / 2.f >= hero->get_global_pos_x())
+    else if (global_pos.x - agro_area / 2.f <= hero->get_global_pos().x &&
+             global_pos.x + agro_area / 2.f >= hero->get_global_pos().x)
         agro = true;
 
     get_animation()->play(delta_time);
@@ -199,11 +194,11 @@ void skeleton_warrior::update(game_object*              hero,
 void skeleton_spearman::update(game_object*              hero,
                                std::chrono::milliseconds delta_time)
 {
-    std::cout << global_pos_x << std::endl;
+    std::cout << global_pos.x << std::endl;
     if (collision::game_object_with_game_object(this, hero) ||
         state == game_object_state::attack)
     {
-        direction = global_pos_x < hero->get_global_pos_x() ? 0 : 1;
+        direction = global_pos.x < hero->get_global_pos().x ? 0 : 1;
         attack(hero, delta_time);
     }
     else
@@ -236,12 +231,12 @@ void skeleton_spearman::move()
     set_state(game_object_state::walk);
     if (direction == 0)
     {
-        global_pos_x += speed;
+        global_pos.x += speed;
         patrol_area_dt += speed;
     }
     else
     {
-        global_pos_x -= speed;
+        global_pos.x -= speed;
         patrol_area_dt -= speed;
     }
 }

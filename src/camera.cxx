@@ -18,10 +18,10 @@ public:
         , height(height_)
     {
     }
-    void look_at(float pos_x, float pos_y) final
+    void look_at(transform2d pos) final
     {
-        position = glm::vec3(pos_x - width, pos_y - height * 1.25f, 2.f);
-        target   = glm::vec3(pos_x - width, pos_y - height * 1.25f, 0.f);
+        position = glm::vec3(pos.x - width, pos.y - height * 1.25f, 2.f);
+        target   = glm::vec3(pos.x - width, pos.y - height * 1.25f, 0.f);
         view     = glm::lookAt(position, target, up);
     }
     float* get_view() final { return &view[0][0]; }

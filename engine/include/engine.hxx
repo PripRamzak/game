@@ -38,8 +38,8 @@ public:
     virtual void render(texture*       texture,
                         vertex_buffer* vertex_buffer,
                         index_buffer*  index_buffer,
-                        float*         min_uv,
-                        float*         max_uv,
+                        transform2d    min_uv,
+                        transform2d    max_uv,
                         float*         matrix) = 0;
     // clang-format on
     // virtual void      render_buttons(float* matrix)                     = 0;

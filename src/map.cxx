@@ -121,22 +121,22 @@ index_buffer* map::get_index_buffer(map_tile_type type)
     return tiles[type].tile_index_buffer;
 }
 
-float* map::get_tile_min_uv(map_tile_type type)
+transform2d map::get_tile_min_uv(map_tile_type type)
 {
     return tiles[type].min_uv;
 }
 
-float* map::get_tile_max_uv(map_tile_type type)
+transform2d map::get_tile_max_uv(map_tile_type type)
 {
     return tiles[type].max_uv;
 }
 
 map::tile::tile()
 {
-    min_uv[0] = 0.f;
-    min_uv[1] = 0.f;
-    max_uv[0] = 1.f;
-    max_uv[1] = 1.f;
+    min_uv.x = 0.f;
+    min_uv.y = 0.f;
+    max_uv.x = 1.f;
+    max_uv.y = 1.f;
 
     tile_vertex_buffer = create_vertex_buffer();
     tile_index_buffer  = create_index_buffer();
@@ -144,10 +144,10 @@ map::tile::tile()
 
 map::tile::tile(float min_u, float max_u, float min_v, float max_v)
 {
-    min_uv[0] = min_u;
-    min_uv[1] = min_v;
-    max_uv[0] = max_u;
-    max_uv[1] = max_v;
+    min_uv.x = min_u;
+    min_uv.y = min_v;
+    max_uv.x = max_u;
+    max_uv.y = max_v;
 
     tile_vertex_buffer = create_vertex_buffer();
     tile_index_buffer  = create_index_buffer();

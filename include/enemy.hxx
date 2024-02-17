@@ -5,10 +5,9 @@
 class enemy : public game_object
 {
 public:
-    enemy(int                       health,
+    enemy(transform2d               global_pos,
+          int                       health,
           float                     speed,
-          float                     global_pos_x,
-          float                     global_pos_y,
           float                     size,
           game_object_state         state,
           std::chrono::milliseconds attack_delay);
@@ -31,10 +30,9 @@ protected:
 class skeleton_warrior : public enemy
 {
 public:
-    skeleton_warrior(int                       health,
+    skeleton_warrior(transform2d               global_pos,
+                     int                       health,
                      float                     speed,
-                     float                     global_pos_x,
-                     float                     global_pos_y,
                      float                     size,
                      std::chrono::milliseconds attack_delay,
                      float                     agro_area);
@@ -49,10 +47,9 @@ private:
 class skeleton_spearman : public enemy
 {
 public:
-    skeleton_spearman(int                       health,
+    skeleton_spearman(transform2d               global_pos,
+                      int                       health,
                       float                     speed,
-                      float                     global_pos_x,
-                      float                     global_pos_y,
                       float                     size,
                       std::chrono::milliseconds attack_delay,
                       float                     patrol_area,

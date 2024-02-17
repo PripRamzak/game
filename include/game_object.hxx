@@ -21,18 +21,16 @@ enum class game_object_state
 class game_object
 {
 public:
-    game_object(int               health,
+    game_object(transform2d       global_pos,
+                int               health,
                 float             speed,
-                float             global_pos_x,
-                float             global_pos_y,
                 float             size,
                 game_object_state state);
     bool              is_alive();
     void              hurt();
     void              set_state(game_object_state state_);
+    transform2d       get_global_pos();
     int               get_health();
-    float             get_global_pos_x();
-    float             get_global_pos_y();
     float             get_size();
     game_object_state get_state();
     int               get_direction();
@@ -47,11 +45,10 @@ public:
 
 protected:
     std::unordered_map<game_object_state, animation*> sprites;
-    int                                               health       = 0;
-    float                                             speed        = 0.f;
-    float                                             global_pos_x = 0.f;
-    float                                             global_pos_y = 0.f;
-    float                                             size         = 0.f;
-    int                                               direction    = 0;
+    transform2d                                       global_pos;
+    int                                               health    = 0;
+    float                                             speed     = 0.f;
+    float                                             size      = 0.f;
+    int                                               direction = 0;
     game_object_state state = game_object_state::idle;
 };

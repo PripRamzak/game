@@ -19,6 +19,7 @@ add_library(engine SHARED
         include/sprite.hxx
         src/texture.cxx
         include/texture.hxx
+        include/transform2d.hxx
         src/vertex_buffer.cxx
         include/vertex_buffer.hxx
         include/stb_image.h)

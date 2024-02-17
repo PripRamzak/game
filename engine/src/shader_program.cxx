@@ -167,12 +167,12 @@ public:
         glUniform1f(location, value);
         gl_check();
     }
-    void set_uniform_2fv(const char* name, int count, float* value) final
+    void set_uniform_2fv(const char* name, int count, transform2d value) final
     {
         GLint location = glGetUniformLocation(program, name);
         gl_check();
         assert(location != -1);
-        glUniform2fv(location, count, value);
+        glUniform2fv(location, count, &value.x);
         gl_check();
     }
     void set_uniform_matrix3fv(const char* name,

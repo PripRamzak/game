@@ -6,13 +6,12 @@
 class hero : public game_object
 {
 public:
-    hero(int   health,
-         float speed,
-         float global_pos_x,
-         float global_pos_y,
-         float size,
-         float jump_force,
-         float jump_height);
+    hero(transform2d global_pos,
+         int         health,
+         float       speed,
+         float       size,
+         float       jump_force,
+         float       jump_height);
     static void initialize();
     void        move(float dx, float dy, map* map);
     void        jump();

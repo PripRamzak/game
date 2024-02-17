@@ -53,28 +53,29 @@ bool map_with_game_object(map*         map,
              j++, map_tile_vertices += 4)
         {
             bool collision_right =
-                game_object->global_pos_x +
-                    (game_object_vertices + 2)->x * game_object->size >
-                map_tile_vertices->x;
+                game_object->global_pos.x +
+                    (game_object_vertices + 2)->pos.x * game_object->size >
+                map_tile_vertices->pos.x;
             bool collision_left =
-                (map_tile_vertices + 2)->x >
-                game_object->global_pos_x +
-                    game_object_vertices->x * game_object->size;
-            bool collision_up = (map_tile_vertices + 2)->y >
-                                game_object->global_pos_y +
-                                    game_object_vertices->y * game_object->size;
+                (map_tile_vertices + 2)->pos.x >
+                game_object->global_pos.x +
+                    game_object_vertices->pos.x * game_object->size;
+            bool collision_up =
+                (map_tile_vertices + 2)->pos.y >
+                game_object->global_pos.y +
+                    game_object_vertices->pos.y * game_object->size;
             bool collision_down;
 
             if (direction == direction::left || direction == direction::right)
                 collision_down =
-                    game_object->global_pos_y +
-                        (game_object_vertices + 2)->y * game_object->size >
-                    map_tile_vertices->y;
+                    game_object->global_pos.y +
+                        (game_object_vertices + 2)->pos.y * game_object->size >
+                    map_tile_vertices->pos.y;
             else
                 collision_down =
-                    game_object->global_pos_y +
-                        (game_object_vertices + 2)->y * game_object->size >=
-                    map_tile_vertices->y;
+                    game_object->global_pos.y +
+                        (game_object_vertices + 2)->pos.y * game_object->size >=
+                    map_tile_vertices->pos.y;
 
             bool collision_x = collision_left && collision_right;
             bool collision_y = collision_up && collision_down;
@@ -86,31 +87,33 @@ bool map_with_game_object(map*         map,
                 {
                     case direction::up:
                         std::cout << "top" << std::endl;
-                        game_object->global_pos_y -=
-                            game_object->global_pos_y +
-                            game_object_vertices->y * game_object->size -
-                            (map_tile_vertices + 2)->y;
+                        game_object->global_pos.y -=
+                            game_object->global_pos.y +
+                            game_object_vertices->pos.y * game_object->size -
+                            (map_tile_vertices + 2)->pos.y;
                         break;
                     case direction::down:
                         std::cout << "bottom" << std::endl;
-                        game_object->global_pos_y -=
-                            game_object->global_pos_y +
-                            (game_object_vertices + 2)->y * game_object->size -
-                            map_tile_vertices->y;
+                        game_object->global_pos.y -=
+                            game_object->global_pos.y +
+                            (game_object_vertices + 2)->pos.y *
+                                game_object->size -
+                            map_tile_vertices->pos.y;
                         break;
                     case direction::left:
                         std::cout << "left" << std::endl;
-                        game_object->global_pos_x -=
-                            game_object->global_pos_x +
-                            game_object_vertices->x * game_object->size -
-                            (map_tile_vertices + 2)->x;
+                        game_object->global_pos.x -=
+                            game_object->global_pos.x +
+                            game_object_vertices->pos.x * game_object->size -
+                            (map_tile_vertices + 2)->pos.x;
                         break;
                     case direction::right:
                         std::cout << "right" << std::endl;
-                        game_object->global_pos_x -=
-                            game_object->global_pos_x +
-                            (game_object_vertices + 2)->x * game_object->size -
-                            map_tile_vertices->x;
+                        game_object->global_pos.x -=
+                            game_object->global_pos.x +
+                            (game_object_vertices + 2)->pos.x *
+                                game_object->size -
+                            map_tile_vertices->pos.x;
                         break;
                 }
                 return true;
@@ -134,23 +137,23 @@ bool game_object_with_game_object(game_object* game_object1,
                                                  ->data();
 
     bool collision_x =
-        game_object1->global_pos_x +
-                (game_object1_vertices + 2)->x * game_object1->size >
-            game_object2->global_pos_x +
-                game_object2_vertices->x * game_object2->size &&
-        game_object2->global_pos_x +
-                (game_object2_vertices + 2)->x * game_object2->size >
-            game_object1->global_pos_x +
-                game_object1_vertices->x * game_object1->size;
+        game_object1->global_pos.x +
+                (game_object1_vertices + 2)->pos.x * game_object1->size >
+            game_object2->global_pos.x +
+                game_object2_vertices->pos.x * game_object2->size &&
+        game_object2->global_pos.x +
+                (game_object2_vertices + 2)->pos.x * game_object2->size >
+            game_object1->global_pos.x +
+                game_object1_vertices->pos.x * game_object1->size;
     bool collision_y =
-        game_object1->global_pos_y +
-                (game_object1_vertices + 2)->y * game_object1->size >
-            game_object2->global_pos_y +
-                game_object2_vertices->y * game_object2->size &&
-        game_object2->global_pos_y +
-                (game_object2_vertices + 2)->y * game_object2->size >
-            game_object1->global_pos_y +
-                game_object1_vertices->y * game_object1->size;
+        game_object1->global_pos.y +
+                (game_object1_vertices + 2)->pos.y * game_object1->size >
+            game_object2->global_pos.y +
+                game_object2_vertices->pos.y * game_object2->size &&
+        game_object2->global_pos.y +
+                (game_object2_vertices + 2)->pos.y * game_object2->size >
+            game_object1->global_pos.y +
+                game_object1_vertices->pos.y * game_object1->size;
     bool collision = collision_x && collision_y;
 
     if (collision)

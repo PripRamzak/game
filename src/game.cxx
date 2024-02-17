@@ -43,7 +43,7 @@ int main(int /*argc*/, char** /*argv*/)
     // Warrior creating
 
     hero::initialize();
-    hero* warrior = new hero(4, 10.f, 300.f, 464.f, 2.f, 12.f, 300.f);
+    hero* warrior = new hero({ 300.f, 464.f }, 4, 10.f, 2.f, 12.f, 300.f);
 
     glm::mat4 warrior_scale =
         glm::scale(glm::mat4{ 1 },
@@ -53,8 +53,8 @@ int main(int /*argc*/, char** /*argv*/)
 
     enemy::initialize();
     // std::vector<enemy*> enemies;
-    enemy* skel =
-        new skeleton_spearman(4, 4.f, 800.f, 418.f, 2.f, 2000ms, 400.f, 2000ms);
+    enemy* skel = new skeleton_spearman(
+        { 800.f, 418.f }, 4, 4.f, 2.f, 2000ms, 400.f, 2000ms);
     /*enemy* skel = new skeleton_warrior(
         4, 5.f, 800.f, 450.f, 2.f, 2000ms, 600.f);*/
 
@@ -182,8 +182,7 @@ int main(int /*argc*/, char** /*argv*/)
                     skel->update(warrior, frame_time_dif);
             }
 
-            camera->look_at(warrior->get_global_pos_x(),
-                            warrior->get_global_pos_y());
+            camera->look_at(warrior->get_global_pos());
 
             glm::mat4 view = glm::make_mat4x4(camera->get_view());
 
@@ -270,11 +269,9 @@ int main(int /*argc*/, char** /*argv*/)
 
             if (skel->is_alive())
             {
-                glm::mat4 skel_translate =
-                    glm::translate(glm::mat4{ 1 },
-                                   glm::vec3{ skel->get_global_pos_x(),
-                                              skel->get_global_pos_y(),
-                                              0.f });
+                transform2d skel_pos       = skel->get_global_pos();
+                glm::mat4   skel_translate = glm::translate(
+                    glm::mat4{ 1 }, glm::vec3{ skel_pos.x, skel_pos.y, 0.f });
 
                 glm::mat4 skel_mvp =
                     projection * view * skel_translate * skel_scale;
@@ -285,11 +282,9 @@ int main(int /*argc*/, char** /*argv*/)
                                &skel_mvp[0][0]);
             }
 
-            glm::mat4 warrior_translate =
-                glm::translate(glm::mat4{ 1 },
-                               glm::vec3{ warrior->get_global_pos_x(),
-                                          warrior->get_global_pos_y(),
-                                          0.f });
+            transform2d warrior_pos       = warrior->get_global_pos();
+            glm::mat4   warrior_translate = glm::translate(
+                glm::mat4{ 1 }, glm::vec3{ warrior_pos.x, warrior_pos.y, 0.f });
 
             glm::mat4 warrior_mvp =
                 projection * view * warrior_translate * warrior_scale;

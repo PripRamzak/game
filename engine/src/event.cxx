@@ -96,10 +96,10 @@ bool check_pressing_button(SDL_Event             sdl_event,
     vertex_2d movement_buttons_vertex = *buttons_[0].vertex_buffer_->data();
     vertex_2d attack_button_vertex    = *buttons_[1].vertex_buffer_->data();
 
-    if (finger_x > movement_buttons_vertex.x + buttons_[0].width / 3 &&
-        finger_x < movement_buttons_vertex.x + buttons_[0].width / 3 * 2 &&
-        finger_y > movement_buttons_vertex.y &&
-        finger_y < movement_buttons_vertex.y + buttons_[0].height / 3)
+    if (finger_x > movement_buttons_vertex.pos.x + buttons_[0].width / 3 &&
+        finger_x < movement_buttons_vertex.pos.x + buttons_[0].width / 3 * 2 &&
+        finger_y > movement_buttons_vertex.pos.y &&
+        finger_y < movement_buttons_vertex.pos.y + buttons_[0].height / 3)
     {
         if (sdl_event.type == SDL_EVENT_FINGER_DOWN)
         {
@@ -113,11 +113,12 @@ bool check_pressing_button(SDL_Event             sdl_event,
         }
         return true;
     }
-    else if (finger_x > movement_buttons_vertex.x + buttons_[0].width / 3 &&
-             finger_x < movement_buttons_vertex.x + buttons_[0].width / 3 * 2 &&
+    else if (finger_x > movement_buttons_vertex.pos.x + buttons_[0].width / 3 &&
+             finger_x <
+                 movement_buttons_vertex.pos.x + buttons_[0].width / 3 * 2 &&
              finger_y >
-                 movement_buttons_vertex.y + buttons_[0].height / 3 * 2 &&
-             finger_y < movement_buttons_vertex.y + buttons_[0].height)
+                 movement_buttons_vertex.pos.y + buttons_[0].height / 3 * 2 &&
+             finger_y < movement_buttons_vertex.pos.y + buttons_[0].height)
     {
         if (sdl_event.type == SDL_EVENT_FINGER_DOWN)
         {
@@ -131,10 +132,12 @@ bool check_pressing_button(SDL_Event             sdl_event,
         }
         return true;
     }
-    else if (finger_x > movement_buttons_vertex.x &&
-             finger_x < movement_buttons_vertex.x + buttons_[0].width / 3 &&
-             finger_y > movement_buttons_vertex.y + buttons_[0].height / 3 &&
-             finger_y < movement_buttons_vertex.y + buttons_[0].height / 3 * 2)
+    else if (finger_x > movement_buttons_vertex.pos.x &&
+             finger_x < movement_buttons_vertex.pos.x + buttons_[0].width / 3 &&
+             finger_y >
+                 movement_buttons_vertex.pos.y + buttons_[0].height / 3 &&
+             finger_y <
+                 movement_buttons_vertex.pos.y + buttons_[0].height / 3 * 2)
     {
         if (sdl_event.type == SDL_EVENT_FINGER_DOWN)
         {
@@ -148,10 +151,12 @@ bool check_pressing_button(SDL_Event             sdl_event,
         }
         return true;
     }
-    else if (finger_x > movement_buttons_vertex.x + buttons_[0].width / 3 &&
-             finger_x < movement_buttons_vertex.x + buttons_[0].width &&
-             finger_y > movement_buttons_vertex.y + buttons_[0].height / 3 &&
-             finger_y < movement_buttons_vertex.y + buttons_[0].height / 3 * 2)
+    else if (finger_x > movement_buttons_vertex.pos.x + buttons_[0].width / 3 &&
+             finger_x < movement_buttons_vertex.pos.x + buttons_[0].width &&
+             finger_y >
+                 movement_buttons_vertex.pos.y + buttons_[0].height / 3 &&
+             finger_y <
+                 movement_buttons_vertex.pos.y + buttons_[0].height / 3 * 2)
     {
         if (sdl_event.type == SDL_EVENT_FINGER_DOWN)
         {
@@ -166,10 +171,10 @@ bool check_pressing_button(SDL_Event             sdl_event,
         return true;
     }
 
-    if (finger_x > attack_button_vertex.x &&
-        finger_x < attack_button_vertex.x + buttons_[1].width &&
-        finger_y > attack_button_vertex.y &&
-        finger_y < attack_button_vertex.y + buttons_[1].height)
+    if (finger_x > attack_button_vertex.pos.x &&
+        finger_x < attack_button_vertex.pos.x + buttons_[1].width &&
+        finger_y > attack_button_vertex.pos.y &&
+        finger_y < attack_button_vertex.pos.y + buttons_[1].height)
     {
         if (sdl_event.type == SDL_EVENT_FINGER_DOWN)
         {

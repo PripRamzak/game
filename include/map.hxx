@@ -42,8 +42,8 @@ public:
     texture*       get_tileset();
     vertex_buffer* get_vertex_buffer(map_tile_type type);
     index_buffer*  get_index_buffer(map_tile_type type);
-    float*         get_tile_min_uv(map_tile_type type);
-    float*         get_tile_max_uv(map_tile_type type);
+    transform2d    get_tile_min_uv(map_tile_type type);
+    transform2d    get_tile_max_uv(map_tile_type type);
     ~map();
 
 private:
@@ -51,8 +51,8 @@ private:
     {
         vertex_buffer* tile_vertex_buffer;
         index_buffer*  tile_index_buffer;
-        float          min_uv[2];
-        float          max_uv[2];
+        transform2d    min_uv;
+        transform2d    max_uv;
 
         tile();
         tile(float min_u, float max_u, float min_v, float max_v);
