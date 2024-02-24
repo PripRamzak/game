@@ -24,11 +24,11 @@
 #include "imgui_impl_sdl3.h"
 
 bool check_pressing_key(SDL_Event sdl_event, event& event);
-bool check_pressing_button(SDL_Event             sdl_event,
+/*bool check_pressing_button(SDL_Event             sdl_event,
                            event&                event,
                            std::vector<buttons>& buttons_,
                            float                 window_width,
-                           float                 window_height);
+                           float                 window_height);*/
 bool is_key_down(key key_);
 
 void gl_check();
@@ -73,6 +73,7 @@ class game_engine final : public engine
     SDL_GLContext   context;
     shader_program* hero_program;
     shader_program* map_program;
+    shader_program* collider_program;
 
     SDL_AudioDeviceID          audio_device;
     SDL_AudioSpec              device_audio_spec;
@@ -338,9 +339,42 @@ public:
             return false;
         }
 
+        collider_program = create_shader_program();
+
+        if (!collider_program->create_shader("shaders/collider.vert",
+                                             shader_type::vertex))
+        {
+            SDL_GL_DeleteContext(context);
+            SDL_DestroyWindow(window);
+            SDL_Quit();
+            return false;
+        }
+
+        collider_program->bind("vertex_position", 0);
+        collider_program->bind("vertex_color", 1);
+
+        if (!collider_program->create_shader("shaders/collider.frag",
+                                             shader_type::fragment))
+        {
+            SDL_GL_DeleteContext(context);
+            SDL_DestroyWindow(window);
+            SDL_Quit();
+            return false;
+        }
+
+        if (!collider_program->link())
+        {
+            SDL_GL_DeleteContext(context);
+            SDL_DestroyWindow(window);
+            SDL_Quit();
+            return false;
+        }
+
         glEnable(GL_BLEND);
         gl_check();
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        gl_check();
+        glLineWidth(3);
         gl_check();
         glClearColor(24.f / 255.f, 20.f / 255.f, 37.f / 255.f, 0.f);
         gl_check();
@@ -394,7 +428,7 @@ public:
 
         SDL_PlayAudioDevice(audio_device);
 
-        mobile_buttons.resize(2);
+        /*mobile_buttons.resize(2);
 
         mobile_buttons[0].width  = 270.f;
         mobile_buttons[0].height = 270.f;
@@ -448,7 +482,7 @@ public:
         mobile_buttons[1].vertex_buffer_->buffer_data();
 
         buttons_index_buffer = create_index_buffer();
-        buttons_index_buffer->add_indexes(static_cast<size_t>(4));
+        buttons_index_buffer->add_indexes(static_cast<size_t>(4));*/
 
         return true;
     }
@@ -472,12 +506,12 @@ public:
                     SDL_Event e2;
                     e1.type = SDL_EVENT_FINGER_DOWN;
                     e2.type = SDL_EVENT_FINGER_UP;
-                    if (check_pressing_button(sdl_event,
+                    /*if (check_pressing_button(sdl_event,
                                               event,
                                               mobile_buttons,
                                               window_width_pixels,
                                               window_height_pixels))
-                        return true;
+                        return true;*/
                     break;
                 case SDL_EVENT_QUIT:
                     event = event::turn_off;
@@ -514,9 +548,6 @@ public:
         hero_program->set_uniform_1f(
             "number",
             static_cast<float>(anim_sprite->get_current_frame_number()));
-        hero_program->set_uniform_1f(
-            "width",
-            sprite_->get_width() / static_cast<float>(texture_->get_width()));
         hero_program->set_uniform_1i("direction", direction);
         hero_program->set_uniform_1i("texture", 0);
         hero_program->set_uniform_matrix4fv("matrix", 1, GL_FALSE, matrix);
@@ -531,7 +562,7 @@ public:
                               2,
                               GL_FLOAT,
                               GL_FALSE,
-                              sizeof(vertex_2d),
+                              sizeof(vertex2d_uv),
                               reinterpret_cast<void*>(0));
         gl_check();
         glEnableVertexAttribArray(0);
@@ -541,7 +572,7 @@ public:
                               2,
                               GL_FLOAT,
                               GL_FALSE,
-                              sizeof(vertex_2d),
+                              sizeof(vertex2d_uv),
                               reinterpret_cast<void*>(2 * sizeof(float)));
         gl_check();
         glEnableVertexAttribArray(1);
@@ -582,7 +613,7 @@ public:
                               2,
                               GL_FLOAT,
                               GL_FALSE,
-                              sizeof(vertex_2d),
+                              sizeof(vertex2d_uv),
                               reinterpret_cast<void*>(0));
         gl_check();
         glEnableVertexAttribArray(0);
@@ -592,7 +623,7 @@ public:
                               2,
                               GL_FLOAT,
                               GL_FALSE,
-                              sizeof(vertex_2d),
+                              sizeof(vertex2d_uv),
                               reinterpret_cast<void*>(2 * sizeof(float)));
         gl_check();
         glEnableVertexAttribArray(1);
@@ -625,7 +656,7 @@ public:
                               2,
                               GL_FLOAT,
                               GL_FALSE,
-                              sizeof(vertex_2d),
+                              sizeof(vertex2d_uv),
                               reinterpret_cast<void*>(0));
         gl_check();
         glEnableVertexAttribArray(0);
@@ -635,7 +666,7 @@ public:
                               2,
                               GL_FLOAT,
                               GL_FALSE,
-                              sizeof(vertex_2d),
+                              sizeof(vertex2d_uv),
                               reinterpret_cast<void*>(2 * sizeof(float)));
         gl_check();
         glEnableVertexAttribArray(1);
@@ -643,6 +674,40 @@ public:
 
         glDrawElements(
             GL_TRIANGLES, index_buffer->get_size(), GL_UNSIGNED_SHORT, 0);
+        gl_check();
+    }
+    void render(vertex_buffer* vertex_buffer,
+                index_buffer*  index_buffer,
+                float*         matrix) override
+    {
+        collider_program->use();
+        collider_program->set_uniform_matrix4fv("matrix", 1, GL_FALSE, matrix);
+
+        vertex_buffer->bind();
+        index_buffer->bind();
+
+        glVertexAttribPointer(0,
+                              2,
+                              GL_FLOAT,
+                              GL_FALSE,
+                              sizeof(vertex2d_color),
+                              reinterpret_cast<void*>(0));
+        gl_check();
+        glEnableVertexAttribArray(0);
+        gl_check();
+
+        glVertexAttribPointer(1,
+                              4,
+                              GL_FLOAT,
+                              GL_FALSE,
+                              sizeof(vertex2d_color),
+                              reinterpret_cast<void*>(2 * sizeof(float)));
+        gl_check();
+        glEnableVertexAttribArray(1);
+        gl_check();
+
+        glDrawElements(
+            GL_LINES, index_buffer->get_size(), GL_UNSIGNED_SHORT, 0);
         gl_check();
     }
     /*void render_buttons(float* matrix) final

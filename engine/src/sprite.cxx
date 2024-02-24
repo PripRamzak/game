@@ -5,13 +5,14 @@ sprite::sprite(texture* textures_, float width_, float height_)
     , width(width_)
     , height(height_)
 {
-    vb = create_vertex_buffer();
+    vertex2d_uv vertices[4];
+    vertices[0] = { -(width / 2), -(height / 2), 0.f, 1.f };
+    vertices[1] = { width / 2, -(height / 2), 1.f, 1.f };
+    vertices[2] = { width / 2, height / 2, 1.f, 0.f };
+    vertices[3] = { -(width / 2), height / 2, 0.f, 0.f };
 
-    vb->add_vertex({ -(width / 2), -(height / 2), 0.f, 1.f });
-    vb->add_vertex({ width / 2, -(height / 2), 1.f, 1.f });
-    vb->add_vertex({ width / 2, height / 2, 1.f, 0.f });
-    vb->add_vertex({ -(width / 2), height / 2, 0.f, 0.f });
-    vb->buffer_data();
+    vb = create_vertex_buffer();
+    vb->buffer_data(vertices, static_cast<size_t>(4));
 }
 
 float sprite::get_width()

@@ -27,42 +27,30 @@ map::map(float tile_width_, float tile_height_, std::string file_path)
 {
     tileset = dungeon;
 
-    tile brick_top = {
-        32.f / 240.f, 48.f / 240.f, 224.f / 288.f, 240.f / 288.f
-    };
-    tile brick_bottom = {
-        32.f / 240.f, 48.f / 240.f, 256.f / 288.f, 272.f / 288.f
-    };
-    tile brick_left = {
-        48.f / 240.f, 64.f / 240.f, 240.f / 288.f, 256.f / 288.f
-    };
-    tile brick_right = {
-        16.f / 240.f, 32.f / 240.f, 240.f / 288.f, 256.f / 288.f
-    };
-    tile brick_top_left = {
-        96.f / 240.f, 112.f / 240.f, 224.f / 288.f, 240.f / 288.f
-    };
-    tile brick_top_right = {
-        80.f / 240.f, 96.f / 240.f, 224.f / 288.f, 240.f / 288.f
-    };
-    tile brick_bottom_left = {
-        96.f / 240.f, 112.f / 240.f, 240.f / 288.f, 256.f / 288.f
-    };
-    tile brick_bottom_right = {
-        80.f / 240.f, 96.f / 240.f, 240.f / 288.f, 256.f / 288.f
-    };
-    tile plate_top_left = {
-        48.f / 240.f, 64.f / 240.f, 160.f / 288.f, 172.f / 288.f
-    };
-    tile plate_top_right = {
-        16.f / 240.f, 32.f / 240.f, 160.f / 288.f, 172.f / 288.f
-    };
-    tile plate_bottom_left = {
-        48.f / 240.f, 64.f / 240.f, 192.f / 288.f, 208.f / 288.f
-    };
-    tile plate_bottom_right = {
-        16.f / 240.f, 32.f / 240.f, 192.f / 288.f, 208.f / 288.f
-    };
+    tile brick_top          = { { 32.f / 240.f, 224.f / 288.f },
+                                { 48.f / 240.f, 240.f / 288.f } };
+    tile brick_bottom       = { { 32.f / 240.f, 256.f / 288.f },
+                                { 48.f / 240.f, 272.f / 288.f } };
+    tile brick_left         = { { 48.f / 240.f, 240.f / 288.f },
+                                { 64.f / 240.f, 256.f / 288.f } };
+    tile brick_right        = { { 16.f / 240.f, 240.f / 288.f },
+                                { 32.f / 240.f, 256.f / 288.f } };
+    tile brick_top_left     = { { 96.f / 240.f, 224.f / 288.f },
+                                { 112.f / 240.f, 240.f / 288.f } };
+    tile brick_top_right    = { { 80.f / 240.f, 224.f / 288.f },
+                                { 96.f / 240.f, 240.f / 288.f } };
+    tile brick_bottom_left  = { { 96.f / 240.f, 240.f / 288.f },
+                                { 112.f / 240.f, 256.f / 288.f } };
+    tile brick_bottom_right = { { 80.f / 240.f, 240.f / 288.f },
+                                { 96.f / 240.f, 256.f / 288.f } };
+    tile plate_top_left     = { { 48.f / 240.f, 160.f / 288.f },
+                                { 64.f / 240.f, 172.f / 288.f } };
+    tile plate_top_right    = { { 16.f / 240.f, 160.f / 288.f },
+                                { 32.f / 240.f, 172.f / 288.f } };
+    tile plate_bottom_left  = { { 48.f / 240.f, 192.f / 288.f },
+                                { 64.f / 240.f, 208.f / 288.f } };
+    tile plate_bottom_right = { { 16.f / 240.f, 192.f / 288.f },
+                                { 32.f / 240.f, 208.f / 288.f } };
 
     tiles.emplace(map_tile_type::brick_top, brick_top);
     tiles.emplace(map_tile_type::brick_bottom, brick_bottom);
@@ -104,11 +92,24 @@ map::map(float tile_width_, float tile_height_, std::string file_path)
                 break;
         }
     }
+
+    for (auto& tile : tiles)
+    {
+        tile.second.tile_vertex_buffer->buffer_data(
+            tile.second.vertices.data(), tile.second.vertices.size());
+        tile.second.tile_index_buffer->add_indexes(
+            primitives::triangle, tile.second.vertices.size() / 4);
+    }
 }
 
 texture* map::get_tileset()
 {
     return tileset;
+}
+
+std::vector<vertex2d_uv>& map::get_vertices(map_tile_type type)
+{
+    return tiles[type].vertices;
 }
 
 vertex_buffer* map::get_vertex_buffer(map_tile_type type)
@@ -142,13 +143,10 @@ map::tile::tile()
     tile_index_buffer  = create_index_buffer();
 };
 
-map::tile::tile(float min_u, float max_u, float min_v, float max_v)
+map::tile::tile(transform2d min_uv, transform2d max_uv)
+    : min_uv(min_uv)
+    , max_uv(max_uv)
 {
-    min_uv.x = min_u;
-    min_uv.y = min_v;
-    max_uv.x = max_u;
-    max_uv.y = max_v;
-
     tile_vertex_buffer = create_vertex_buffer();
     tile_index_buffer  = create_index_buffer();
 }
@@ -159,16 +157,14 @@ void map::draw_vertical_line(float         start_x,
                              map_tile_type type)
 {
     tile& tile = tiles[type];
-    tile.tile_vertex_buffer->add_vertex(
+    tile.vertices.push_back(
         { start_x, start_y, 0.f, static_cast<float>(length) });
-    tile.tile_vertex_buffer->add_vertex(
+    tile.vertices.push_back(
         { start_x + tile_width, start_y, 1.f, static_cast<float>(length) });
-    tile.tile_vertex_buffer->add_vertex(
+    tile.vertices.push_back(
         { start_x + tile_width, start_y + length * tile_height, 1.f, 0.f });
-    tile.tile_vertex_buffer->add_vertex(
+    tile.vertices.push_back(
         { start_x, start_y + length * tile_width, 0.f, 0.f });
-    tile.tile_vertex_buffer->buffer_data();
-    tile.tile_index_buffer->add_indexes(static_cast<size_t>(4));
 }
 
 void map::draw_horizontal_line(float         start_x,
@@ -177,41 +173,34 @@ void map::draw_horizontal_line(float         start_x,
                                map_tile_type type)
 {
     tile& tile = tiles[type];
-    tile.tile_vertex_buffer->add_vertex({ start_x, start_y, 0.f, 1.f });
-    tile.tile_vertex_buffer->add_vertex({ start_x + length * tile_width,
-                                          start_y,
-                                          static_cast<float>(length),
-                                          1.f });
-    tile.tile_vertex_buffer->add_vertex({ start_x + length * tile_width,
-                                          start_y + tile_height,
-                                          static_cast<float>(length),
-                                          0.f });
-    tile.tile_vertex_buffer->add_vertex(
-        { start_x, start_y + tile_height, 0.f, 0.f });
-
-    tile.tile_vertex_buffer->buffer_data();
-    tile.tile_index_buffer->add_indexes(static_cast<size_t>(4));
+    tile.vertices.push_back({ start_x, start_y, 0.f, 1.f });
+    tile.vertices.push_back({ start_x + length * tile_width,
+                              start_y,
+                              static_cast<float>(length),
+                              1.f });
+    tile.vertices.push_back({ start_x + length * tile_width,
+                              start_y + tile_height,
+                              static_cast<float>(length),
+                              0.f });
+    tile.vertices.push_back({ start_x, start_y + tile_height, 0.f, 0.f });
 }
 
 void map::fill_rectangle(
     float start_x, float start_y, int width, int height, map_tile_type type)
 {
     tile& tile = tiles[type];
-    tile.tile_vertex_buffer->add_vertex(
+    tile.vertices.push_back(
         { start_x, start_y, 0.f, static_cast<float>(height) });
-    tile.tile_vertex_buffer->add_vertex({ start_x + width * tile_width,
-                                          start_y,
-                                          static_cast<float>(width),
-                                          static_cast<float>(height) });
-    tile.tile_vertex_buffer->add_vertex({ start_x + width * tile_width,
-                                          start_y + height * tile_height,
-                                          static_cast<float>(width),
-                                          0.f });
-    tile.tile_vertex_buffer->add_vertex(
+    tile.vertices.push_back({ start_x + width * tile_width,
+                              start_y,
+                              static_cast<float>(width),
+                              static_cast<float>(height) });
+    tile.vertices.push_back({ start_x + width * tile_width,
+                              start_y + height * tile_height,
+                              static_cast<float>(width),
+                              0.f });
+    tile.vertices.push_back(
         { start_x, start_y + height * tile_height, 0.f, 0.f });
-
-    tile.tile_vertex_buffer->buffer_data();
-    tile.tile_index_buffer->add_indexes(static_cast<size_t>(4));
 }
 
 /*void delete_tiles_horizontal(int      start_x,
@@ -228,7 +217,7 @@ void map::fill_rectangle(
             auto vertex_it = std::find_if(
                 tile_it->vertices.begin(),
                 tile_it->vertices.end(),
-                [&](const vertex_2d vertex)
+                [&](const vertex2d_uv vertex)
                 {
                     return vertex.x == static_cast<float>(i) * tile_width &&
                            vertex.y == (static_cast<float>(start_y) - 1.f) *
@@ -260,7 +249,7 @@ void delete_tiles_vertical(int      start_x,
             auto vertex_it = std::find_if(
                 tile_it->vertices.begin(),
                 tile_it->vertices.end(),
-                [&](const vertex_2d vertex)
+                [&](const vertex2d_uv vertex)
                 {
                     return vertex.x == (static_cast<float>(start_x) - 1.f) *
                                            tile_width &&

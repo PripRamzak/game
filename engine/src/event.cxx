@@ -84,6 +84,7 @@ bool check_pressing_key(SDL_Event sdl_event, event& event)
     return false;
 }
 
+/*
 bool check_pressing_button(SDL_Event             sdl_event,
                            event&                event,
                            std::vector<buttons>& buttons_,
@@ -93,8 +94,8 @@ bool check_pressing_button(SDL_Event             sdl_event,
     float finger_x = sdl_event.tfinger.x * window_width;
     float finger_y = sdl_event.tfinger.y * window_height;
 
-    vertex_2d movement_buttons_vertex = *buttons_[0].vertex_buffer_->data();
-    vertex_2d attack_button_vertex    = *buttons_[1].vertex_buffer_->data();
+    vertex2d_uv movement_buttons_vertex = *buttons_[0].vertex_buffer_->data();
+    vertex2d_uv attack_button_vertex    = *buttons_[1].vertex_buffer_->data();
 
     if (finger_x > movement_buttons_vertex.pos.x + buttons_[0].width / 3 &&
         finger_x < movement_buttons_vertex.pos.x + buttons_[0].width / 3 * 2 &&
@@ -190,4 +191,4 @@ bool check_pressing_button(SDL_Event             sdl_event,
     }
 
     return false;
-}
+}*/

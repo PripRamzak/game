@@ -5,7 +5,6 @@
 #include "include/hero.hxx"
 #include "include/interface.hxx"
 #include "include/map.hxx"
-#include <include/enemy.hxx>
 
 #include <chrono>
 #include <cstdlib>
@@ -36,7 +35,7 @@ int main(int /*argc*/, char** /*argv*/)
     camera* camera = create_camera(window_width / 2, window_height / 2);
 
     index_buffer* solo_objects_index_buffer = create_index_buffer();
-    solo_objects_index_buffer->add_indexes(static_cast<size_t>(4));
+    solo_objects_index_buffer->add_indexes(primitives::triangle, 1);
 
     using namespace std::chrono_literals;
 
@@ -53,10 +52,10 @@ int main(int /*argc*/, char** /*argv*/)
 
     enemy::initialize();
     // std::vector<enemy*> enemies;
-    enemy* skel = new skeleton_spearman(
-        { 800.f, 418.f }, 4, 4.f, 2.f, 2000ms, 400.f, 2000ms);
-    /*enemy* skel = new skeleton_warrior(
-        4, 5.f, 800.f, 450.f, 2.f, 2000ms, 600.f);*/
+    /*enemy* skel = new skeleton_spearman(
+        { 800.f, 418.f }, 4, 4.f, 2.f, 2000ms, 400.f, 2000ms);*/
+    enemy* skel =
+        new skeleton_warrior({ 800.f, 450.f }, 4, 5.f, 2.f, 2000ms, 600.f);
 
     glm::mat4 skel_scale = glm::scale(
         glm::mat4{ 1 }, glm::vec3{ skel->get_size(), skel->get_size(), 1.f });
@@ -272,7 +271,6 @@ int main(int /*argc*/, char** /*argv*/)
                 transform2d skel_pos       = skel->get_global_pos();
                 glm::mat4   skel_translate = glm::translate(
                     glm::mat4{ 1 }, glm::vec3{ skel_pos.x, skel_pos.y, 0.f });
-
                 glm::mat4 skel_mvp =
                     projection * view * skel_translate * skel_scale;
 
@@ -280,6 +278,50 @@ int main(int /*argc*/, char** /*argv*/)
                                solo_objects_index_buffer,
                                skel->get_direction(),
                                &skel_mvp[0][0]);
+
+                collision::collider* coll = skel->get_collider();
+                glm::mat4            skel_collider_translate = glm::translate(
+                    glm::mat4{ 1 },
+                    glm::vec3{ skel_pos.x + coll->get_rectangle().pos.x,
+                               skel_pos.y + coll->get_rectangle().pos.y,
+                               0.f });
+                glm::mat4 skel_collider_mvp =
+                    projection * view * skel_collider_translate;
+
+                engine->render(coll->get_vertex_buffer(),
+                               coll->get_index_buffer(),
+                               &skel_collider_mvp[0][0]);
+
+                collision::collider* attack_trigger =
+                    skel->get_attack_trigger();
+                glm::mat4 skel_attack_trigger_translate = glm::translate(
+                    glm::mat4{ 1 },
+                    glm::vec3{
+                        skel_pos.x + attack_trigger->get_rectangle().pos.x,
+                        skel_pos.y + attack_trigger->get_rectangle().pos.y,
+                        0.f });
+                glm::mat4 skel_attack_trigger_mvp =
+                    projection * view * skel_attack_trigger_translate;
+                engine->render(attack_trigger->get_vertex_buffer(),
+                               attack_trigger->get_index_buffer(),
+                               &skel_attack_trigger_mvp[0][0]);
+
+                if (skel->get_state() == game_object_state::attack)
+                {
+                    collision::collider* attack_coll =
+                        skel->get_attack_collider();
+                    glm::mat4 skel_attack_collider_translate = glm::translate(
+                        glm::mat4{ 1 },
+                        glm::vec3{
+                            skel_pos.x + attack_coll->get_rectangle().pos.x,
+                            skel_pos.y + attack_coll->get_rectangle().pos.y,
+                            0.f });
+                    glm::mat4 skel_attack_collider_mvp =
+                        projection * view * skel_attack_collider_translate;
+                    engine->render(attack_coll->get_vertex_buffer(),
+                                   attack_coll->get_index_buffer(),
+                                   &skel_attack_collider_mvp[0][0]);
+                }
             }
 
             transform2d warrior_pos       = warrior->get_global_pos();
@@ -293,6 +335,38 @@ int main(int /*argc*/, char** /*argv*/)
                            solo_objects_index_buffer,
                            warrior->get_direction(),
                            &warrior_mvp[0][0]);
+
+            collision::collider* warrior_collider = warrior->get_collider();
+            glm::mat4            warrior_collider_translate = glm::translate(
+                glm::mat4{ 1 },
+                glm::vec3{
+                    warrior_pos.x + warrior_collider->get_rectangle().pos.x,
+                    warrior_pos.y + warrior_collider->get_rectangle().pos.y,
+                    0.f });
+            glm::mat4 warrior_collider_mvp =
+                projection * view * warrior_collider_translate;
+            engine->render(warrior_collider->get_vertex_buffer(),
+                           warrior_collider->get_index_buffer(),
+                           &warrior_collider_mvp[0][0]);
+
+            if (warrior->get_state() == game_object_state::attack)
+            {
+                collision::collider* warrior_attack_collider =
+                    warrior->get_attack_collider();
+                glm::mat4 warrior_attack_collider_translate = glm::translate(
+                    glm::mat4{ 1 },
+                    glm::vec3{
+                        warrior_pos.x +
+                            warrior_attack_collider->get_rectangle().pos.x,
+                        warrior_pos.y +
+                            warrior_attack_collider->get_rectangle().pos.y,
+                        0.f });
+                glm::mat4 warrior_attack_collider_mvp =
+                    projection * view * warrior_attack_collider_translate;
+                engine->render(warrior_attack_collider->get_vertex_buffer(),
+                               warrior_attack_collider->get_index_buffer(),
+                               &warrior_attack_collider_mvp[0][0]);
+            }
 
             switch (warrior->get_health())
             {

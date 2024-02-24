@@ -25,6 +25,27 @@ hero::hero(transform2d global_pos,
     sprites.emplace(game_object_state::attack, warrior_attack_anim);
     sprites.emplace(game_object_state::jump, warrior_jump_anim);
     sprites.emplace(game_object_state::fall, warrior_fall_anim);
+
+    collision::collider* idle_hitbox = new collision::collider(
+        { -14.f, -20.f }, { 34.f, 44.f }, { e_color::GREEN, 0.6f }, size);
+    collision::collider* run_hitbox = new collision::collider(
+        { -12.f, -20.f }, { 32.f, 44.f }, { e_color::GREEN, 0.6f }, size);
+    collision::collider* attack_hitbox = new collision::collider(
+        { -15.f, -20.f }, { 26.f, 44.f }, { e_color::GREEN, 0.6f }, size);
+    collision::collider* jump_hitbox = new collision::collider(
+        { -24.f, -24.f }, { 48.f, 48.f }, { e_color::GREEN, 0.6f }, size);
+    collision::collider* fall_hitbox = new collision::collider(
+        { -24.f, -24.f }, { 48.f, 48.f }, { e_color::GREEN, 0.6f }, size);
+
+    hitboxes.emplace(game_object_state::idle, idle_hitbox);
+    hitboxes.emplace(game_object_state::run, run_hitbox);
+    hitboxes.emplace(game_object_state::attack, attack_hitbox);
+    hitboxes.emplace(game_object_state::jump, jump_hitbox);
+    hitboxes.emplace(game_object_state::fall, fall_hitbox);
+
+    attack_collider = new collision::collider{
+        { 11.f, -10.f }, { 32.f, 34.f }, { e_color::ORANGE, 0.6f }, size
+    };
 }
 
 void hero::initialize()
@@ -74,9 +95,11 @@ void hero::move(float dx, float dy, map* map)
 
     if (delta_x < 0.f)
     {
-        direction = 1;
-        if (collision::map_with_game_object(
-                map, this, collision::direction::left))
+        change_direction(1);
+        if (collision::map_with_game_object(map,
+                                            global_pos,
+                                            hitboxes[state]->get_rectangle(),
+                                            collision::direction::left))
         {
             if (state != game_object_state::jump &&
                 state != game_object_state::fall)
@@ -88,9 +111,11 @@ void hero::move(float dx, float dy, map* map)
     }
     else if (delta_x > 0.f)
     {
-        direction = 0;
-        if (collision::map_with_game_object(
-                map, this, collision::direction::right))
+        change_direction(0);
+        if (collision::map_with_game_object(map,
+                                            global_pos,
+                                            hitboxes[state]->get_rectangle(),
+                                            collision::direction::right))
         {
             if (state != game_object_state::jump &&
                 state != game_object_state::fall)
@@ -102,7 +127,10 @@ void hero::move(float dx, float dy, map* map)
     }
 
     if (state != game_object_state::jump && state != game_object_state::fall &&
-        !collision::map_with_game_object(map, this, collision::direction::down))
+        !collision::map_with_game_object(map,
+                                         global_pos,
+                                         hitboxes[state]->get_rectangle(),
+                                         collision::direction::down))
     {
         set_state(game_object_state::fall);
         delta_y += speed;
@@ -112,8 +140,10 @@ void hero::move(float dx, float dy, map* map)
 
     if (delta_y > 0.f)
     {
-        if (collision::map_with_game_object(
-                map, this, collision::direction::down))
+        if (collision::map_with_game_object(map,
+                                            global_pos,
+                                            hitboxes[state]->get_rectangle(),
+                                            collision::direction::down))
         {
             set_state(game_object_state::idle);
             return;
@@ -122,8 +152,10 @@ void hero::move(float dx, float dy, map* map)
             set_state(game_object_state::fall);
     }
     else if (delta_y < 0.f)
-        if (collision::map_with_game_object(
-                map, this, collision::direction::up))
+        if (collision::map_with_game_object(map,
+                                            global_pos,
+                                            hitboxes[state]->get_rectangle(),
+                                            collision::direction::up))
         {
             set_state(game_object_state::fall);
             jump_height_dt = 0.f;
@@ -156,7 +188,11 @@ void hero::attack(game_object* enemy)
 
     if (!attacked && anim_current_number == anim_quantity - 1)
     {
-        if (collision::game_object_with_game_object(this, enemy))
+        if (collision::game_object_with_game_object(
+                global_pos,
+                attack_collider->get_rectangle(),
+                enemy->get_global_pos(),
+                enemy->get_collider()->get_rectangle()))
             enemy->hurt();
         attacked = true;
     }

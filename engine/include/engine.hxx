@@ -42,6 +42,7 @@ public:
                         transform2d    max_uv,
                         float*         matrix) = 0;
     // clang-format on
+    virtual void render(vertex_buffer* vb, index_buffer* ib, float* matrix) = 0;
     // virtual void      render_buttons(float* matrix)                     = 0;
     virtual bool      render_gui(bool& show_menu_window, gui_type type) = 0;
     virtual bool      swap_buffers()                                    = 0;

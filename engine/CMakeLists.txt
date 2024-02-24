@@ -4,6 +4,7 @@ add_library(engine SHARED
         include/animation.hxx
         src/animation.cxx
         include/buttons.hxx
+        include/color.hxx
         src/event.cxx
         include/event.hxx
         include/geometry.hxx

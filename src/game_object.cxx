@@ -64,6 +64,16 @@ int game_object::get_direction()
     return direction;
 }
 
+collision::collider* game_object::get_collider()
+{
+    return hitboxes[state];
+}
+
+collision::collider* game_object::get_attack_collider()
+{
+    return attack_collider;
+}
+
 animation* game_object::get_animation()
 {
     return sprites[state];
@@ -73,4 +83,15 @@ game_object::~game_object()
 {
     for (auto sprite : sprites)
         delete sprite.second;
+}
+
+void game_object::change_direction(int new_dir)
+{
+    if (direction != new_dir)
+    {
+        direction = new_dir;
+        for (auto& hitbox : hitboxes)
+            hitbox.second->change_pos(direction);
+        attack_collider->change_pos(direction);
+    }
 }

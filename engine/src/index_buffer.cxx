@@ -14,7 +14,6 @@ class opengl_index_buffer final : public index_buffer
 {
     GLuint                EBO = 0;
     std::vector<uint16_t> indexes;
-    size_t                size = 0;
 
 public:
     opengl_index_buffer()
@@ -22,29 +21,45 @@ public:
         glGenBuffers(1, &EBO);
         gl_check();
     }
-    void add_indexes(size_t vertices_num) final
+    void add_indexes(primitives primitive, int count) final
     {
-        uint16_t old_vertices_num = static_cast<uint16_t>(size) / 6 * 4;
-        for (int i = old_vertices_num; i < old_vertices_num + vertices_num;
-             i += 4)
-        {
-            indexes.push_back(i);
-            indexes.push_back(i + 1);
-            indexes.push_back(i + 2);
-            indexes.push_back(i);
-            indexes.push_back(i + 2);
-            indexes.push_back(i + 3);
-        }
+        uint16_t new_index;
+        if (indexes.size() == 0)
+            new_index = 0;
+        else
+            new_index = indexes[indexes.size() - 1] + 1;
 
-        size += vertices_num / 4 * 6;
+        for (int i = 0; i < count; i++)
+        {
+            switch (primitive)
+            {
+                case primitives::line:
+                    indexes.push_back(new_index);
+                    indexes.push_back(new_index + 1);
+                    indexes.push_back(new_index + 1);
+                    indexes.push_back(new_index + 2);
+                    indexes.push_back(new_index + 2);
+                    indexes.push_back(new_index + 3);
+                    indexes.push_back(new_index + 3);
+                    indexes.push_back(new_index);
+                    break;
+                case primitives::triangle:
+                    indexes.push_back(new_index);
+                    indexes.push_back(new_index + 1);
+                    indexes.push_back(new_index + 2);
+                    indexes.push_back(new_index);
+                    indexes.push_back(new_index + 2);
+                    indexes.push_back(new_index + 3);
+                    break;
+            }
+            new_index = indexes[indexes.size() - 1];
+        }
 
         buffer_data();
     }
     void delete_indexes(size_t objects_num) final
     {
         indexes.erase(indexes.end() - objects_num * 6, indexes.end());
-        size -= objects_num * 6;
-
         buffer_data();
     }
     void buffer_data() final
@@ -52,13 +67,13 @@ public:
         bind();
 
         GLsizeiptr buffer_size =
-            static_cast<GLsizeiptr>(size * sizeof(uint16_t));
+            static_cast<GLsizeiptr>(indexes.size() * sizeof(uint16_t));
 
         glBufferData(
             GL_ELEMENT_ARRAY_BUFFER, buffer_size, &indexes[0], GL_STREAM_DRAW);
         gl_check();
     }
-    size_t get_size() final { return size; }
+    size_t get_size() final { return indexes.size(); }
     void   bind() final
     {
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);

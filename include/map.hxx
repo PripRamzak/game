@@ -39,23 +39,26 @@ public:
                                                  int      start_y,
                                                  int      length,
                                                  map_tile type)           = 0;*/
-    texture*       get_tileset();
-    vertex_buffer* get_vertex_buffer(map_tile_type type);
-    index_buffer*  get_index_buffer(map_tile_type type);
-    transform2d    get_tile_min_uv(map_tile_type type);
-    transform2d    get_tile_max_uv(map_tile_type type);
+    texture*                  get_tileset();
+    std::vector<vertex2d_uv>& get_vertices(map_tile_type type);
+    vertex_buffer*            get_vertex_buffer(map_tile_type type);
+    index_buffer*             get_index_buffer(map_tile_type type);
+    transform2d               get_tile_min_uv(map_tile_type type);
+    transform2d               get_tile_max_uv(map_tile_type type);
     ~map();
 
 private:
     struct tile
     {
-        vertex_buffer* tile_vertex_buffer;
-        index_buffer*  tile_index_buffer;
-        transform2d    min_uv;
-        transform2d    max_uv;
+        transform2d              min_uv;
+        transform2d              max_uv;
+        std::vector<vertex2d_uv> vertices;
+        vertex_buffer*           tile_vertex_buffer;
+        index_buffer*            tile_index_buffer;
 
         tile();
-        tile(float min_u, float max_u, float min_v, float max_v);
+        tile(transform2d min_uv, transform2d max_uv);
+        // tile(float min_u, float max_u, float min_v, float max_v);
     };
 
     void draw_vertical_line(float         start_x,

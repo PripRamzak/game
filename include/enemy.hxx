@@ -11,17 +11,19 @@ public:
           float                     size,
           game_object_state         state,
           std::chrono::milliseconds attack_delay);
-    static void  initialize();
-    void         spawn();
-    bool         is_spawned();
-    virtual void update(game_object*              hero,
-                        std::chrono::milliseconds delta_time) = 0;
+    static void          initialize();
+    void                 spawn();
+    bool                 is_spawned();
+    virtual void         update(game_object*              hero,
+                                std::chrono::milliseconds delta_time) = 0;
+    collision::collider* get_attack_trigger();
     ~enemy();
 
 protected:
     virtual void move();
     void         attack(game_object* hero, std::chrono::milliseconds);
 
+    collision::collider*      attack_trigger;
     std::chrono::milliseconds attack_delay;
     std::chrono::milliseconds attack_delay_dt;
     bool                      spawned = false;

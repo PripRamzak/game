@@ -11,17 +11,14 @@ class game_interface : public interface
 public:
     game_interface(float pos_x, float pos_y, int width, int height)
     {
-        vertex_2d v1 = { pos_x, pos_y, 0.f, 1.f };
-        vertex_2d v2 = { pos_x + width, pos_y, 1.f, 1.f };
-        vertex_2d v3 = { pos_x + width, pos_y + height, 1.f, 0.f };
-        vertex_2d v4 = { pos_x, pos_y + height, 0.f, 0.f };
+        vertex2d_uv vertices[4];
+        vertices[0] = { pos_x, pos_y, 0.f, 1.f };
+        vertices[1] = { pos_x + width, pos_y, 1.f, 1.f };
+        vertices[2] = { pos_x + width, pos_y + height, 1.f, 0.f };
+        vertices[3] = { pos_x, pos_y + height, 0.f, 0.f };
 
         vertex_buffer_ = create_vertex_buffer();
-        vertex_buffer_->add_vertex(v1);
-        vertex_buffer_->add_vertex(v2);
-        vertex_buffer_->add_vertex(v3);
-        vertex_buffer_->add_vertex(v4);
-        vertex_buffer_->buffer_data();
+        vertex_buffer_->buffer_data(vertices, static_cast<size_t>(4));
     }
     void add_texture(texture* texture_) final { textures.push_back(texture_); }
     void set_texture(int number) final { current_texture = number; }
