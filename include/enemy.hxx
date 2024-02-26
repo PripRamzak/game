@@ -35,14 +35,13 @@ public:
                      int                       health,
                      float                     speed,
                      float                     size,
-                     std::chrono::milliseconds attack_delay,
-                     float                     agro_area);
+                     std::chrono::milliseconds attack_delay);
     void update(game_object*              hero,
                 std::chrono::milliseconds delta_time) override;
 
 private:
-    bool  agro      = false;
-    float agro_area = 0.f;
+    bool                 agro = false;
+    collision::collider* agro_trigger;
 };
 
 class skeleton_spearman : public enemy

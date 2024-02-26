@@ -76,15 +76,13 @@ skeleton_warrior::skeleton_warrior(transform2d               global_pos,
                                    int                       health,
                                    float                     speed,
                                    float                     size,
-                                   std::chrono::milliseconds attack_delay,
-                                   float                     agro_area)
+                                   std::chrono::milliseconds attack_delay)
     : enemy(global_pos,
             health,
             speed,
             size,
             game_object_state::idle,
             attack_delay)
-    , agro_area(agro_area)
 {
     animation* anim_skeleton_warrior_idle =
         new animation(resources::skeleton_warrior_idle, 7, 125ms);
@@ -113,6 +111,9 @@ skeleton_warrior::skeleton_warrior(transform2d               global_pos,
     };
     attack_trigger = new collision::collider{
         { -22.f, -50.f }, { 70.f, 100.f }, { e_color::YELLOW, 0.6f }, size
+    };
+    agro_trigger = new collision::collider{
+        { -300.f, -50.f }, { 600.f, 100.f }, { e_color::RED, 0.6f }, 1.f
     };
 }
 
@@ -183,8 +184,11 @@ void skeleton_warrior::update(game_object*              hero,
             attack_delay_dt = 0ms;
         }
     }
-    else if (global_pos.x - agro_area / 2.f <= hero->get_global_pos().x &&
-             global_pos.x + agro_area / 2.f >= hero->get_global_pos().x)
+    else if (collision::game_object_with_game_object(
+                 global_pos,
+                 agro_trigger->get_rectangle(),
+                 hero->get_global_pos(),
+                 hero->get_collider()->get_rectangle()))
         agro = true;
 
     get_animation()->play(delta_time);
