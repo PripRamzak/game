@@ -64,15 +64,15 @@ void hero::initialize()
         texture* warrior_fall_texture = create_texture("img/warrior_fall.png");
 
         sprite* warrior_idle_sprite =
-            new sprite(warrior_idle_sprite_sheet, 48.f, 48.f);
+            new sprite(warrior_idle_sprite_sheet, { 48.f, 48.f });
         sprite* warrior_run_sprite =
-            new sprite(warrior_run_sprite_sheet, 48.f, 48.f);
+            new sprite(warrior_run_sprite_sheet, { 48.f, 48.f });
         sprite* warrior_attack_sprite =
-            new sprite(warrior_attack_sprite_sheet, 86.f, 48.f);
+            new sprite(warrior_attack_sprite_sheet, { 86.f, 48.f });
         sprite* warrior_jump_sprite =
-            new sprite(warrior_jump_texture, 48.f, 48.f);
+            new sprite(warrior_jump_texture, { 48.f, 48.f });
         sprite* warrior_fall_sprite =
-            new sprite(warrior_fall_texture, 48.f, 48.f);
+            new sprite(warrior_fall_texture, { 48.f, 48.f });
 
         warrior_idle_anim   = new animation(warrior_idle_sprite, 6, 100ms);
         warrior_run_anim    = new animation(warrior_run_sprite, 6, 100ms);

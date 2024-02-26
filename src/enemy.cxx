@@ -41,11 +41,13 @@ void enemy::initialize()
             create_texture("img/skeleton_warrior_attack.png");
 
         sprite* skeleton_warrior_idle_sprite =
-            new sprite(skeleton_warrior_idle_sprite_sheet, 58.f, 64.f);
+            new sprite(skeleton_warrior_idle_sprite_sheet, { 58.f, 64.f });
         sprite* skeleton_warrior_run_sprite =
-            new sprite(skeleton_warrior_run_sprite_sheet, 70.f, 64.f);
+            new sprite(skeleton_warrior_run_sprite_sheet, { 70.f, 64.f });
         sprite* skeleton_warrior_attack_sprite =
-            new sprite(skeleton_warrior_attack_sprite_sheet, 114.f, 76.f);
+            new sprite(skeleton_warrior_attack_sprite_sheet,
+                       { 114.f, 76.f },
+                       { 57.f, 44.f });
 
         skeleton_warrior_idle_anim =
             new animation(skeleton_warrior_idle_sprite, 7, 125ms);
@@ -62,11 +64,15 @@ void enemy::initialize()
             create_texture("img/skeleton_spearman_attack.png");
 
         sprite* skeleton_spearman_idle_sprite =
-            new sprite(skeleton_spearman_idle_sprite_sheet, 36.f, 82.f);
+            new sprite(skeleton_spearman_idle_sprite_sheet,
+                       { 36.f, 82.f },
+                       { 18.f, 54.f });
         sprite* skeleton_spearman_walk_sprite =
-            new sprite(skeleton_spearman_walk_sprite_sheet, 64.f, 94.f);
+            new sprite(skeleton_spearman_walk_sprite_sheet,
+                       { 64.f, 94.f },
+                       { 32.f, 66.f });
         sprite* skeleton_spearman_attack_sprite =
-            new sprite(skeleton_spearman_attack_sprite_sheet, 100.f, 56.f);
+            new sprite(skeleton_spearman_attack_sprite_sheet, { 100.f, 56.f });
 
         skeleton_spearman_idle_anim =
             new animation(skeleton_spearman_idle_sprite, 7, 125ms);
