@@ -30,7 +30,6 @@ class map
 {
 public:
     map(float tile_width_, float tile_height_, std::string file_path);
-    static void initialize();
     /*virtual void           delete_tiles_horizontal(int      start_x,
                                                    int      start_y,
                                                    int      length,

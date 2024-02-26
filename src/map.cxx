@@ -1,12 +1,11 @@
 #include "include/map.hxx"
 #include "engine/include/memory_buf.hxx"
+#include "include/resources.hxx"
 
 #include <algorithm>
 #include <iostream>
 
 #include <glm/matrix.hpp>
-
-static texture* dungeon = nullptr;
 
 std::istream& operator>>(std::istream& is, map_tile_type& type)
 {
@@ -16,17 +15,11 @@ std::istream& operator>>(std::istream& is, map_tile_type& type)
     return is;
 }
 
-void map::initialize()
-{
-    dungeon = create_texture("img/dungeon.png");
-}
-
 map::map(float tile_width_, float tile_height_, std::string file_path)
-    : tile_width(tile_width_)
+    : tileset(resources::dungeon)
+    , tile_width(tile_width_)
     , tile_height(tile_height_)
 {
-    tileset = dungeon;
-
     tile brick_top          = { { 32.f / 240.f, 224.f / 288.f },
                                 { 48.f / 240.f, 240.f / 288.f } };
     tile brick_bottom       = { { 32.f / 240.f, 256.f / 288.f },

@@ -1,19 +1,9 @@
 #include "include/enemy.hxx"
+#include "include/resources.hxx"
 
 #include <cmath>
-#include <iostream>
 
 using namespace std::chrono_literals;
-
-static animation* skeleton_warrior_idle_anim   = nullptr;
-static animation* skeleton_warrior_run_anim    = nullptr;
-static animation* skeleton_warrior_attack_anim = nullptr;
-
-static animation* skeleton_spearman_idle_anim   = nullptr;
-static animation* skeleton_spearman_walk_anim   = nullptr;
-static animation* skeleton_spearman_attack_anim = nullptr;
-
-static bool enemy_init = false;
 
 enemy::enemy(transform2d               global_pos,
              int                       health,
@@ -25,66 +15,6 @@ enemy::enemy(transform2d               global_pos,
     , attack_delay(attack_delay)
     , attack_delay_dt(0ms)
 {
-}
-
-void enemy::initialize()
-{
-    using namespace std::chrono_literals;
-
-    if (!enemy_init)
-    {
-        texture* skeleton_warrior_idle_sprite_sheet =
-            create_texture("img/skeleton_warrior_idle.png");
-        texture* skeleton_warrior_run_sprite_sheet =
-            create_texture("img/skeleton_warrior_run.png");
-        texture* skeleton_warrior_attack_sprite_sheet =
-            create_texture("img/skeleton_warrior_attack.png");
-
-        sprite* skeleton_warrior_idle_sprite =
-            new sprite(skeleton_warrior_idle_sprite_sheet, { 58.f, 64.f });
-        sprite* skeleton_warrior_run_sprite =
-            new sprite(skeleton_warrior_run_sprite_sheet, { 70.f, 64.f });
-        sprite* skeleton_warrior_attack_sprite =
-            new sprite(skeleton_warrior_attack_sprite_sheet,
-                       { 114.f, 76.f },
-                       { 57.f, 44.f });
-
-        skeleton_warrior_idle_anim =
-            new animation(skeleton_warrior_idle_sprite, 7, 125ms);
-        skeleton_warrior_run_anim =
-            new animation(skeleton_warrior_run_sprite, 8, 125ms);
-        skeleton_warrior_attack_anim =
-            new animation(skeleton_warrior_attack_sprite, 4, 125ms);
-
-        texture* skeleton_spearman_idle_sprite_sheet =
-            create_texture("img/skeleton_spearman_idle.png");
-        texture* skeleton_spearman_walk_sprite_sheet =
-            create_texture("img/skeleton_spearman_walk.png");
-        texture* skeleton_spearman_attack_sprite_sheet =
-            create_texture("img/skeleton_spearman_attack.png");
-
-        sprite* skeleton_spearman_idle_sprite =
-            new sprite(skeleton_spearman_idle_sprite_sheet,
-                       { 36.f, 82.f },
-                       { 18.f, 54.f });
-        sprite* skeleton_spearman_walk_sprite =
-            new sprite(skeleton_spearman_walk_sprite_sheet,
-                       { 64.f, 94.f },
-                       { 32.f, 66.f });
-        sprite* skeleton_spearman_attack_sprite =
-            new sprite(skeleton_spearman_attack_sprite_sheet, { 100.f, 56.f });
-
-        skeleton_spearman_idle_anim =
-            new animation(skeleton_spearman_idle_sprite, 7, 125ms);
-        skeleton_spearman_walk_anim =
-            new animation(skeleton_spearman_walk_sprite, 7, 125ms);
-        skeleton_spearman_attack_anim =
-            new animation(skeleton_spearman_attack_sprite, 4, 125ms);
-
-        enemy_init = true;
-    }
-    else
-        std::cout << "Enemy already init!" << std::endl;
 }
 
 void enemy::spawn()
@@ -156,9 +86,16 @@ skeleton_warrior::skeleton_warrior(transform2d               global_pos,
             attack_delay)
     , agro_area(agro_area)
 {
-    sprites.emplace(game_object_state::idle, skeleton_warrior_idle_anim);
-    sprites.emplace(game_object_state::move, skeleton_warrior_run_anim);
-    sprites.emplace(game_object_state::attack, skeleton_warrior_attack_anim);
+    animation* anim_skeleton_warrior_idle =
+        new animation(resources::skeleton_warrior_idle, 7, 125ms);
+    animation* anim_skeleton_warrior_run =
+        new animation(resources::skeleton_warrior_run, 8, 125ms);
+    animation* anim_skeleton_warrior_attack =
+        new animation(resources::skeleton_warrior_attack, 4, 125ms);
+
+    sprites.emplace(game_object_state::idle, anim_skeleton_warrior_idle);
+    sprites.emplace(game_object_state::move, anim_skeleton_warrior_run);
+    sprites.emplace(game_object_state::attack, anim_skeleton_warrior_attack);
 
     collision::collider* idle_hitbox = new collision::collider(
         { -15.f, -26.f }, { 34.f, 58.f }, { e_color::GREEN, 0.6f }, size);
@@ -197,9 +134,16 @@ skeleton_spearman::skeleton_spearman(transform2d               global_pos,
     , patrol_time(patrol_time)
     , patrol_time_dt(0ms)
 {
-    sprites.emplace(game_object_state::idle, skeleton_spearman_idle_anim);
-    sprites.emplace(game_object_state::move, skeleton_spearman_walk_anim);
-    sprites.emplace(game_object_state::attack, skeleton_spearman_attack_anim);
+    animation* anim_skeleton_spearman_idle =
+        new animation(resources::skeleton_spearman_idle, 7, 125ms);
+    animation* anim_skeleton_spearman_walk =
+        new animation(resources::skeleton_spearman_walk, 7, 125ms);
+    animation* anim_skeleton_spearman_attack =
+        new animation(resources::skeleton_spearman_attack, 4, 125ms);
+
+    sprites.emplace(game_object_state::idle, anim_skeleton_spearman_idle);
+    sprites.emplace(game_object_state::move, anim_skeleton_spearman_walk);
+    sprites.emplace(game_object_state::attack, anim_skeleton_spearman_attack);
 
     collision::collider* idle_hitbox = new collision::collider(
         { -14.f, -23.f }, { 28.f, 64.f }, { e_color::GREEN, 0.6f }, size);

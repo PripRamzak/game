@@ -5,6 +5,7 @@
 #include "include/hero.hxx"
 #include "include/interface.hxx"
 #include "include/map.hxx"
+#include "include/resources.hxx"
 
 #include <chrono>
 #include <cstdlib>
@@ -25,6 +26,8 @@ int main(int /*argc*/, char** /*argv*/)
     if (!engine->initialize())
         return EXIT_FAILURE;
 
+    resources::init();
+
     float window_width = static_cast<float>(engine->get_window_width_pixels());
     float window_height =
         static_cast<float>(engine->get_window_height_pixels());
@@ -40,8 +43,6 @@ int main(int /*argc*/, char** /*argv*/)
     using namespace std::chrono_literals;
 
     // Warrior creating
-
-    hero::initialize();
     hero* warrior = new hero({ 300.f, 464.f }, 4, 10.f, 2.f, 12.f, 300.f);
 
     glm::mat4 warrior_scale =
@@ -50,7 +51,6 @@ int main(int /*argc*/, char** /*argv*/)
 
     // Skeleton creating
 
-    enemy::initialize();
     // std::vector<enemy*> enemies;
     /*enemy* skel = new skeleton_spearman(
         { 800.f, 418.f }, 4, 4.f, 2.f, 2000ms, 400.f, 2000ms);*/
@@ -62,27 +62,22 @@ int main(int /*argc*/, char** /*argv*/)
 
     // Map creating
 
-    map::initialize();
     map* dungeon_map = new map(64.f, 64.f, "data/level_1.txt");
 
     // Interface
-
-    texture* heart_full_texture  = create_texture("img/heart_full.png");
-    texture* heart_half_texture  = create_texture("img/heart_half.png");
-    texture* heart_empty_texture = create_texture("img/heart_empty.png");
 
     std::vector<interface*> health;
     health.resize(2);
 
     health[0] = create_interface(10.f, 10.f, 64.f, 64.f);
-    health[0]->add_texture(heart_full_texture);
-    health[0]->add_texture(heart_half_texture);
-    health[0]->add_texture(heart_empty_texture);
+    health[0]->add_texture(resources::heart_full);
+    health[0]->add_texture(resources::heart_half);
+    health[0]->add_texture(resources::heart_empty);
 
     health[1] = create_interface(84.f, 10.f, 64.f, 64.f);
-    health[1]->add_texture(heart_full_texture);
-    health[1]->add_texture(heart_half_texture);
-    health[1]->add_texture(heart_empty_texture);
+    health[1]->add_texture(resources::heart_full);
+    health[1]->add_texture(resources::heart_half);
+    health[1]->add_texture(resources::heart_half);
 
     // Sound
 

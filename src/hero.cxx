@@ -1,14 +1,9 @@
 #include "include/hero.hxx"
+#include "include/resources.hxx"
 
 #include <algorithm>
 
-static animation* warrior_idle_anim   = nullptr;
-static animation* warrior_run_anim    = nullptr;
-static animation* warrior_attack_anim = nullptr;
-static animation* warrior_jump_anim   = nullptr;
-static animation* warrior_fall_anim   = nullptr;
-
-static bool hero_init = false;
+using namespace std::chrono_literals;
 
 hero::hero(transform2d global_pos,
            int         health,
@@ -20,11 +15,22 @@ hero::hero(transform2d global_pos,
     , jump_height(jump_height)
     , jump_force(jump_force)
 {
-    sprites.emplace(game_object_state::idle, warrior_idle_anim);
-    sprites.emplace(game_object_state::move, warrior_run_anim);
-    sprites.emplace(game_object_state::attack, warrior_attack_anim);
-    sprites.emplace(game_object_state::jump, warrior_jump_anim);
-    sprites.emplace(game_object_state::fall, warrior_fall_anim);
+    animation* anim_warrior_idle =
+        new animation(resources::warrior_idle, 6, 100ms);
+    animation* anim_warrior_run =
+        new animation(resources::warrior_run, 6, 100ms);
+    animation* anim_warrior_attack =
+        new animation(resources::warrior_attack, 4, 125ms);
+    animation* anim_warrior_jump =
+        new animation(resources::warrior_jump, 1, 250ms);
+    animation* anim_warrior_fall =
+        new animation(resources::warrior_fall, 1, 250ms);
+
+    sprites.emplace(game_object_state::idle, anim_warrior_idle);
+    sprites.emplace(game_object_state::move, anim_warrior_run);
+    sprites.emplace(game_object_state::attack, anim_warrior_attack);
+    sprites.emplace(game_object_state::jump, anim_warrior_jump);
+    sprites.emplace(game_object_state::fall, anim_warrior_fall);
 
     collision::collider* idle_hitbox = new collision::collider(
         { -14.f, -20.f }, { 34.f, 44.f }, { e_color::GREEN, 0.6f }, size);
@@ -46,44 +52,6 @@ hero::hero(transform2d global_pos,
     attack_collider = new collision::collider{
         { 11.f, -10.f }, { 32.f, 34.f }, { e_color::ORANGE, 0.6f }, size
     };
-}
-
-void hero::initialize()
-{
-    using namespace std::chrono_literals;
-
-    if (!hero_init)
-    {
-        texture* warrior_idle_sprite_sheet =
-            create_texture("img/warrior_idle.png");
-        texture* warrior_run_sprite_sheet =
-            create_texture("img/warrior_run.png");
-        texture* warrior_attack_sprite_sheet =
-            create_texture("img/warrior_attack.png");
-        texture* warrior_jump_texture = create_texture("img/warrior_jump.png");
-        texture* warrior_fall_texture = create_texture("img/warrior_fall.png");
-
-        sprite* warrior_idle_sprite =
-            new sprite(warrior_idle_sprite_sheet, { 48.f, 48.f });
-        sprite* warrior_run_sprite =
-            new sprite(warrior_run_sprite_sheet, { 48.f, 48.f });
-        sprite* warrior_attack_sprite =
-            new sprite(warrior_attack_sprite_sheet, { 86.f, 48.f });
-        sprite* warrior_jump_sprite =
-            new sprite(warrior_jump_texture, { 48.f, 48.f });
-        sprite* warrior_fall_sprite =
-            new sprite(warrior_fall_texture, { 48.f, 48.f });
-
-        warrior_idle_anim   = new animation(warrior_idle_sprite, 6, 100ms);
-        warrior_run_anim    = new animation(warrior_run_sprite, 6, 100ms);
-        warrior_attack_anim = new animation(warrior_attack_sprite, 4, 125ms);
-        warrior_jump_anim   = new animation(warrior_jump_sprite, 1, 250ms);
-        warrior_fall_anim   = new animation(warrior_fall_sprite, 1, 250ms);
-
-        hero_init = true;
-    }
-    else
-        std::cout << "Hero already inited!" << std::endl;
 }
 
 void hero::move(float dx, float dy, map* map)

@@ -12,10 +12,9 @@ public:
          float       size,
          float       jump_force,
          float       jump_height);
-    static void initialize();
-    void        move(float dx, float dy, map* map);
-    void        jump();
-    void        attack(game_object* enemy);
+    void move(float dx, float dy, map* map);
+    void jump();
+    void attack(game_object* enemy);
     ~hero();
 
 private:

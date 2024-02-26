@@ -11,7 +11,6 @@ public:
           float                     size,
           game_object_state         state,
           std::chrono::milliseconds attack_delay);
-    static void          initialize();
     void                 spawn();
     bool                 is_spawned();
     virtual void         update(game_object*              hero,

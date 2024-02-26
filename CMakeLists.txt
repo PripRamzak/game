@@ -42,7 +42,9 @@ target_sources(game PRIVATE
         src/interface.cxx
         include/interface.hxx
         src/map.cxx
-        include/map.hxx)
+        include/map.hxx
+        src/resources.cxx
+        include/resources.hxx)
 target_compile_features(game PRIVATE cxx_std_20)
 target_link_libraries(game PRIVATE engine SDL3::SDL3-shared glm::glm)
 target_include_directories(game PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
