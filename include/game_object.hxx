@@ -10,8 +10,7 @@
 enum class game_object_state
 {
     idle,
-    walk,
-    run,
+    move,
     attack,
     jump,
     fall,

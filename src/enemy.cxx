@@ -104,7 +104,7 @@ collision::collider* enemy::get_attack_trigger()
 
 void enemy::move()
 {
-    set_state(game_object_state::run);
+    set_state(game_object_state::move);
     if (direction == 0)
         global_pos.x += speed;
     else
@@ -157,7 +157,7 @@ skeleton_warrior::skeleton_warrior(transform2d               global_pos,
     , agro_area(agro_area)
 {
     sprites.emplace(game_object_state::idle, skeleton_warrior_idle_anim);
-    sprites.emplace(game_object_state::run, skeleton_warrior_run_anim);
+    sprites.emplace(game_object_state::move, skeleton_warrior_run_anim);
     sprites.emplace(game_object_state::attack, skeleton_warrior_attack_anim);
 
     collision::collider* idle_hitbox = new collision::collider(
@@ -168,7 +168,7 @@ skeleton_warrior::skeleton_warrior(transform2d               global_pos,
         { -23.f, -24.f }, { 40.f, 62.f }, { e_color::GREEN, 0.6f }, size);
 
     hitboxes.emplace(game_object_state::idle, idle_hitbox);
-    hitboxes.emplace(game_object_state::run, run_hitbox);
+    hitboxes.emplace(game_object_state::move, run_hitbox);
     hitboxes.emplace(game_object_state::attack, attack_hitbox);
 
     attack_collider = new collision::collider{
@@ -190,7 +190,7 @@ skeleton_spearman::skeleton_spearman(transform2d               global_pos,
             health,
             speed,
             size,
-            game_object_state::walk,
+            game_object_state::move,
             attack_delay)
     , patrol_area(patrol_area)
     , patrol_area_dt(patrol_area / 2.f)
@@ -198,7 +198,7 @@ skeleton_spearman::skeleton_spearman(transform2d               global_pos,
     , patrol_time_dt(0ms)
 {
     sprites.emplace(game_object_state::idle, skeleton_spearman_idle_anim);
-    sprites.emplace(game_object_state::walk, skeleton_spearman_walk_anim);
+    sprites.emplace(game_object_state::move, skeleton_spearman_walk_anim);
     sprites.emplace(game_object_state::attack, skeleton_spearman_attack_anim);
 
     collision::collider* idle_hitbox = new collision::collider(
@@ -209,7 +209,7 @@ skeleton_spearman::skeleton_spearman(transform2d               global_pos,
         { -32.f, -26.f }, { 32.f, 54.f }, { e_color::GREEN, 0.6f }, size);
 
     hitboxes.emplace(game_object_state::idle, idle_hitbox);
-    hitboxes.emplace(game_object_state::walk, walk_hitbox);
+    hitboxes.emplace(game_object_state::move, walk_hitbox);
     hitboxes.emplace(game_object_state::attack, attack_hitbox);
 
     attack_collider = new collision::collider{
@@ -285,7 +285,7 @@ void skeleton_spearman::update(game_object*              hero,
 
 void skeleton_spearman::move()
 {
-    set_state(game_object_state::walk);
+    set_state(game_object_state::move);
     if (direction == 0)
     {
         global_pos.x += speed;

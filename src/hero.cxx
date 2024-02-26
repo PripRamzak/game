@@ -21,7 +21,7 @@ hero::hero(transform2d global_pos,
     , jump_force(jump_force)
 {
     sprites.emplace(game_object_state::idle, warrior_idle_anim);
-    sprites.emplace(game_object_state::run, warrior_run_anim);
+    sprites.emplace(game_object_state::move, warrior_run_anim);
     sprites.emplace(game_object_state::attack, warrior_attack_anim);
     sprites.emplace(game_object_state::jump, warrior_jump_anim);
     sprites.emplace(game_object_state::fall, warrior_fall_anim);
@@ -38,7 +38,7 @@ hero::hero(transform2d global_pos,
         { -24.f, -24.f }, { 48.f, 48.f }, { e_color::GREEN, 0.6f }, size);
 
     hitboxes.emplace(game_object_state::idle, idle_hitbox);
-    hitboxes.emplace(game_object_state::run, run_hitbox);
+    hitboxes.emplace(game_object_state::move, run_hitbox);
     hitboxes.emplace(game_object_state::attack, attack_hitbox);
     hitboxes.emplace(game_object_state::jump, jump_hitbox);
     hitboxes.emplace(game_object_state::fall, fall_hitbox);
@@ -162,7 +162,7 @@ void hero::move(float dx, float dy, map* map)
         }
 
     if (state != game_object_state::jump && state != game_object_state::fall)
-        set_state(game_object_state::run);
+        set_state(game_object_state::move);
 }
 
 void hero::jump()
