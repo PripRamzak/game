@@ -19,10 +19,12 @@ sprite* warrior_fall{ nullptr };
 sprite* skeleton_warrior_idle{ nullptr };
 sprite* skeleton_warrior_run{ nullptr };
 sprite* skeleton_warrior_attack{ nullptr };
+sprite* skeleton_warrior_dead{ nullptr };
 
 sprite* skeleton_spearman_idle{ nullptr };
 sprite* skeleton_spearman_walk{ nullptr };
 sprite* skeleton_spearman_attack{ nullptr };
+sprite* skeleton_spearman_dead{ nullptr };
 
 static bool res_init = false;
 
@@ -52,6 +54,8 @@ void init()
         create_texture("img/enemy/skeleton_warrior_run.png");
     texture* t_skeleton_warrior_attack =
         create_texture("img/enemy/skeleton_warrior_attack.png");
+    texture* t_skeleton_warrior_dead =
+        create_texture("img/enemy/skeleton_warrior_dead.png");
 
     texture* t_skeleton_spearman_idle =
         create_texture("img/enemy/skeleton_spearman_idle.png");
@@ -59,6 +63,8 @@ void init()
         create_texture("img/enemy/skeleton_spearman_walk.png");
     texture* t_skeleton_spearman_attack =
         create_texture("img/enemy/skeleton_spearman_attack.png");
+    texture* t_skeleton_spearman_dead =
+        create_texture("img/enemy/skeleton_spearman_dead.png");
 
     warrior_idle   = new sprite(t_warrior_idle, { 48.f, 48.f });
     warrior_run    = new sprite(t_warrior_run, { 48.f, 48.f });
@@ -70,13 +76,17 @@ void init()
     skeleton_warrior_run  = new sprite(t_skeleton_warrior_run, { 70.f, 64.f });
     skeleton_warrior_attack =
         new sprite(t_skeleton_warrior_attack, { 114.f, 76.f }, { 57.f, 44.f });
+    skeleton_warrior_dead =
+        new sprite(t_skeleton_warrior_dead, { 128.f, 64.f });
 
     skeleton_spearman_idle =
-        new sprite(t_skeleton_spearman_idle, { 36.f, 82.f }, { 18.f, 54.f });
+        new sprite(t_skeleton_spearman_idle, { 36.f, 82.f }, { 18.f, 35.f });
     skeleton_spearman_walk =
-        new sprite(t_skeleton_spearman_walk, { 64.f, 94.f }, { 32.f, 66.f });
+        new sprite(t_skeleton_spearman_walk, { 64.f, 94.f });
     skeleton_spearman_attack =
-        new sprite(t_skeleton_spearman_attack, { 100.f, 56.f });
+        new sprite(t_skeleton_spearman_attack, { 100.f, 56.f }, { 50.f, 9.f });
+    skeleton_spearman_dead =
+        new sprite(t_skeleton_spearman_dead, { 128.f, 82.f }, { 64.f, 35.f });
 
     res_init = true;
 }

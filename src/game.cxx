@@ -52,9 +52,10 @@ int main(int /*argc*/, char** /*argv*/)
     // Skeleton creating
 
     // std::vector<enemy*> enemies;
-    /*enemy* skel = new skeleton_spearman(
-        { 800.f, 418.f }, 4, 4.f, 2.f, 2000ms, 400.f, 2000ms);*/
-    enemy* skel = new skeleton_warrior({ 800.f, 450.f }, 4, 5.f, 2.f, 2000ms);
+    enemy* skel = new skeleton_spearman(
+        { 800.f, 418.f }, 4, 4.f, 2.f, 2000ms, 400.f, 2000ms);
+    /*enemy* skel = new skeleton_warrior({ 800.f, 450.f }, 4, 5.f, 2.f,
+     * 2000ms);*/
 
     glm::mat4 skel_scale = glm::scale(
         glm::mat4{ 1 }, glm::vec3{ skel->get_size(), skel->get_size(), 1.f });
@@ -171,8 +172,7 @@ int main(int /*argc*/, char** /*argv*/)
                     warrior->attack(skel);
                 warrior->get_animation()->play(frame_time_dif);
 
-                if (skel->is_alive())
-                    skel->update(warrior, frame_time_dif);
+                skel->update(warrior, frame_time_dif);
             }
 
             camera->look_at(warrior->get_global_pos());
@@ -260,19 +260,19 @@ int main(int /*argc*/, char** /*argv*/)
 
             // Objects render
 
-            if (skel->is_alive())
+            transform2d skel_pos       = skel->get_global_pos();
+            glm::mat4   skel_translate = glm::translate(
+                glm::mat4{ 1 }, glm::vec3{ skel_pos.x, skel_pos.y, 0.f });
+            glm::mat4 skel_mvp =
+                projection * view * skel_translate * skel_scale;
+
+            engine->render(skel->get_animation(),
+                           solo_objects_index_buffer,
+                           skel->get_direction(),
+                           &skel_mvp[0][0]);
+
+            if (skel->get_state() != game_object_state::dead)
             {
-                transform2d skel_pos       = skel->get_global_pos();
-                glm::mat4   skel_translate = glm::translate(
-                    glm::mat4{ 1 }, glm::vec3{ skel_pos.x, skel_pos.y, 0.f });
-                glm::mat4 skel_mvp =
-                    projection * view * skel_translate * skel_scale;
-
-                engine->render(skel->get_animation(),
-                               solo_objects_index_buffer,
-                               skel->get_direction(),
-                               &skel_mvp[0][0]);
-
                 collision::collider* coll = skel->get_collider();
                 glm::mat4            skel_collider_translate = glm::translate(
                     glm::mat4{ 1 },

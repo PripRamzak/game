@@ -21,8 +21,10 @@ extern sprite* warrior_fall;
 extern sprite* skeleton_warrior_idle;
 extern sprite* skeleton_warrior_run;
 extern sprite* skeleton_warrior_attack;
+extern sprite* skeleton_warrior_dead;
 
 extern sprite* skeleton_spearman_idle;
 extern sprite* skeleton_spearman_walk;
 extern sprite* skeleton_spearman_attack;
+extern sprite* skeleton_spearman_dead;
 } // namespace resources

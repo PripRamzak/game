@@ -90,10 +90,13 @@ skeleton_warrior::skeleton_warrior(transform2d               global_pos,
         new animation(resources::skeleton_warrior_run, 8, 125ms);
     animation* anim_skeleton_warrior_attack =
         new animation(resources::skeleton_warrior_attack, 4, 125ms);
+    animation* anim_skeleton_warrior_dead =
+        new animation(resources::skeleton_warrior_dead, 4, 125ms);
 
     sprites.emplace(game_object_state::idle, anim_skeleton_warrior_idle);
     sprites.emplace(game_object_state::move, anim_skeleton_warrior_run);
     sprites.emplace(game_object_state::attack, anim_skeleton_warrior_attack);
+    sprites.emplace(game_object_state::dead, anim_skeleton_warrior_dead);
 
     collision::collider* idle_hitbox = new collision::collider(
         { -15.f, -26.f }, { 34.f, 58.f }, { e_color::GREEN, 0.6f }, size);
@@ -141,10 +144,13 @@ skeleton_spearman::skeleton_spearman(transform2d               global_pos,
         new animation(resources::skeleton_spearman_walk, 7, 125ms);
     animation* anim_skeleton_spearman_attack =
         new animation(resources::skeleton_spearman_attack, 4, 125ms);
+    animation* anim_skeleton_spearman_dead =
+        new animation(resources::skeleton_spearman_dead, 5, 125ms);
 
     sprites.emplace(game_object_state::idle, anim_skeleton_spearman_idle);
     sprites.emplace(game_object_state::move, anim_skeleton_spearman_walk);
     sprites.emplace(game_object_state::attack, anim_skeleton_spearman_attack);
+    sprites.emplace(game_object_state::dead, anim_skeleton_spearman_dead);
 
     collision::collider* idle_hitbox = new collision::collider(
         { -14.f, -23.f }, { 28.f, 64.f }, { e_color::GREEN, 0.6f }, size);
@@ -168,28 +174,34 @@ skeleton_spearman::skeleton_spearman(transform2d               global_pos,
 void skeleton_warrior::update(game_object*              hero,
                               std::chrono::milliseconds delta_time)
 {
-    if (agro)
+    if (is_alive())
     {
-        change_direction(global_pos.x < hero->get_global_pos().x ? 0 : 1);
-        if (collision::game_object_with_game_object(
-                global_pos,
-                attack_trigger->get_rectangle(),
-                hero->get_global_pos(),
-                hero->get_collider()->get_rectangle()) ||
-            state == game_object_state::attack)
-            attack(hero, delta_time);
-        else if (state != game_object_state::attack)
+        if (agro)
         {
-            move();
-            attack_delay_dt = 0ms;
+            change_direction(global_pos.x < hero->get_global_pos().x ? 0 : 1);
+            if (collision::game_object_with_game_object(
+                    global_pos,
+                    attack_trigger->get_rectangle(),
+                    hero->get_global_pos(),
+                    hero->get_collider()->get_rectangle()) ||
+                state == game_object_state::attack)
+                attack(hero, delta_time);
+            else if (state != game_object_state::attack)
+            {
+                move();
+                attack_delay_dt = 0ms;
+            }
         }
+        else if (collision::game_object_with_game_object(
+                     global_pos,
+                     agro_trigger->get_rectangle(),
+                     hero->get_global_pos(),
+                     hero->get_collider()->get_rectangle()))
+            agro = true;
     }
-    else if (collision::game_object_with_game_object(
-                 global_pos,
-                 agro_trigger->get_rectangle(),
-                 hero->get_global_pos(),
-                 hero->get_collider()->get_rectangle()))
-        agro = true;
+    else if (get_animation()->get_current_frame_number() ==
+             get_animation()->get_frames_quantity() - 1)
+        return;
 
     get_animation()->play(delta_time);
 }
@@ -197,36 +209,42 @@ void skeleton_warrior::update(game_object*              hero,
 void skeleton_spearman::update(game_object*              hero,
                                std::chrono::milliseconds delta_time)
 {
-    if (collision::game_object_with_game_object(
-            global_pos,
-            attack_trigger->get_rectangle(),
-            hero->get_global_pos(),
-            hero->get_collider()->get_rectangle()) ||
-        state == game_object_state::attack)
+    if (is_alive())
     {
-        change_direction(global_pos.x < hero->get_global_pos().x ? 0 : 1);
-        attack(hero, delta_time);
-    }
-    else
-    {
-        change_direction(patrol_direction);
-        attack_delay_dt = 0ms;
-
-        if (std::abs(patrol_area_dt) >= patrol_area)
+        if (collision::game_object_with_game_object(
+                global_pos,
+                attack_trigger->get_rectangle(),
+                hero->get_global_pos(),
+                hero->get_collider()->get_rectangle()) ||
+            state == game_object_state::attack)
         {
-            patrol_time_dt += delta_time;
-            if (patrol_time_dt < patrol_time)
-                set_state(game_object_state::idle);
-            else
-            {
-                patrol_time_dt -= patrol_time;
-                patrol_area_dt   = 0.f;
-                patrol_direction = patrol_direction == 0 ? 1 : 0;
-            }
+            change_direction(global_pos.x < hero->get_global_pos().x ? 0 : 1);
+            attack(hero, delta_time);
         }
         else
-            move();
+        {
+            change_direction(patrol_direction);
+            attack_delay_dt = 0ms;
+
+            if (std::abs(patrol_area_dt) >= patrol_area)
+            {
+                patrol_time_dt += delta_time;
+                if (patrol_time_dt < patrol_time)
+                    set_state(game_object_state::idle);
+                else
+                {
+                    patrol_time_dt -= patrol_time;
+                    patrol_area_dt   = 0.f;
+                    patrol_direction = patrol_direction == 0 ? 1 : 0;
+                }
+            }
+            else
+                move();
+        }
     }
+    else if (get_animation()->get_current_frame_number() ==
+             get_animation()->get_frames_quantity() - 1)
+        return;
 
     get_animation()->play(delta_time);
 }

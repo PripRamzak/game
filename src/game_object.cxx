@@ -17,7 +17,11 @@ game_object::game_object(transform2d       global_pos,
 
 bool game_object::is_alive()
 {
-    return health > 0 ? true : false;
+    if (health > 0)
+        return true;
+    else
+        set_state(game_object_state::dead);
+    return false;
 }
 
 void game_object::hurt()

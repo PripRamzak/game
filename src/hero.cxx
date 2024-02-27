@@ -150,6 +150,9 @@ void hero::jump()
 
 void hero::attack(game_object* enemy)
 {
+    if (enemy->get_state() == game_object_state::dead)
+        return;
+    
     animation* attack_anim         = sprites[state];
     int        anim_current_number = attack_anim->get_current_frame_number();
     int        anim_quantity       = attack_anim->get_frames_quantity();

@@ -14,7 +14,7 @@ enum class game_object_state
     attack,
     jump,
     fall,
-    run_n_attack
+    dead
 };
 
 class game_object
