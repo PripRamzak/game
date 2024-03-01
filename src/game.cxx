@@ -42,8 +42,12 @@ int main(int /*argc*/, char** /*argv*/)
 
     using namespace std::chrono_literals;
 
+    // Map creating
+    map* dungeon_map = new map(64.f, 64.f, "data/level_1.txt");
+
     // Warrior creating
-    hero* warrior = new hero({ 300.f, 464.f }, 4, 10.f, 2.f, 12.f, 300.f);
+    hero* warrior =
+        new hero({ 300.f, 464.f }, 10.f, 2.f, 0, dungeon_map, 4, 12.f, 300.f);
 
     glm::mat4 warrior_scale =
         glm::scale(glm::mat4{ 1 },
@@ -52,17 +56,15 @@ int main(int /*argc*/, char** /*argv*/)
     // Skeleton creating
 
     // std::vector<enemy*> enemies;
-    enemy* skel = new skeleton_spearman(
-        { 800.f, 418.f }, 4, 4.f, 2.f, 2000ms, 400.f, 2000ms);
+    /*enemy* skel = new skeleton_spearman(
+        { 800.f, 418.f }, 4, 4.f, 2.f, 2000ms, 400.f, 2000ms);*/
     /*enemy* skel = new skeleton_warrior({ 800.f, 450.f }, 4, 5.f, 2.f,
      * 2000ms);*/
+    enemy* skel = new skeleton_archer(
+        { 800, 450.f }, 4.f, 2.f, 1, dungeon_map, 4, 2000ms);
 
     glm::mat4 skel_scale = glm::scale(
         glm::mat4{ 1 }, glm::vec3{ skel->get_size(), skel->get_size(), 1.f });
-
-    // Map creating
-
-    map* dungeon_map = new map(64.f, 64.f, "data/level_1.txt");
 
     // Interface
 
@@ -131,30 +133,30 @@ int main(int /*argc*/, char** /*argv*/)
             if (!show_in_game_menu_window)
             {
                 if (engine->check_key(key::attack) &&
-                    warrior->get_state() != game_object_state::jump &&
-                    warrior->get_state() != game_object_state::fall)
+                    warrior->get_state() != character_state::jump &&
+                    warrior->get_state() != character_state::fall)
                 {
-                    warrior->set_state(game_object_state::attack);
+                    warrior->set_state(character_state::melee_attack);
 
                     if (warrior->get_animation()->get_current_frame_number() ==
                         2)
                         sound_attack->play(audio_properties::once);
                 }
                 else if (engine->check_key(key::jump) &&
-                         warrior->get_state() != game_object_state::jump &&
-                         warrior->get_state() != game_object_state::fall)
-                    warrior->set_state(game_object_state::jump);
+                         warrior->get_state() != character_state::jump &&
+                         warrior->get_state() != character_state::fall)
+                    warrior->set_state(character_state::jump);
                 else
                 {
                     float dx = 0.f;
                     float dy = 0.f;
 
-                    if (warrior->get_state() == game_object_state::jump)
+                    if (warrior->get_state() == character_state::jump)
                     {
                         dy--;
                         warrior->jump();
                     }
-                    else if (warrior->get_state() == game_object_state::fall)
+                    else if (warrior->get_state() == character_state::fall)
                         dy++;
 
                     if (engine->check_key(key::left))
@@ -163,12 +165,12 @@ int main(int /*argc*/, char** /*argv*/)
                         dx++;
 
                     if (dx == 0 && dy == 0)
-                        warrior->set_state(game_object_state::idle);
+                        warrior->set_state(character_state::idle);
                     else
-                        warrior->move(dx, dy, dungeon_map);
+                        warrior->move(dx, dy);
                 }
 
-                if (warrior->get_state() == game_object_state::attack)
+                if (warrior->get_state() == character_state::melee_attack)
                     warrior->attack(skel);
                 warrior->get_animation()->play(frame_time_dif);
 
@@ -271,7 +273,36 @@ int main(int /*argc*/, char** /*argv*/)
                            skel->get_direction(),
                            &skel_mvp[0][0]);
 
-            if (skel->get_state() != game_object_state::dead)
+            for (auto& arrow_ :
+                 dynamic_cast<skeleton_archer*>(skel)->get_arrows())
+            {
+                transform2d arrow_pos       = arrow_->get_global_pos();
+                glm::mat4   arrow_translate = glm::translate(
+                    glm::mat4{ 1 }, glm::vec3{ arrow_pos.x, arrow_pos.y, 0.f });
+                glm::mat4 arrow_scale = glm::scale(
+                    glm::mat4{ 1 },
+                    glm::vec3(arrow_->get_size(), arrow_->get_size(), 1.f));
+                glm::mat4 arrow_mvp =
+                    projection * view * arrow_translate * arrow_scale;
+                engine->render(arrow_->get_sprite(),
+                               solo_objects_index_buffer,
+                               arrow_->get_direction(),
+                               &arrow_mvp[0][0]);
+
+                collision::collider* arr_coll = arrow_->get_hitbox();
+                glm::mat4            arr_collider_translate = glm::translate(
+                    glm::mat4{ 1 },
+                    glm::vec3{ arrow_pos.x + arr_coll->get_rectangle().pos.x,
+                               arrow_pos.y + arr_coll->get_rectangle().pos.y,
+                               0.f });
+                glm::mat4 arr_coll_mvp =
+                    projection * view * arr_collider_translate;
+                engine->render(arr_coll->get_vertex_buffer(),
+                               arr_coll->get_index_buffer(),
+                               &arr_coll_mvp[0][0]);
+            }
+
+            if (skel->get_state() != character_state::dead)
             {
                 collision::collider* coll = skel->get_collider();
                 glm::mat4            skel_collider_translate = glm::translate(
@@ -300,7 +331,7 @@ int main(int /*argc*/, char** /*argv*/)
                                attack_trigger->get_index_buffer(),
                                &skel_attack_trigger_mvp[0][0]);
 
-                if (skel->get_state() == game_object_state::attack)
+                if (skel->get_state() == character_state::melee_attack)
                 {
                     collision::collider* attack_coll =
                         skel->get_attack_collider();
@@ -343,7 +374,7 @@ int main(int /*argc*/, char** /*argv*/)
                            warrior_collider->get_index_buffer(),
                            &warrior_collider_mvp[0][0]);
 
-            if (warrior->get_state() == game_object_state::attack)
+            if (warrior->get_state() == character_state::melee_attack)
             {
                 collision::collider* warrior_attack_collider =
                     warrior->get_attack_collider();

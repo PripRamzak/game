@@ -27,4 +27,12 @@ extern sprite* skeleton_spearman_idle;
 extern sprite* skeleton_spearman_walk;
 extern sprite* skeleton_spearman_attack;
 extern sprite* skeleton_spearman_dead;
+
+extern sprite* skeleton_archer_idle;
+extern sprite* skeleton_archer_walk;
+extern sprite* skeleton_archer_attack;
+extern sprite* skeleton_archer_shot;
+extern sprite* skeleton_archer_dead;
+
+extern sprite* arrow;
 } // namespace resources

@@ -12,7 +12,8 @@ public:
     collider(transform2d offset,
              transform2d rect_size,
              color       color,
-             float       scale);
+             float       scale,
+             int         direction);
     void           change_pos(int direction);
     rectangle&     get_rectangle();
     vertex_buffer* get_vertex_buffer();

@@ -26,6 +26,14 @@ sprite* skeleton_spearman_walk{ nullptr };
 sprite* skeleton_spearman_attack{ nullptr };
 sprite* skeleton_spearman_dead{ nullptr };
 
+sprite* skeleton_archer_idle{ nullptr };
+sprite* skeleton_archer_walk{ nullptr };
+sprite* skeleton_archer_attack{ nullptr };
+sprite* skeleton_archer_shot{ nullptr };
+sprite* skeleton_archer_dead{ nullptr };
+
+sprite* arrow{ nullptr };
+
 static bool res_init = false;
 
 void init()
@@ -66,6 +74,19 @@ void init()
     texture* t_skeleton_spearman_dead =
         create_texture("img/enemy/skeleton_spearman_dead.png");
 
+    texture* t_skeleton_archer_idle =
+        create_texture("img/enemy/skeleton_archer_idle.png");
+    texture* t_skeleton_archer_walk =
+        create_texture("img/enemy/skeleton_archer_walk.png");
+    texture* t_skeleton_archer_attack =
+        create_texture("img/enemy/skeleton_archer_attack.png");
+    texture* t_skeleton_archer_shot =
+        create_texture("img/enemy/skeleton_archer_shot.png");
+    texture* t_skeleton_archer_dead =
+        create_texture("img/enemy/skeleton_archer_dead.png");
+
+    texture* t_arrow = create_texture("img/enemy/arrow.png");
+
     warrior_idle   = new sprite(t_warrior_idle, { 48.f, 48.f });
     warrior_run    = new sprite(t_warrior_run, { 48.f, 48.f });
     warrior_attack = new sprite(t_warrior_attack, { 86.f, 48.f });
@@ -87,6 +108,16 @@ void init()
         new sprite(t_skeleton_spearman_attack, { 100.f, 56.f }, { 50.f, 9.f });
     skeleton_spearman_dead =
         new sprite(t_skeleton_spearman_dead, { 128.f, 82.f }, { 64.f, 35.f });
+
+    skeleton_archer_idle = new sprite(t_skeleton_archer_idle, { 128.f, 64.f });
+    skeleton_archer_walk = new sprite(t_skeleton_archer_walk, { 128.f, 64.f });
+    skeleton_archer_attack =
+        new sprite(t_skeleton_archer_attack, { 128.f, 66.f }, { 64.f, 34.f });
+    skeleton_archer_shot =
+        new sprite(t_skeleton_archer_shot, { 128.f, 74.f }, { 64.f, 42.f });
+    skeleton_archer_dead = new sprite(t_skeleton_archer_dead, { 128.f, 64.f });
+
+    arrow = new sprite(t_arrow, { 48, 16 });
 
     res_init = true;
 }

@@ -1,5 +1,4 @@
 #include "include/collision.hxx"
-#include "include/game_object.hxx"
 
 #include <unordered_map>
 #include <vector>
@@ -44,9 +43,11 @@ collider::collider()
 collider::collider(transform2d offset,
                    transform2d rect_size,
                    color       color,
-                   float       scale)
+                   float       scale,
+                   int         direction)
     : offset({ offset.x * scale, offset.y * scale })
-    , rect({ offset.x * scale,
+    , rect({ direction == 0 ? offset.x * scale
+                            : -1 * (rect_size.x + offset.x) * scale,
              offset.y * scale,
              rect_size.x * scale,
              rect_size.y * scale })

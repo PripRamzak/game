@@ -31,10 +31,10 @@ public:
                         index_buffer* index_buffer,
                         int direction,
                         float* matrix) = 0;
-    /*virtual void render(sprite*       sprite,
+    virtual void render(sprite*       sprite,
                         index_buffer* index_buffer,
                         int           direction,
-                        float*        matrix) = 0;*/
+                        float*        matrix) = 0;
     virtual void render(texture*       texture,
                         vertex_buffer* vertex_buffer,
                         index_buffer*  index_buffer,

@@ -73,6 +73,7 @@ class game_engine final : public engine
     SDL_GLContext   context;
     shader_program* hero_program;
     shader_program* map_program;
+    shader_program* sprite_program;
     shader_program* collider_program;
 
     SDL_AudioDeviceID          audio_device;
@@ -339,6 +340,37 @@ public:
             return false;
         }
 
+        sprite_program = create_shader_program();
+
+        if (!sprite_program->create_shader("shaders/sprite.vert",
+                                           shader_type::vertex))
+        {
+            SDL_GL_DeleteContext(context);
+            SDL_DestroyWindow(window);
+            SDL_Quit();
+            return false;
+        }
+
+        if (!sprite_program->create_shader("shaders/sprite.frag",
+                                           shader_type::fragment))
+        {
+            SDL_GL_DeleteContext(context);
+            SDL_DestroyWindow(window);
+            SDL_Quit();
+            return false;
+        }
+
+        sprite_program->bind("vertex_position", 0);
+        sprite_program->bind("text_coord", 1);
+
+        if (!sprite_program->link())
+        {
+            SDL_GL_DeleteContext(context);
+            SDL_DestroyWindow(window);
+            SDL_Quit();
+            return false;
+        }
+
         collider_program = create_shader_program();
 
         if (!collider_program->create_shader("shaders/collider.vert",
@@ -582,29 +614,18 @@ public:
             GL_TRIANGLES, index_buffer->get_size(), GL_UNSIGNED_SHORT, 0);
         gl_check();
     }
-    /*void render(sprite*       sprite,
+    void render(sprite*       sprite,
                 index_buffer* index_buffer,
                 int           direction,
                 float*        matrix) final
     {
-        hero_program->use();
-        hero_program->set_uniform_1f(
-            "quantity", static_cast<float>(sprite->get_frames_quantity()));
-        hero_program->set_uniform_1f(
-            "number",
-            static_cast<float>(sprite->get_current_frame_number(direction)));
-        hero_program->set_uniform_1f("start_position",
-                                     sprite->get_start_position());
-        hero_program->set_uniform_1f(
-            "width",
-            sprite->get_width() /
-                static_cast<float>(sprite->get_texture()->get_width()));
-        hero_program->set_uniform_1i("direction", direction);
-        hero_program->set_uniform_1i("texture", 0);
-        hero_program->set_uniform_matrix4fv("matrix", 1, GL_FALSE, matrix);
+        sprite_program->use();
+        sprite_program->set_uniform_1i("direction", direction);
+        sprite_program->set_uniform_1i("texture", 0);
+        sprite_program->set_uniform_matrix4fv("mvp", 1, GL_FALSE, matrix);
 
         sprite->get_texture()->active(0);
-        sprite->get_tileset()->bind();
+        sprite->get_texture()->bind();
 
         sprite->get_vertex_buffer()->bind();
         index_buffer->bind();
@@ -632,7 +653,7 @@ public:
         glDrawElements(
             GL_TRIANGLES, index_buffer->get_size(), GL_UNSIGNED_SHORT, 0);
         gl_check();
-    }*/
+    }
     void render(texture*       texture,
                 vertex_buffer* vertex_buffer,
                 index_buffer*  index_buffer,

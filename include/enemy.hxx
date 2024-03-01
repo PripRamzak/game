@@ -1,26 +1,29 @@
 #pragma once
 
-#include "game_object.hxx"
+#include "arrow.hxx"
+#include "character.hxx"
 
-class enemy : public game_object
+class enemy : public character
 {
 public:
     enemy(transform2d               global_pos,
-          int                       health,
           float                     speed,
           float                     size,
-          game_object_state         state,
+          int                       direction,
+          map*                      level_map,
+          int                       health,
+          character_state           state,
           std::chrono::milliseconds attack_delay);
     void                 spawn();
     bool                 is_spawned();
-    virtual void         update(game_object*              hero,
+    virtual void         update(character*                hero,
                                 std::chrono::milliseconds delta_time) = 0;
     collision::collider* get_attack_trigger();
     ~enemy();
 
 protected:
     virtual void move();
-    void         attack(game_object* hero, std::chrono::milliseconds);
+    void         attack(character* hero, std::chrono::milliseconds);
 
     collision::collider*      attack_trigger;
     std::chrono::milliseconds attack_delay;
@@ -32,12 +35,13 @@ class skeleton_warrior : public enemy
 {
 public:
     skeleton_warrior(transform2d               global_pos,
-                     int                       health,
                      float                     speed,
                      float                     size,
+                     int                       direction,
+                     map*                      level_map,
+                     int                       health,
                      std::chrono::milliseconds attack_delay);
-    void update(game_object*              hero,
-                std::chrono::milliseconds delta_time) override;
+    void update(character* hero, std::chrono::milliseconds delta_time) override;
 
 private:
     bool                 agro = false;
@@ -48,14 +52,15 @@ class skeleton_spearman : public enemy
 {
 public:
     skeleton_spearman(transform2d               global_pos,
-                      int                       health,
                       float                     speed,
                       float                     size,
+                      int                       direction,
+                      map*                      level_map,
+                      int                       health,
                       std::chrono::milliseconds attack_delay,
                       float                     patrol_area,
                       std::chrono::milliseconds patrol_time);
-    void update(game_object*              hero,
-                std::chrono::milliseconds delta_time) override;
+    void update(character* hero, std::chrono::milliseconds delta_time) override;
 
 private:
     void move() override;
@@ -65,4 +70,26 @@ private:
     float                     patrol_area_dt   = 0.f;
     std::chrono::milliseconds patrol_time;
     std::chrono::milliseconds patrol_time_dt;
+};
+
+class skeleton_archer : public enemy
+{
+public:
+    skeleton_archer(transform2d               global_pos,
+                    float                     speed,
+                    float                     size,
+                    int                       direction,
+                    map*                      level_map,
+                    int                       health,
+                    std::chrono::milliseconds attack_delay);
+    void update(character* hero, std::chrono::milliseconds delta_time) override;
+    std::vector<std::unique_ptr<arrow>>& get_arrows();
+
+private:
+    void shoot(game_object* hero, std::chrono::milliseconds delta_time);
+
+    std::vector<std::unique_ptr<arrow>> arrows;
+    collision::collider*                shot_trigger;
+    std::chrono::milliseconds           shot_cooldown;
+    std::chrono::milliseconds           shot_cooldown_dt;
 };

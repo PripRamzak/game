@@ -1,20 +1,22 @@
 #pragma once
 
-#include "game_object.hxx"
+#include "character.hxx"
 #include "map.hxx"
 
-class hero : public game_object
+class hero : public character
 {
 public:
     hero(transform2d global_pos,
-         int         health,
          float       speed,
          float       size,
+         int         direction,
+         map*        level_map,
+         int         health,
          float       jump_force,
          float       jump_height);
-    void move(float dx, float dy, map* map);
+    void move(float dx, float dy);
     void jump();
-    void attack(game_object* enemy);
+    void attack(character* enemy);
     ~hero();
 
 private:

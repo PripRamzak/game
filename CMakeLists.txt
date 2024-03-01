@@ -29,8 +29,12 @@ endif ()
 
 target_sources(game PRIVATE
         src/game.cxx
+        src/arrow.cxx
+        include/arrow.hxx
         src/camera.cxx
         include/camera.hxx
+        src/character.cxx
+        include/character.hxx
         include/collision.hxx
         src/collision.cxx
         src/enemy.cxx
