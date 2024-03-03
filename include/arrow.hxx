@@ -13,6 +13,7 @@ public:
           int                      direction,
           map*                     level_map);
     void                 update(character* hero);
+    void                 draw(float* matrix) override;
     bool                 is_destroyed();
     prip_engine::sprite* get_sprite();
     collision::collider* get_hitbox();

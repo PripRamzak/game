@@ -14,12 +14,8 @@ public:
           int                       health,
           character_state           state,
           std::chrono::milliseconds attack_delay);
-    void                 spawn();
-    bool                 is_spawned();
-    virtual void         update(character*                hero,
-                                std::chrono::milliseconds delta_time) = 0;
-    collision::collider* get_attack_trigger();
-    ~enemy();
+    void draw(float* matrix) override;
+    virtual ~enemy();
 
 protected:
     virtual void move();
@@ -28,7 +24,6 @@ protected:
     collision::collider*      attack_trigger;
     std::chrono::milliseconds attack_delay;
     std::chrono::milliseconds attack_delay_dt;
-    bool                      spawned = false;
 };
 
 class skeleton_warrior : public enemy
@@ -41,7 +36,9 @@ public:
                      map*                      level_map,
                      int                       health,
                      std::chrono::milliseconds attack_delay);
-    void update(character* hero, std::chrono::milliseconds delta_time) override;
+    void update(std::chrono::milliseconds delta_time, character* hero) override;
+    void draw(float* matrix) override;
+    ~skeleton_warrior();
 
 private:
     bool                 agro = false;
@@ -60,7 +57,8 @@ public:
                       std::chrono::milliseconds attack_delay,
                       float                     patrol_area,
                       std::chrono::milliseconds patrol_time);
-    void update(character* hero, std::chrono::milliseconds delta_time) override;
+    void update(std::chrono::milliseconds delta_time, character* hero) override;
+    ~skeleton_spearman();
 
 private:
     void move() override;
@@ -82,8 +80,9 @@ public:
                     map*                      level_map,
                     int                       health,
                     std::chrono::milliseconds attack_delay);
-    void update(character* hero, std::chrono::milliseconds delta_time) override;
-    std::vector<std::unique_ptr<arrow>>& get_arrows();
+    void update(std::chrono::milliseconds delta_time, character* hero) override;
+    void draw(float* matrix) override;
+    ~skeleton_archer();
 
 private:
     void shoot(game_object* hero, std::chrono::milliseconds delta_time);

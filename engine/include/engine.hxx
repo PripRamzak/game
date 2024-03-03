@@ -24,14 +24,8 @@ enum class gui_type
 bool          init();
 bool          read_input(event& e);
 sound_buffer* create_sound_buffer(const char* file_path);
-void          render(animation*    anim_sprite,
-                     index_buffer* index_buffer,
-                     int           direction,
-                     float*        matrix);
-void          render(sprite*       sprite,
-                     index_buffer* index_buffer,
-                     int           direction,
-                     float*        matrix);
+void          render(animation* anim_sprite, int direction, float* matrix);
+void          render(sprite* sprite, int direction, float* matrix);
 void          render(texture*       texture,
                      vertex_buffer* vertex_buffer,
                      index_buffer*  index_buffer,

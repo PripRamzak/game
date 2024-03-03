@@ -74,6 +74,8 @@ static shader_program* map_program;
 static shader_program* sprite_program;
 static shader_program* collider_program;
 
+static index_buffer* solo_objects_index_buffer;
+
 static SDL_AudioDeviceID          audio_device;
 static SDL_AudioSpec              device_audio_spec;
 static std::vector<sound_buffer*> sounds;
@@ -405,6 +407,9 @@ bool init()
               << std::endl;
     glViewport(0, 0, window_width_pixels, window_height_pixels);
 
+    solo_objects_index_buffer = create_index_buffer();
+    solo_objects_index_buffer->add_indexes(primitives::triangle, 1);
+
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGui_ImplSDL3_InitForOpenGL(window, context);
@@ -558,10 +563,7 @@ sound_buffer* create_sound_buffer(const char* file_path)
     return sound_buffer;
 }
 
-void render(animation*    anim_sprite,
-            index_buffer* index_buffer,
-            int           direction,
-            float*        matrix)
+void render(animation* anim_sprite, int direction, float* matrix)
 {
     sprite*  sprite_  = anim_sprite->get_sprite();
     texture* texture_ = sprite_->get_texture();
@@ -579,7 +581,7 @@ void render(animation*    anim_sprite,
     texture_->bind();
 
     sprite_->get_vertex_buffer()->bind();
-    index_buffer->bind();
+    solo_objects_index_buffer->bind();
 
     glVertexAttribPointer(0,
                           2,
@@ -601,15 +603,14 @@ void render(animation*    anim_sprite,
     glEnableVertexAttribArray(1);
     gl_check();
 
-    glDrawElements(
-        GL_TRIANGLES, index_buffer->get_size(), GL_UNSIGNED_SHORT, 0);
+    glDrawElements(GL_TRIANGLES,
+                   solo_objects_index_buffer->get_size(),
+                   GL_UNSIGNED_SHORT,
+                   0);
     gl_check();
 }
 
-void render(sprite*       sprite,
-            index_buffer* index_buffer,
-            int           direction,
-            float*        matrix)
+void render(sprite* sprite, int direction, float* matrix)
 {
     sprite_program->use();
     sprite_program->set_uniform_1i("direction", direction);
@@ -620,7 +621,7 @@ void render(sprite*       sprite,
     sprite->get_texture()->bind();
 
     sprite->get_vertex_buffer()->bind();
-    index_buffer->bind();
+    solo_objects_index_buffer->bind();
 
     glVertexAttribPointer(0,
                           2,
@@ -642,8 +643,10 @@ void render(sprite*       sprite,
     glEnableVertexAttribArray(1);
     gl_check();
 
-    glDrawElements(
-        GL_TRIANGLES, index_buffer->get_size(), GL_UNSIGNED_SHORT, 0);
+    glDrawElements(GL_TRIANGLES,
+                   solo_objects_index_buffer->get_size(),
+                   GL_UNSIGNED_SHORT,
+                   0);
     gl_check();
 }
 

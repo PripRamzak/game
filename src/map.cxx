@@ -1,5 +1,7 @@
-#include "include/map.hxx"
+#include "engine/include/engine.hxx"
 #include "engine/include/memory_buf.hxx"
+
+#include "include/map.hxx"
 #include "include/resources.hxx"
 
 #include <algorithm>
@@ -20,30 +22,30 @@ map::map(float tile_width_, float tile_height_, std::string file_path)
     , tile_width(tile_width_)
     , tile_height(tile_height_)
 {
-    tile brick_top          = { { 32.f / 240.f, 224.f / 288.f },
-                                { 48.f / 240.f, 240.f / 288.f } };
-    tile brick_bottom       = { { 32.f / 240.f, 256.f / 288.f },
-                                { 48.f / 240.f, 272.f / 288.f } };
-    tile brick_left         = { { 48.f / 240.f, 240.f / 288.f },
-                                { 64.f / 240.f, 256.f / 288.f } };
-    tile brick_right        = { { 16.f / 240.f, 240.f / 288.f },
-                                { 32.f / 240.f, 256.f / 288.f } };
-    tile brick_top_left     = { { 96.f / 240.f, 224.f / 288.f },
-                                { 112.f / 240.f, 240.f / 288.f } };
-    tile brick_top_right    = { { 80.f / 240.f, 224.f / 288.f },
-                                { 96.f / 240.f, 240.f / 288.f } };
-    tile brick_bottom_left  = { { 96.f / 240.f, 240.f / 288.f },
-                                { 112.f / 240.f, 256.f / 288.f } };
-    tile brick_bottom_right = { { 80.f / 240.f, 240.f / 288.f },
-                                { 96.f / 240.f, 256.f / 288.f } };
-    tile plate_top_left     = { { 48.f / 240.f, 160.f / 288.f },
-                                { 64.f / 240.f, 172.f / 288.f } };
-    tile plate_top_right    = { { 16.f / 240.f, 160.f / 288.f },
-                                { 32.f / 240.f, 172.f / 288.f } };
-    tile plate_bottom_left  = { { 48.f / 240.f, 192.f / 288.f },
-                                { 64.f / 240.f, 208.f / 288.f } };
-    tile plate_bottom_right = { { 16.f / 240.f, 192.f / 288.f },
-                                { 32.f / 240.f, 208.f / 288.f } };
+    tile* brick_top          = new tile{ { 32.f / 240.f, 224.f / 288.f },
+                                         { 48.f / 240.f, 240.f / 288.f } };
+    tile* brick_bottom       = new tile{ { 32.f / 240.f, 256.f / 288.f },
+                                         { 48.f / 240.f, 272.f / 288.f } };
+    tile* brick_left         = new tile{ { 48.f / 240.f, 240.f / 288.f },
+                                         { 64.f / 240.f, 256.f / 288.f } };
+    tile* brick_right        = new tile{ { 16.f / 240.f, 240.f / 288.f },
+                                         { 32.f / 240.f, 256.f / 288.f } };
+    tile* brick_top_left     = new tile{ { 96.f / 240.f, 224.f / 288.f },
+                                         { 112.f / 240.f, 240.f / 288.f } };
+    tile* brick_top_right    = new tile{ { 80.f / 240.f, 224.f / 288.f },
+                                         { 96.f / 240.f, 240.f / 288.f } };
+    tile* brick_bottom_left  = new tile{ { 96.f / 240.f, 240.f / 288.f },
+                                         { 112.f / 240.f, 256.f / 288.f } };
+    tile* brick_bottom_right = new tile{ { 80.f / 240.f, 240.f / 288.f },
+                                         { 96.f / 240.f, 256.f / 288.f } };
+    tile* plate_top_left     = new tile{ { 48.f / 240.f, 160.f / 288.f },
+                                         { 64.f / 240.f, 172.f / 288.f } };
+    tile* plate_top_right    = new tile{ { 16.f / 240.f, 160.f / 288.f },
+                                         { 32.f / 240.f, 172.f / 288.f } };
+    tile* plate_bottom_left  = new tile{ { 48.f / 240.f, 192.f / 288.f },
+                                         { 64.f / 240.f, 208.f / 288.f } };
+    tile* plate_bottom_right = new tile{ { 16.f / 240.f, 192.f / 288.f },
+                                         { 32.f / 240.f, 208.f / 288.f } };
 
     tiles.emplace(map_tile_type::brick_top, brick_top);
     tiles.emplace(map_tile_type::brick_bottom, brick_bottom);
@@ -88,11 +90,23 @@ map::map(float tile_width_, float tile_height_, std::string file_path)
 
     for (auto& tile : tiles)
     {
-        tile.second.tile_vertex_buffer->buffer_data(
-            tile.second.vertices.data(), tile.second.vertices.size());
-        tile.second.tile_index_buffer->add_indexes(
-            prip_engine::primitives::triangle, tile.second.vertices.size() / 4);
+        tile.second->tile_vertex_buffer->buffer_data(
+            tile.second->vertices.data(), tile.second->vertices.size());
+        tile.second->tile_index_buffer->add_indexes(
+            prip_engine::primitives::triangle,
+            tile.second->vertices.size() / 4);
     }
+}
+
+void map::draw(float* matrix)
+{
+    for (auto& tile : tiles)
+        prip_engine::render(tileset,
+                            tile.second->tile_vertex_buffer,
+                            tile.second->tile_index_buffer,
+                            tile.second->min_uv,
+                            tile.second->max_uv,
+                            matrix);
 }
 
 prip_engine::texture* map::get_tileset()
@@ -102,27 +116,27 @@ prip_engine::texture* map::get_tileset()
 
 std::vector<prip_engine::vertex2d_uv>& map::get_vertices(map_tile_type type)
 {
-    return tiles[type].vertices;
+    return tiles[type]->vertices;
 }
 
 prip_engine::vertex_buffer* map::get_vertex_buffer(map_tile_type type)
 {
-    return tiles[type].tile_vertex_buffer;
+    return tiles[type]->tile_vertex_buffer;
 }
 
 prip_engine::index_buffer* map::get_index_buffer(map_tile_type type)
 {
-    return tiles[type].tile_index_buffer;
+    return tiles[type]->tile_index_buffer;
 }
 
 prip_engine::transform2d map::get_tile_min_uv(map_tile_type type)
 {
-    return tiles[type].min_uv;
+    return tiles[type]->min_uv;
 }
 
 prip_engine::transform2d map::get_tile_max_uv(map_tile_type type)
 {
-    return tiles[type].max_uv;
+    return tiles[type]->max_uv;
 }
 
 map::tile::tile()
@@ -150,14 +164,14 @@ void map::draw_vertical_line(float         start_x,
                              int           length,
                              map_tile_type type)
 {
-    tile& tile = tiles[type];
-    tile.vertices.push_back(
+    tile* tile = tiles[type];
+    tile->vertices.push_back(
         { start_x, start_y, 0.f, static_cast<float>(length) });
-    tile.vertices.push_back(
+    tile->vertices.push_back(
         { start_x + tile_width, start_y, 1.f, static_cast<float>(length) });
-    tile.vertices.push_back(
+    tile->vertices.push_back(
         { start_x + tile_width, start_y + length * tile_height, 1.f, 0.f });
-    tile.vertices.push_back(
+    tile->vertices.push_back(
         { start_x, start_y + length * tile_width, 0.f, 0.f });
 }
 
@@ -166,34 +180,34 @@ void map::draw_horizontal_line(float         start_x,
                                int           length,
                                map_tile_type type)
 {
-    tile& tile = tiles[type];
-    tile.vertices.push_back({ start_x, start_y, 0.f, 1.f });
-    tile.vertices.push_back({ start_x + length * tile_width,
-                              start_y,
-                              static_cast<float>(length),
-                              1.f });
-    tile.vertices.push_back({ start_x + length * tile_width,
-                              start_y + tile_height,
-                              static_cast<float>(length),
-                              0.f });
-    tile.vertices.push_back({ start_x, start_y + tile_height, 0.f, 0.f });
+    tile* tile = tiles[type];
+    tile->vertices.push_back({ start_x, start_y, 0.f, 1.f });
+    tile->vertices.push_back({ start_x + length * tile_width,
+                               start_y,
+                               static_cast<float>(length),
+                               1.f });
+    tile->vertices.push_back({ start_x + length * tile_width,
+                               start_y + tile_height,
+                               static_cast<float>(length),
+                               0.f });
+    tile->vertices.push_back({ start_x, start_y + tile_height, 0.f, 0.f });
 }
 
 void map::fill_rectangle(
     float start_x, float start_y, int width, int height, map_tile_type type)
 {
-    tile& tile = tiles[type];
-    tile.vertices.push_back(
+    tile* tile = tiles[type];
+    tile->vertices.push_back(
         { start_x, start_y, 0.f, static_cast<float>(height) });
-    tile.vertices.push_back({ start_x + width * tile_width,
-                              start_y,
-                              static_cast<float>(width),
-                              static_cast<float>(height) });
-    tile.vertices.push_back({ start_x + width * tile_width,
-                              start_y + height * tile_height,
-                              static_cast<float>(width),
-                              0.f });
-    tile.vertices.push_back(
+    tile->vertices.push_back({ start_x + width * tile_width,
+                               start_y,
+                               static_cast<float>(width),
+                               static_cast<float>(height) });
+    tile->vertices.push_back({ start_x + width * tile_width,
+                               start_y + height * tile_height,
+                               static_cast<float>(width),
+                               0.f });
+    tile->vertices.push_back(
         { start_x, start_y + height * tile_height, 0.f, 0.f });
 }
 
@@ -268,42 +282,7 @@ map::~map()
     delete tileset;
     for (auto& tile : tiles)
     {
-        delete tile.second.tile_vertex_buffer;
-        delete tile.second.tile_index_buffer;
+        delete tile.second->tile_vertex_buffer;
+        delete tile.second->tile_index_buffer;
     }
 }
-
-/*
-void game_logic_level_1(map*                 map,
-                        game_object*         hero,
-                        std::vector<enemy*>& enemies)
-{
-    static bool second_room_cleaned = false;
-
-    if (hero->get_global_pos_x() > 900.f && !enemies[0]->is_spawned())
-    {
-        enemies[0]->spawn();
-        // map->draw_vertical_line(13, 4, 4, map_tile_type::brick_left);
-    }
-    else if (!enemies[0]->is_alive() && enemies[0]->is_spawned() &&
-             !enemies[1]->is_spawned())
-        enemies[1]->spawn();
-    else if (enemies[1]->is_spawned() && !enemies[1]->is_alive() &&
-             !second_room_cleaned)
-    {
-        // map->delete_tiles_vertical(13, 4, 4, map_tile::wall_left);
-        // map->delete_tiles_horizontal(18, 12, 4, map_tile::wall_bottom);
-        second_room_cleaned = true;
-    }
-    else if (hero->get_global_pos_y() > 1300.f && !enemies[2]->is_spawned())
-    {
-        enemies[2]->spawn();
-        // map->draw_horizontal_line(18, 17, 4, map_tile_type::brick_top);
-    }
-    else if (!enemies[2]->is_alive() && enemies[2]->is_spawned() &&
-             !enemies[3]->is_spawned())
-        enemies[3]->spawn();
-    else if (!enemies[3]->is_alive() && enemies[3]->is_spawned() &&
-             !enemies[4]->is_spawned())
-        enemies[4]->spawn();
-}*/

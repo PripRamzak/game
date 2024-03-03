@@ -1,5 +1,9 @@
+#include "engine/include/engine.hxx"
+
 #include "include/arrow.hxx"
 #include "include/resources.hxx"
+
+#include "glm/gtc/type_ptr.hpp"
 
 arrow::arrow(prip_engine::transform2d global_pos,
              int                      size,
@@ -21,7 +25,7 @@ void arrow::update(character* hero)
             global_pos,
             hitbox->get_rectangle(),
             hero->get_global_pos(),
-            hero->get_collider()->get_rectangle()))
+            hero->get_hitbox()->get_rectangle()))
     {
         hero->hurt();
         destroyed = true;
@@ -35,6 +39,18 @@ void arrow::update(character* hero)
         destroyed = true;
     else
         global_pos.x += direction == 0 ? speed : -speed;
+}
+
+void arrow::draw(float* matrix)
+{
+    glm::mat4 projection_view = glm::make_mat4x4(matrix);
+    glm::mat4 translate       = glm::translate(
+        glm::mat4{ 1 }, glm::vec3{ global_pos.x, global_pos.y, 0.f });
+    glm::mat4 scale = glm::scale(glm::mat4{ 1 }, glm::vec3(size, size, 1.f));
+    glm::mat4 mvp   = projection_view * translate * scale;
+    prip_engine::render(spr, direction, &mvp[0][0]);
+
+    hitbox->draw(global_pos, matrix);
 }
 
 bool arrow::is_destroyed()

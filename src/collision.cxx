@@ -1,4 +1,8 @@
+#include "engine/include/engine.hxx"
+
 #include "include/collision.hxx"
+
+#include "glm/gtc/type_ptr.hpp"
 
 #include <unordered_map>
 #include <vector>
@@ -63,6 +67,16 @@ collider::collider(prip_engine::transform2d offset,
 
     vb->buffer_data(vertices, static_cast<size_t>(4));
     ib->add_indexes(prip_engine::primitives::line, 1);
+}
+
+void collider::draw(const prip_engine::transform2d& pos, float* matrix)
+{
+    glm::mat4 projection_view = glm::make_mat4x4(matrix);
+    glm::mat4 translate       = glm::translate(
+        glm::mat4{ 1 },
+        glm::vec3{ pos.x + rect.pos.x, pos.y + rect.pos.y, 0.f });
+    glm::mat4 mvp = projection_view * translate;
+    prip_engine::render(vb, ib, &mvp[0][0]);
 }
 
 void collider::change_pos(int direction)

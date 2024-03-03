@@ -19,19 +19,12 @@ enemy::enemy(prip_engine::transform2d  global_pos,
 {
 }
 
-void enemy::spawn()
+void enemy::draw(float* matrix)
 {
-    spawned = true;
-}
+    character::draw(matrix);
 
-bool enemy::is_spawned()
-{
-    return spawned;
-}
-
-collision::collider* enemy::get_attack_trigger()
-{
-    return attack_trigger;
+    if (state != character_state::dead)
+        attack_trigger->draw(global_pos, matrix);
 }
 
 void enemy::move()
@@ -41,6 +34,11 @@ void enemy::move()
         global_pos.x += speed;
     else
         global_pos.x -= speed;
+}
+
+enemy::~enemy()
+{
+    delete attack_trigger;
 }
 
 void enemy::attack(character* hero, std::chrono::milliseconds delta_time)
@@ -66,13 +64,11 @@ void enemy::attack(character* hero, std::chrono::milliseconds delta_time)
                 global_pos,
                 attack_collider->get_rectangle(),
                 hero->get_global_pos(),
-                hero->get_collider()->get_rectangle()))
+                hero->get_hitbox()->get_rectangle()))
             hero->hurt();
         set_state(character_state::idle);
     }
 }
-
-enemy::~enemy() = default;
 
 skeleton_warrior::skeleton_warrior(prip_engine::transform2d  global_pos,
                                    float                     speed,
@@ -148,6 +144,56 @@ skeleton_warrior::skeleton_warrior(prip_engine::transform2d  global_pos,
                                             direction };
 }
 
+void skeleton_warrior::update(std::chrono::milliseconds delta_time,
+                              character*                hero)
+{
+    if (is_alive())
+    {
+        if (agro)
+        {
+            change_direction(global_pos.x < hero->get_global_pos().x ? 0 : 1);
+            attack_trigger->change_pos(direction);
+
+            if (collision::game_object_with_game_object(
+                    global_pos,
+                    attack_trigger->get_rectangle(),
+                    hero->get_global_pos(),
+                    hero->get_hitbox()->get_rectangle()) ||
+                state == character_state::melee_attack)
+                attack(hero, delta_time);
+            else if (state != character_state::melee_attack)
+            {
+                move();
+                attack_delay_dt = 0ms;
+            }
+        }
+        else if (collision::game_object_with_game_object(
+                     global_pos,
+                     agro_trigger->get_rectangle(),
+                     hero->get_global_pos(),
+                     hero->get_hitbox()->get_rectangle()))
+            agro = true;
+    }
+    else if (get_animation()->get_current_frame_number() ==
+             get_animation()->get_frames_quantity() - 1)
+        return;
+
+    get_animation()->play(delta_time);
+}
+
+void skeleton_warrior::draw(float* matrix)
+{
+    enemy::draw(matrix);
+
+    if (state != character_state::dead)
+        agro_trigger->draw(global_pos, matrix);
+}
+
+skeleton_warrior::~skeleton_warrior()
+{
+    delete agro_trigger;
+}
+
 skeleton_spearman::skeleton_spearman(prip_engine::transform2d  global_pos,
                                      float                     speed,
                                      float                     size,
@@ -221,6 +267,62 @@ skeleton_spearman::skeleton_spearman(prip_engine::transform2d  global_pos,
                                  { prip_engine::e_color::YELLOW, 0.6f },
                                  size,
                                  direction };
+}
+
+void skeleton_spearman::update(std::chrono::milliseconds delta_time,
+                               character*                hero)
+{
+    if (is_alive())
+    {
+        if (collision::game_object_with_game_object(
+                global_pos,
+                attack_trigger->get_rectangle(),
+                hero->get_global_pos(),
+                hero->get_hitbox()->get_rectangle()) ||
+            state == character_state::melee_attack)
+        {
+            change_direction(global_pos.x < hero->get_global_pos().x ? 0 : 1);
+            attack_trigger->change_pos(direction);
+            attack(hero, delta_time);
+        }
+        else
+        {
+            change_direction(patrol_direction);
+            attack_trigger->change_pos(direction);
+            attack_delay_dt = 0ms;
+
+            if (std::abs(patrol_area_dt) >= patrol_area)
+            {
+                patrol_time_dt += delta_time;
+                if (patrol_time_dt < patrol_time)
+                    set_state(character_state::idle);
+                else
+                {
+                    patrol_time_dt -= patrol_time;
+                    patrol_area_dt   = 0.f;
+                    patrol_direction = patrol_direction == 0 ? 1 : 0;
+                }
+            }
+            else
+                move();
+        }
+    }
+    else if (get_animation()->get_current_frame_number() ==
+             get_animation()->get_frames_quantity() - 1)
+        return;
+
+    get_animation()->play(delta_time);
+}
+
+skeleton_spearman::~skeleton_spearman() = default;
+
+void skeleton_spearman::move()
+{
+    enemy::move();
+    if (direction == 0)
+        patrol_area_dt += speed;
+    else
+        patrol_area_dt -= speed;
 }
 
 skeleton_archer::skeleton_archer(prip_engine::transform2d  global_pos,
@@ -307,45 +409,8 @@ skeleton_archer::skeleton_archer(prip_engine::transform2d  global_pos,
                                            direction);
 }
 
-void skeleton_warrior::update(character*                hero,
-                              std::chrono::milliseconds delta_time)
-{
-    if (is_alive())
-    {
-        if (agro)
-        {
-            change_direction(global_pos.x < hero->get_global_pos().x ? 0 : 1);
-            attack_trigger->change_pos(direction);
-
-            if (collision::game_object_with_game_object(
-                    global_pos,
-                    attack_trigger->get_rectangle(),
-                    hero->get_global_pos(),
-                    hero->get_collider()->get_rectangle()) ||
-                state == character_state::melee_attack)
-                attack(hero, delta_time);
-            else if (state != character_state::melee_attack)
-            {
-                move();
-                attack_delay_dt = 0ms;
-            }
-        }
-        else if (collision::game_object_with_game_object(
-                     global_pos,
-                     agro_trigger->get_rectangle(),
-                     hero->get_global_pos(),
-                     hero->get_collider()->get_rectangle()))
-            agro = true;
-    }
-    else if (get_animation()->get_current_frame_number() ==
-             get_animation()->get_frames_quantity() - 1)
-        return;
-
-    get_animation()->play(delta_time);
-}
-
-void skeleton_spearman::update(character*                hero,
-                               std::chrono::milliseconds delta_time)
+void skeleton_archer::update(std::chrono::milliseconds delta_time,
+                             character*                hero)
 {
     if (is_alive())
     {
@@ -353,67 +418,7 @@ void skeleton_spearman::update(character*                hero,
                 global_pos,
                 attack_trigger->get_rectangle(),
                 hero->get_global_pos(),
-                hero->get_collider()->get_rectangle()) ||
-            state == character_state::melee_attack)
-        {
-            change_direction(global_pos.x < hero->get_global_pos().x ? 0 : 1);
-            attack_trigger->change_pos(direction);
-            attack(hero, delta_time);
-        }
-        else
-        {
-            change_direction(patrol_direction);
-            attack_trigger->change_pos(direction);
-            attack_delay_dt = 0ms;
-
-            if (std::abs(patrol_area_dt) >= patrol_area)
-            {
-                patrol_time_dt += delta_time;
-                if (patrol_time_dt < patrol_time)
-                    set_state(character_state::idle);
-                else
-                {
-                    patrol_time_dt -= patrol_time;
-                    patrol_area_dt   = 0.f;
-                    patrol_direction = patrol_direction == 0 ? 1 : 0;
-                }
-            }
-            else
-                move();
-        }
-    }
-    else if (get_animation()->get_current_frame_number() ==
-             get_animation()->get_frames_quantity() - 1)
-        return;
-
-    get_animation()->play(delta_time);
-}
-
-void skeleton_spearman::move()
-{
-    set_state(character_state::move);
-    if (direction == 0)
-    {
-        global_pos.x += speed;
-        patrol_area_dt += speed;
-    }
-    else
-    {
-        global_pos.x -= speed;
-        patrol_area_dt -= speed;
-    }
-}
-
-void skeleton_archer::update(character*                hero,
-                             std::chrono::milliseconds delta_time)
-{
-    if (is_alive())
-    {
-        if (collision::game_object_with_game_object(
-                global_pos,
-                attack_trigger->get_rectangle(),
-                hero->get_global_pos(),
-                hero->get_collider()->get_rectangle()) ||
+                hero->get_hitbox()->get_rectangle()) ||
             state == character_state::melee_attack)
         {
             change_direction(global_pos.x < hero->get_global_pos().x ? 0 : 1);
@@ -423,7 +428,7 @@ void skeleton_archer::update(character*                hero,
                      global_pos,
                      shot_trigger->get_rectangle(),
                      hero->get_global_pos(),
-                     hero->get_collider()->get_rectangle()) ||
+                     hero->get_hitbox()->get_rectangle()) ||
                  state == character_state::range_attack)
         {
             change_direction(global_pos.x < hero->get_global_pos().x ? 0 : 1);
@@ -444,6 +449,22 @@ void skeleton_archer::update(character*                hero,
     }
 
     get_animation()->play(delta_time);
+}
+
+void skeleton_archer::draw(float* matrix)
+{
+    for (auto it = arrows.begin(); it != arrows.end(); ++it)
+        (*it)->draw(matrix);
+
+    enemy::draw(matrix);
+
+    if (state != character_state::dead)
+        shot_trigger->draw(global_pos, matrix);
+}
+
+skeleton_archer::~skeleton_archer()
+{
+    delete shot_trigger;
 }
 
 void skeleton_archer::shoot(game_object*              hero,
@@ -480,9 +501,4 @@ void skeleton_archer::shoot(game_object*              hero,
                           level_map));
         set_state(character_state::idle);
     }
-}
-
-std::vector<std::unique_ptr<arrow>>& skeleton_archer::get_arrows()
-{
-    return arrows;
 }

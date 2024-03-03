@@ -14,12 +14,14 @@ public:
          int                      health,
          float                    jump_force,
          float                    jump_height);
-    void move(float dx, float dy);
-    void jump();
-    void attack(character* enemy);
+    void update(std::chrono::milliseconds, character* enemy) override;
     ~hero();
 
 private:
+    void move(float dx, float dy);
+    void jump();
+    void attack(character* enemy);
+
     bool  attacked       = false;
     float jump_force     = 0.f;
     float jump_height    = 0.f;

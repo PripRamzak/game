@@ -30,14 +30,7 @@ class map
 {
 public:
     map(float tile_width_, float tile_height_, std::string file_path);
-    /*virtual void           delete_tiles_horizontal(int      start_x,
-                                                   int      start_y,
-                                                   int      length,
-                                                   map_tile type)         = 0;
-    virtual void           delete_tiles_vertical(int      start_x,
-                                                 int      start_y,
-                                                 int      length,
-                                                 map_tile type)           = 0;*/
+    void                                   draw(float* matrix);
     prip_engine::texture*                  get_tileset();
     std::vector<prip_engine::vertex2d_uv>& get_vertices(map_tile_type type);
     prip_engine::vertex_buffer* get_vertex_buffer(map_tile_type type);
@@ -72,14 +65,17 @@ private:
                         int           width,
                         int           height,
                         map_tile_type type);
+    /*virtual void           delete_tiles_horizontal(int      start_x,
+                                                   int      start_y,
+                                                   int      length,
+                                                   map_tile type)         = 0;
+    virtual void           delete_tiles_vertical(int      start_x,
+                                                 int      start_y,
+                                                 int      length,
+                                                 map_tile type)           = 0;*/
 
-    prip_engine::texture*                   tileset = nullptr;
-    std::unordered_map<map_tile_type, tile> tiles;
-    float                                   tile_width  = 0;
-    float                                   tile_height = 0;
+    prip_engine::texture*                    tileset = nullptr;
+    std::unordered_map<map_tile_type, tile*> tiles;
+    float                                    tile_width  = 0;
+    float                                    tile_height = 0;
 };
-
-/*
-void game_logic_level_1(map*                 map,
-                        game_object*         hero,
-                        std::vector<enemy*>& enemies);*/

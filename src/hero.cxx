@@ -1,3 +1,5 @@
+#include "engine/include/engine.hxx"
+
 #include "include/hero.hxx"
 #include "include/resources.hxx"
 
@@ -81,6 +83,50 @@ hero::hero(prip_engine::transform2d global_pos,
                                  { prip_engine::e_color::ORANGE, 0.6f },
                                  size,
                                  direction };
+}
+
+void hero::update(std::chrono::milliseconds delta_time, character* enemy)
+{
+    if (prip_engine::is_key_down(prip_engine::key::attack) &&
+        state != character_state::jump && state != character_state::fall)
+    {
+        set_state(character_state::melee_attack);
+
+        /*if (get_animation()->get_current_frame_number() == 2)
+            sound_attack->play(prip_engine::audio_properties::once);*/
+    }
+    else
+    {
+        float dx = 0.f;
+        float dy = 0.f;
+
+        if (prip_engine::is_key_down(prip_engine::key::jump) &&
+            state != character_state::jump && state != character_state::fall)
+            set_state(character_state::jump);
+
+        if (state == character_state::jump)
+        {
+            dy--;
+            jump();
+        }
+        else if (state == character_state::fall)
+            dy++;
+
+        if (prip_engine::is_key_down(prip_engine::key::left))
+            dx--;
+        if (prip_engine::is_key_down(prip_engine::key::right))
+            dx++;
+
+        if (dx == 0 && dy == 0)
+            set_state(character_state::idle);
+        else
+            move(dx, dy);
+    }
+
+    if (state == character_state::melee_attack)
+        attack(enemy);
+
+    get_animation()->play(delta_time);
 }
 
 void hero::move(float dx, float dy)
@@ -192,7 +238,7 @@ void hero::attack(character* enemy)
                 global_pos,
                 attack_collider->get_rectangle(),
                 enemy->get_global_pos(),
-                enemy->get_collider()->get_rectangle()))
+                enemy->get_hitbox()->get_rectangle()))
             enemy->hurt();
         attacked = true;
     }

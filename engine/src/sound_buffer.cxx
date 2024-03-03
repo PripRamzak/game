@@ -10,13 +10,6 @@ namespace prip_engine
 {
 class game_sound_buffer final : public sound_buffer
 {
-    uint8_t*   buffer        = nullptr;
-    uint32_t   length        = 0;
-    size_t     current_index = 0;
-    bool       is_playing    = false;
-    bool       is_looped     = false;
-    std::mutex audio_mutex;
-
 public:
     game_sound_buffer(const char* file_path, SDL_AudioSpec* device_audio_spec)
     {
@@ -84,6 +77,14 @@ public:
     size_t   get_current_index() final { return current_index; }
     bool     get_playing_status() final { return is_playing; }
     bool     get_loop_property() final { return is_looped; }
+
+private:
+    uint8_t*   buffer        = nullptr;
+    uint32_t   length        = 0;
+    size_t     current_index = 0;
+    bool       is_playing    = false;
+    bool       is_looped     = false;
+    std::mutex audio_mutex;
 };
 
 sound_buffer::~sound_buffer() = default;
