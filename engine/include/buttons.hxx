@@ -3,6 +3,8 @@
 #include "texture.hxx"
 #include "vertex_buffer.hxx"
 
+namespace prip_engine
+{
 struct buttons
 {
     float          width;
@@ -10,3 +12,4 @@ struct buttons
     texture*       texture_;
     vertex_buffer* vertex_buffer_;
 };
+} // namespace prip_engine

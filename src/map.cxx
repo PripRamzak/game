@@ -58,12 +58,12 @@ map::map(float tile_width_, float tile_height_, std::string file_path)
     tiles.emplace(map_tile_type::plate_bottom_left, plate_bottom_left);
     tiles.emplace(map_tile_type::plate_bottom_right, plate_bottom_right);
 
-    memory_buf    buf_level = load_file(file_path);
-    std::istream  data_level(&buf_level);
-    int           method_to_draw_number;
-    float         start_x, start_y;
-    int           length;
-    map_tile_type type;
+    prip_engine::memory_buf buf_level = prip_engine::load_file(file_path);
+    std::istream            data_level(&buf_level);
+    int                     method_to_draw_number;
+    float                   start_x, start_y;
+    int                     length;
+    map_tile_type           type;
 
     while (data_level >> method_to_draw_number)
     {
@@ -91,36 +91,36 @@ map::map(float tile_width_, float tile_height_, std::string file_path)
         tile.second.tile_vertex_buffer->buffer_data(
             tile.second.vertices.data(), tile.second.vertices.size());
         tile.second.tile_index_buffer->add_indexes(
-            primitives::triangle, tile.second.vertices.size() / 4);
+            prip_engine::primitives::triangle, tile.second.vertices.size() / 4);
     }
 }
 
-texture* map::get_tileset()
+prip_engine::texture* map::get_tileset()
 {
     return tileset;
 }
 
-std::vector<vertex2d_uv>& map::get_vertices(map_tile_type type)
+std::vector<prip_engine::vertex2d_uv>& map::get_vertices(map_tile_type type)
 {
     return tiles[type].vertices;
 }
 
-vertex_buffer* map::get_vertex_buffer(map_tile_type type)
+prip_engine::vertex_buffer* map::get_vertex_buffer(map_tile_type type)
 {
     return tiles[type].tile_vertex_buffer;
 }
 
-index_buffer* map::get_index_buffer(map_tile_type type)
+prip_engine::index_buffer* map::get_index_buffer(map_tile_type type)
 {
     return tiles[type].tile_index_buffer;
 }
 
-transform2d map::get_tile_min_uv(map_tile_type type)
+prip_engine::transform2d map::get_tile_min_uv(map_tile_type type)
 {
     return tiles[type].min_uv;
 }
 
-transform2d map::get_tile_max_uv(map_tile_type type)
+prip_engine::transform2d map::get_tile_max_uv(map_tile_type type)
 {
     return tiles[type].max_uv;
 }
@@ -132,16 +132,17 @@ map::tile::tile()
     max_uv.x = 1.f;
     max_uv.y = 1.f;
 
-    tile_vertex_buffer = create_vertex_buffer();
-    tile_index_buffer  = create_index_buffer();
+    tile_vertex_buffer = prip_engine::create_vertex_buffer();
+    tile_index_buffer  = prip_engine::create_index_buffer();
 };
 
-map::tile::tile(transform2d min_uv, transform2d max_uv)
+map::tile::tile(prip_engine::transform2d min_uv,
+                prip_engine::transform2d max_uv)
     : min_uv(min_uv)
     , max_uv(max_uv)
 {
-    tile_vertex_buffer = create_vertex_buffer();
-    tile_index_buffer  = create_index_buffer();
+    tile_vertex_buffer = prip_engine::create_vertex_buffer();
+    tile_index_buffer  = prip_engine::create_index_buffer();
 }
 
 void map::draw_vertical_line(float         start_x,

@@ -1,5 +1,7 @@
 #pragma once
 
+namespace prip_engine
+{
 enum class e_color
 {
     RED,
@@ -51,3 +53,4 @@ struct color
         }
     }
 };
+} // namespace prip_engine

@@ -20,25 +20,25 @@
 
 int main(int /*argc*/, char** /*argv*/)
 {
-    std::unique_ptr<engine, void (*)(engine*)> engine(create_engine(),
-                                                      destroy_engine);
-
-    if (!engine->initialize())
+    if (!prip_engine::init())
         return EXIT_FAILURE;
 
     resources::init();
 
-    float window_width = static_cast<float>(engine->get_window_width_pixels());
+    float window_width =
+        static_cast<float>(prip_engine::get_window_width_pixels());
     float window_height =
-        static_cast<float>(engine->get_window_height_pixels());
+        static_cast<float>(prip_engine::get_window_height_pixels());
 
     glm::mat4 projection =
         glm::ortho<float>(0.f, window_width, window_height, 0.f, -1.f, 1.f);
 
     camera* camera = create_camera(window_width / 2, window_height / 2);
 
-    index_buffer* solo_objects_index_buffer = create_index_buffer();
-    solo_objects_index_buffer->add_indexes(primitives::triangle, 1);
+    prip_engine::index_buffer* solo_objects_index_buffer =
+        prip_engine::create_index_buffer();
+    solo_objects_index_buffer->add_indexes(prip_engine::primitives::triangle,
+                                           1);
 
     using namespace std::chrono_literals;
 
@@ -83,31 +83,31 @@ int main(int /*argc*/, char** /*argv*/)
 
     // Sound
 
-    sound_buffer* music =
-        engine->create_sound_buffer("sound/dungeon_music.wav");
-    music->play(audio_properties::looped);
-    sound_buffer* sound_attack =
-        engine->create_sound_buffer("sound/attack.wav");
+    prip_engine::sound_buffer* music =
+        prip_engine::create_sound_buffer("sound/dungeon_music.wav");
+    music->play(prip_engine::audio_properties::looped);
+    prip_engine::sound_buffer* sound_attack =
+        prip_engine::create_sound_buffer("sound/attack.wav");
 
-    bool  quit                     = false;
-    bool  show_menu_window         = true;
-    bool  show_in_game_menu_window = false;
-    event event                    = event::released;
+    bool               quit                     = false;
+    bool               show_menu_window         = true;
+    bool               show_in_game_menu_window = false;
+    prip_engine::event event                    = prip_engine::event::released;
 
-    timepoint start = engine->get_time();
+    prip_engine::timepoint start = prip_engine::get_time();
 
     while (!quit && warrior->is_alive())
     {
         // Event handling
 
-        while (engine->read_input(event))
-            if (event == event::turn_off)
+        while (prip_engine::read_input(event))
+            if (event == prip_engine::event::turn_off)
             {
                 quit = true;
                 break;
             }
 
-        timepoint last_frame_time = engine->get_time();
+        prip_engine::timepoint last_frame_time = prip_engine::get_time();
 
         std::chrono::milliseconds frame_time_dif =
             std::chrono::duration_cast<std::chrono::milliseconds>(
@@ -122,17 +122,18 @@ int main(int /*argc*/, char** /*argv*/)
 
         if (show_menu_window)
         {
-            if (engine->render_gui(show_menu_window, gui_type::menu))
+            if (prip_engine::render_gui(show_menu_window,
+                                        prip_engine::gui_type::menu))
                 quit = true;
         }
         else
         {
-            if (engine->check_key(key::menu))
+            if (prip_engine::is_key_down(prip_engine::key::menu))
                 show_in_game_menu_window = true;
 
             if (!show_in_game_menu_window)
             {
-                if (engine->check_key(key::attack) &&
+                if (prip_engine::is_key_down(prip_engine::key::attack) &&
                     warrior->get_state() != character_state::jump &&
                     warrior->get_state() != character_state::fall)
                 {
@@ -140,9 +141,9 @@ int main(int /*argc*/, char** /*argv*/)
 
                     if (warrior->get_animation()->get_current_frame_number() ==
                         2)
-                        sound_attack->play(audio_properties::once);
+                        sound_attack->play(prip_engine::audio_properties::once);
                 }
-                else if (engine->check_key(key::jump) &&
+                else if (prip_engine::is_key_down(prip_engine::key::jump) &&
                          warrior->get_state() != character_state::jump &&
                          warrior->get_state() != character_state::fall)
                     warrior->set_state(character_state::jump);
@@ -159,9 +160,9 @@ int main(int /*argc*/, char** /*argv*/)
                     else if (warrior->get_state() == character_state::fall)
                         dy++;
 
-                    if (engine->check_key(key::left))
+                    if (prip_engine::is_key_down(prip_engine::key::left))
                         dx--;
-                    if (engine->check_key(key::right))
+                    if (prip_engine::is_key_down(prip_engine::key::right))
                         dx++;
 
                     if (dx == 0 && dy == 0)
@@ -185,55 +186,55 @@ int main(int /*argc*/, char** /*argv*/)
 
             glm::mat4 map_mvp = projection * view;
 
-            /*engine->render(dungeon_map->get_tileset(),
+            /*prip_engine->render(dungeon_map->get_tileset(),
                            dungeon_map->get_vertex_buffer(map_tile_type::wall),
                            dungeon_map->get_index_buffer(map_tile_type::wall),
                            dungeon_map->get_tile_min_uv(map_tile_type::wall),
                            dungeon_map->get_tile_max_uv(map_tile_type::wall),
                            &map_mvp[0][0]);*/
-            engine->render(
+            prip_engine::render(
                 dungeon_map->get_tileset(),
                 dungeon_map->get_vertex_buffer(map_tile_type::brick_top),
                 dungeon_map->get_index_buffer(map_tile_type::brick_top),
                 dungeon_map->get_tile_min_uv(map_tile_type::brick_top),
                 dungeon_map->get_tile_max_uv(map_tile_type::brick_top),
                 &map_mvp[0][0]);
-            engine->render(
+            prip_engine::render(
                 dungeon_map->get_tileset(),
                 dungeon_map->get_vertex_buffer(map_tile_type::brick_bottom),
                 dungeon_map->get_index_buffer(map_tile_type::brick_bottom),
                 dungeon_map->get_tile_min_uv(map_tile_type::brick_bottom),
                 dungeon_map->get_tile_max_uv(map_tile_type::brick_bottom),
                 &map_mvp[0][0]);
-            engine->render(
+            prip_engine::render(
                 dungeon_map->get_tileset(),
                 dungeon_map->get_vertex_buffer(map_tile_type::brick_left),
                 dungeon_map->get_index_buffer(map_tile_type::brick_left),
                 dungeon_map->get_tile_min_uv(map_tile_type::brick_left),
                 dungeon_map->get_tile_max_uv(map_tile_type::brick_left),
                 &map_mvp[0][0]);
-            engine->render(
+            prip_engine::render(
                 dungeon_map->get_tileset(),
                 dungeon_map->get_vertex_buffer(map_tile_type::brick_right),
                 dungeon_map->get_index_buffer(map_tile_type::brick_right),
                 dungeon_map->get_tile_min_uv(map_tile_type::brick_right),
                 dungeon_map->get_tile_max_uv(map_tile_type::brick_right),
                 &map_mvp[0][0]);
-            engine->render(
+            prip_engine::render(
                 dungeon_map->get_tileset(),
                 dungeon_map->get_vertex_buffer(map_tile_type::brick_top_left),
                 dungeon_map->get_index_buffer(map_tile_type::brick_top_left),
                 dungeon_map->get_tile_min_uv(map_tile_type::brick_top_left),
                 dungeon_map->get_tile_max_uv(map_tile_type::brick_top_left),
                 &map_mvp[0][0]);
-            engine->render(
+            prip_engine::render(
                 dungeon_map->get_tileset(),
                 dungeon_map->get_vertex_buffer(map_tile_type::brick_top_right),
                 dungeon_map->get_index_buffer(map_tile_type::brick_top_right),
                 dungeon_map->get_tile_min_uv(map_tile_type::brick_top_right),
                 dungeon_map->get_tile_max_uv(map_tile_type::brick_top_right),
                 &map_mvp[0][0]);
-            engine->render(
+            prip_engine::render(
                 dungeon_map->get_tileset(),
                 dungeon_map->get_vertex_buffer(
                     map_tile_type::brick_bottom_left),
@@ -241,7 +242,7 @@ int main(int /*argc*/, char** /*argv*/)
                 dungeon_map->get_tile_min_uv(map_tile_type::brick_bottom_left),
                 dungeon_map->get_tile_max_uv(map_tile_type::brick_bottom_left),
                 &map_mvp[0][0]);
-            engine->render(
+            prip_engine::render(
                 dungeon_map->get_tileset(),
                 dungeon_map->get_vertex_buffer(
                     map_tile_type::brick_bottom_right),
@@ -250,7 +251,7 @@ int main(int /*argc*/, char** /*argv*/)
                 dungeon_map->get_tile_min_uv(map_tile_type::brick_bottom_right),
                 dungeon_map->get_tile_max_uv(map_tile_type::brick_bottom_right),
                 &map_mvp[0][0]);
-            engine->render(
+            prip_engine::render(
                 dungeon_map->get_tileset(),
                 dungeon_map->get_vertex_buffer(
                     map_tile_type::plate_bottom_right),
@@ -262,32 +263,32 @@ int main(int /*argc*/, char** /*argv*/)
 
             // Objects render
 
-            transform2d skel_pos       = skel->get_global_pos();
-            glm::mat4   skel_translate = glm::translate(
+            prip_engine::transform2d skel_pos       = skel->get_global_pos();
+            glm::mat4                skel_translate = glm::translate(
                 glm::mat4{ 1 }, glm::vec3{ skel_pos.x, skel_pos.y, 0.f });
             glm::mat4 skel_mvp =
                 projection * view * skel_translate * skel_scale;
 
-            engine->render(skel->get_animation(),
-                           solo_objects_index_buffer,
-                           skel->get_direction(),
-                           &skel_mvp[0][0]);
+            prip_engine::render(skel->get_animation(),
+                                solo_objects_index_buffer,
+                                skel->get_direction(),
+                                &skel_mvp[0][0]);
 
             for (auto& arrow_ :
                  dynamic_cast<skeleton_archer*>(skel)->get_arrows())
             {
-                transform2d arrow_pos       = arrow_->get_global_pos();
-                glm::mat4   arrow_translate = glm::translate(
+                prip_engine::transform2d arrow_pos = arrow_->get_global_pos();
+                glm::mat4                arrow_translate = glm::translate(
                     glm::mat4{ 1 }, glm::vec3{ arrow_pos.x, arrow_pos.y, 0.f });
                 glm::mat4 arrow_scale = glm::scale(
                     glm::mat4{ 1 },
                     glm::vec3(arrow_->get_size(), arrow_->get_size(), 1.f));
                 glm::mat4 arrow_mvp =
                     projection * view * arrow_translate * arrow_scale;
-                engine->render(arrow_->get_sprite(),
-                               solo_objects_index_buffer,
-                               arrow_->get_direction(),
-                               &arrow_mvp[0][0]);
+                prip_engine::render(arrow_->get_sprite(),
+                                    solo_objects_index_buffer,
+                                    arrow_->get_direction(),
+                                    &arrow_mvp[0][0]);
 
                 collision::collider* arr_coll = arrow_->get_hitbox();
                 glm::mat4            arr_collider_translate = glm::translate(
@@ -297,9 +298,9 @@ int main(int /*argc*/, char** /*argv*/)
                                0.f });
                 glm::mat4 arr_coll_mvp =
                     projection * view * arr_collider_translate;
-                engine->render(arr_coll->get_vertex_buffer(),
-                               arr_coll->get_index_buffer(),
-                               &arr_coll_mvp[0][0]);
+                prip_engine::render(arr_coll->get_vertex_buffer(),
+                                    arr_coll->get_index_buffer(),
+                                    &arr_coll_mvp[0][0]);
             }
 
             if (skel->get_state() != character_state::dead)
@@ -313,9 +314,9 @@ int main(int /*argc*/, char** /*argv*/)
                 glm::mat4 skel_collider_mvp =
                     projection * view * skel_collider_translate;
 
-                engine->render(coll->get_vertex_buffer(),
-                               coll->get_index_buffer(),
-                               &skel_collider_mvp[0][0]);
+                prip_engine::render(coll->get_vertex_buffer(),
+                                    coll->get_index_buffer(),
+                                    &skel_collider_mvp[0][0]);
 
                 collision::collider* attack_trigger =
                     skel->get_attack_trigger();
@@ -327,9 +328,9 @@ int main(int /*argc*/, char** /*argv*/)
                         0.f });
                 glm::mat4 skel_attack_trigger_mvp =
                     projection * view * skel_attack_trigger_translate;
-                engine->render(attack_trigger->get_vertex_buffer(),
-                               attack_trigger->get_index_buffer(),
-                               &skel_attack_trigger_mvp[0][0]);
+                prip_engine::render(attack_trigger->get_vertex_buffer(),
+                                    attack_trigger->get_index_buffer(),
+                                    &skel_attack_trigger_mvp[0][0]);
 
                 if (skel->get_state() == character_state::melee_attack)
                 {
@@ -343,23 +344,23 @@ int main(int /*argc*/, char** /*argv*/)
                             0.f });
                     glm::mat4 skel_attack_collider_mvp =
                         projection * view * skel_attack_collider_translate;
-                    engine->render(attack_coll->get_vertex_buffer(),
-                                   attack_coll->get_index_buffer(),
-                                   &skel_attack_collider_mvp[0][0]);
+                    prip_engine::render(attack_coll->get_vertex_buffer(),
+                                        attack_coll->get_index_buffer(),
+                                        &skel_attack_collider_mvp[0][0]);
                 }
             }
 
-            transform2d warrior_pos       = warrior->get_global_pos();
-            glm::mat4   warrior_translate = glm::translate(
+            prip_engine::transform2d warrior_pos = warrior->get_global_pos();
+            glm::mat4                warrior_translate = glm::translate(
                 glm::mat4{ 1 }, glm::vec3{ warrior_pos.x, warrior_pos.y, 0.f });
 
             glm::mat4 warrior_mvp =
                 projection * view * warrior_translate * warrior_scale;
 
-            engine->render(warrior->get_animation(),
-                           solo_objects_index_buffer,
-                           warrior->get_direction(),
-                           &warrior_mvp[0][0]);
+            prip_engine::render(warrior->get_animation(),
+                                solo_objects_index_buffer,
+                                warrior->get_direction(),
+                                &warrior_mvp[0][0]);
 
             collision::collider* warrior_collider = warrior->get_collider();
             glm::mat4            warrior_collider_translate = glm::translate(
@@ -370,9 +371,9 @@ int main(int /*argc*/, char** /*argv*/)
                     0.f });
             glm::mat4 warrior_collider_mvp =
                 projection * view * warrior_collider_translate;
-            engine->render(warrior_collider->get_vertex_buffer(),
-                           warrior_collider->get_index_buffer(),
-                           &warrior_collider_mvp[0][0]);
+            prip_engine::render(warrior_collider->get_vertex_buffer(),
+                                warrior_collider->get_index_buffer(),
+                                &warrior_collider_mvp[0][0]);
 
             if (warrior->get_state() == character_state::melee_attack)
             {
@@ -388,9 +389,10 @@ int main(int /*argc*/, char** /*argv*/)
                         0.f });
                 glm::mat4 warrior_attack_collider_mvp =
                     projection * view * warrior_attack_collider_translate;
-                engine->render(warrior_attack_collider->get_vertex_buffer(),
-                               warrior_attack_collider->get_index_buffer(),
-                               &warrior_attack_collider_mvp[0][0]);
+                prip_engine::render(
+                    warrior_attack_collider->get_vertex_buffer(),
+                    warrior_attack_collider->get_index_buffer(),
+                    &warrior_attack_collider_mvp[0][0]);
             }
 
             switch (warrior->get_health())
@@ -415,7 +417,7 @@ int main(int /*argc*/, char** /*argv*/)
             }
 
             /*for (auto heart : health)
-                engine->render(heart->get_tileset(),
+                prip_engine->render(heart->get_tileset(),
                                heart->get_vertex_buffer(),
                                solo_objects_index_buffer,
                                &projection[0][0]);*/
@@ -423,22 +425,22 @@ int main(int /*argc*/, char** /*argv*/)
             if (!show_in_game_menu_window)
             {
 #ifdef __ANDROID__
-                engine->render_buttons(&to_ndc_coordinates[0][0]);
+                prip_engine->render_buttons(&to_ndc_coordinates[0][0]);
 #endif
             }
-            else if (engine->render_gui(show_in_game_menu_window,
-                                        gui_type::menu))
+            else if (prip_engine::render_gui(show_in_game_menu_window,
+                                             prip_engine::gui_type::menu))
                 quit = true;
         }
 
-        if (!engine->swap_buffers())
+        if (!prip_engine::swap_buffers())
         {
-            engine->uninitialize();
+            prip_engine::destroy();
             return EXIT_FAILURE;
         }
     }
 
-    engine->uninitialize();
+    prip_engine::destroy();
 
     return EXIT_SUCCESS;
 }

@@ -4,27 +4,26 @@
 
 namespace collision
 {
-
 class collider
 {
 public:
     collider();
-    collider(transform2d offset,
-             transform2d rect_size,
-             color       color,
-             float       scale,
-             int         direction);
-    void           change_pos(int direction);
-    rectangle&     get_rectangle();
-    vertex_buffer* get_vertex_buffer();
-    index_buffer*  get_index_buffer();
+    collider(prip_engine::transform2d offset,
+             prip_engine::transform2d rect_size,
+             prip_engine::color       color,
+             float                    scale,
+             int                      direction);
+    void                        change_pos(int direction);
+    prip_engine::rectangle&     get_rectangle();
+    prip_engine::vertex_buffer* get_vertex_buffer();
+    prip_engine::index_buffer*  get_index_buffer();
     ~collider();
 
 private:
-    rectangle      rect;
-    transform2d    offset;
-    vertex_buffer* vb;
-    index_buffer*  ib;
+    prip_engine::rectangle      rect;
+    prip_engine::transform2d    offset;
+    prip_engine::vertex_buffer* vb;
+    prip_engine::index_buffer*  ib;
 };
 
 enum class direction
@@ -35,12 +34,13 @@ enum class direction
     right
 };
 
-bool map_with_game_object(map*             map,
-                          transform2d&     game_object_pos,
-                          const rectangle& collider,
-                          direction        direction);
-bool game_object_with_game_object(const transform2d& game_object1_pos,
-                                  const rectangle&   game_object1_collider,
-                                  const transform2d& game_object2_pos,
-                                  const rectangle&   game_object2_collider);
+bool map_with_game_object(map*                          map,
+                          prip_engine::transform2d&     game_object_pos,
+                          const prip_engine::rectangle& collider,
+                          direction                     direction);
+bool game_object_with_game_object(
+    const prip_engine::transform2d& game_object1_pos,
+    const prip_engine::rectangle&   game_object1_collider,
+    const prip_engine::transform2d& game_object2_pos,
+    const prip_engine::rectangle&   game_object2_collider);
 } // namespace collision

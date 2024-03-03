@@ -2,6 +2,8 @@
 
 #include "transform2d.hxx"
 
+namespace prip_engine
+{
 enum shader_type
 {
     vertex,
@@ -33,3 +35,4 @@ public:
 };
 
 shader_program* create_shader_program();
+} // namespace prip_engine

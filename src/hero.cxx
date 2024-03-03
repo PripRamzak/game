@@ -3,14 +3,14 @@
 
 using namespace std::chrono_literals;
 
-hero::hero(transform2d global_pos,
-           float       speed,
-           float       size,
-           int         direction,
-           map*        level_map,
-           int         health,
-           float       jump_force,
-           float       jump_height)
+hero::hero(prip_engine::transform2d global_pos,
+           float                    speed,
+           float                    size,
+           int                      direction,
+           map*                     level_map,
+           int                      health,
+           float                    jump_force,
+           float                    jump_height)
     : character(global_pos,
                 speed,
                 size,
@@ -21,16 +21,16 @@ hero::hero(transform2d global_pos,
     , jump_height(jump_height)
     , jump_force(jump_force)
 {
-    animation* anim_warrior_idle =
-        new animation(resources::warrior_idle, 6, 100ms);
-    animation* anim_warrior_run =
-        new animation(resources::warrior_run, 6, 100ms);
-    animation* anim_warrior_attack =
-        new animation(resources::warrior_attack, 4, 125ms);
-    animation* anim_warrior_jump =
-        new animation(resources::warrior_jump, 1, 250ms);
-    animation* anim_warrior_fall =
-        new animation(resources::warrior_fall, 1, 250ms);
+    prip_engine::animation* anim_warrior_idle =
+        new prip_engine::animation(resources::warrior_idle, 6, 100ms);
+    prip_engine::animation* anim_warrior_run =
+        new prip_engine::animation(resources::warrior_run, 6, 100ms);
+    prip_engine::animation* anim_warrior_attack =
+        new prip_engine::animation(resources::warrior_attack, 4, 125ms);
+    prip_engine::animation* anim_warrior_jump =
+        new prip_engine::animation(resources::warrior_jump, 1, 250ms);
+    prip_engine::animation* anim_warrior_fall =
+        new prip_engine::animation(resources::warrior_fall, 1, 250ms);
 
     sprites.emplace(character_state::idle, anim_warrior_idle);
     sprites.emplace(character_state::move, anim_warrior_run);
@@ -41,31 +41,31 @@ hero::hero(transform2d global_pos,
     collision::collider* idle_hitbox =
         new collision::collider({ -14.f, -20.f },
                                 { 34.f, 44.f },
-                                { e_color::GREEN, 0.6f },
+                                { prip_engine::e_color::GREEN, 0.6f },
                                 size,
                                 direction);
     collision::collider* run_hitbox =
         new collision::collider({ -12.f, -20.f },
                                 { 32.f, 44.f },
-                                { e_color::GREEN, 0.6f },
+                                { prip_engine::e_color::GREEN, 0.6f },
                                 size,
                                 direction);
     collision::collider* attack_hitbox =
         new collision::collider({ -15.f, -20.f },
                                 { 26.f, 44.f },
-                                { e_color::GREEN, 0.6f },
+                                { prip_engine::e_color::GREEN, 0.6f },
                                 size,
                                 direction);
     collision::collider* jump_hitbox =
         new collision::collider({ -24.f, -24.f },
                                 { 48.f, 48.f },
-                                { e_color::GREEN, 0.6f },
+                                { prip_engine::e_color::GREEN, 0.6f },
                                 size,
                                 direction);
     collision::collider* fall_hitbox =
         new collision::collider({ -24.f, -24.f },
                                 { 48.f, 48.f },
-                                { e_color::GREEN, 0.6f },
+                                { prip_engine::e_color::GREEN, 0.6f },
                                 size,
                                 direction);
 
@@ -75,11 +75,12 @@ hero::hero(transform2d global_pos,
     hitboxes.emplace(character_state::jump, jump_hitbox);
     hitboxes.emplace(character_state::fall, fall_hitbox);
 
-    attack_collider = new collision::collider{ { 11.f, -10.f },
-                                               { 32.f, 34.f },
-                                               { e_color::ORANGE, 0.6f },
-                                               size,
-                                               direction };
+    attack_collider =
+        new collision::collider{ { 11.f, -10.f },
+                                 { 32.f, 34.f },
+                                 { prip_engine::e_color::ORANGE, 0.6f },
+                                 size,
+                                 direction };
 }
 
 void hero::move(float dx, float dy)
@@ -181,9 +182,9 @@ void hero::attack(character* enemy)
     if (enemy->get_state() == character_state::dead)
         return;
 
-    animation* attack_anim         = sprites[state];
-    int        anim_current_number = attack_anim->get_current_frame_number();
-    int        anim_quantity       = attack_anim->get_frames_quantity();
+    prip_engine::animation* attack_anim = sprites[state];
+    int anim_current_number = attack_anim->get_current_frame_number();
+    int anim_quantity       = attack_anim->get_frames_quantity();
 
     if (!attacked && anim_current_number == anim_quantity - 1)
     {

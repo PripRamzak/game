@@ -3,6 +3,8 @@
 #include <cstdint>
 #include <iostream>
 
+namespace prip_engine
+{
 enum class audio_properties
 {
     once,
@@ -27,3 +29,4 @@ public:
 };
 
 sound_buffer* create_sound_buffer(const char* file_path, void* audio_spec);
+} // namespace prip_engine

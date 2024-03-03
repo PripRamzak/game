@@ -6,6 +6,8 @@
 #include <iostream>
 #include <vector>
 
+namespace prip_engine
+{
 class index_buffer
 {
 public:
@@ -18,3 +20,4 @@ public:
 };
 
 index_buffer* create_index_buffer();
+} // namespace prip_engine

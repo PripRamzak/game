@@ -21,29 +21,29 @@ enum class character_state
 class character : public game_object
 {
 public:
-    character(transform2d     global_pos,
-              float           speed,
-              float           size,
-              int             direction,
-              map*            level_map,
-              int             health,
-              character_state state);
-    bool                 is_alive();
-    void                 hurt();
-    void                 set_state(character_state state_);
-    int                  get_health();
-    character_state      get_state();
-    collision::collider* get_collider();
-    collision::collider* get_attack_collider();
-    animation*           get_animation();
+    character(prip_engine::transform2d global_pos,
+              float                    speed,
+              float                    size,
+              int                      direction,
+              map*                     level_map,
+              int                      health,
+              character_state          state);
+    bool                    is_alive();
+    void                    hurt();
+    void                    set_state(character_state state_);
+    int                     get_health();
+    character_state         get_state();
+    collision::collider*    get_collider();
+    collision::collider*    get_attack_collider();
+    prip_engine::animation* get_animation();
     virtual ~character();
 
 protected:
     void change_direction(int new_dir);
 
-    std::unordered_map<character_state, animation*>           sprites;
-    std::unordered_map<character_state, collision::collider*> hitboxes;
-    collision::collider*                                      attack_collider;
-    int                                                       health = 0;
-    character_state                                           state;
+    std::unordered_map<character_state, prip_engine::animation*> sprites;
+    std::unordered_map<character_state, collision::collider*>    hitboxes;
+    collision::collider* attack_collider;
+    int                  health = 0;
+    character_state      state;
 };

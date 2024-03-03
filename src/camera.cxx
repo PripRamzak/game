@@ -18,7 +18,7 @@ public:
         , height(height_)
     {
     }
-    void look_at(transform2d pos) final
+    void look_at(prip_engine::transform2d pos) final
     {
         position = glm::vec3(pos.x - width, pos.y - height * 1.25f, 2.f);
         target   = glm::vec3(pos.x - width, pos.y - height * 1.25f, 0.f);

@@ -1,5 +1,7 @@
 #pragma once
 
+namespace prip_engine
+{
 class texture
 {
 public:
@@ -12,3 +14,4 @@ public:
 
 texture* create_texture(const char* file_path);
 texture* create_texture(unsigned char* pixels, int width, int height);
+} // namespace prip_engine

@@ -36,15 +36,15 @@ static std::unordered_map<direction, std::vector<map_tile_type>>
 
 collider::collider()
 {
-    vb = create_vertex_buffer();
-    ib = create_index_buffer();
+    vb = prip_engine::create_vertex_buffer();
+    ib = prip_engine::create_index_buffer();
 }
 
-collider::collider(transform2d offset,
-                   transform2d rect_size,
-                   color       color,
-                   float       scale,
-                   int         direction)
+collider::collider(prip_engine::transform2d offset,
+                   prip_engine::transform2d rect_size,
+                   prip_engine::color       color,
+                   float                    scale,
+                   int                      direction)
     : offset({ offset.x * scale, offset.y * scale })
     , rect({ direction == 0 ? offset.x * scale
                             : -1 * (rect_size.x + offset.x) * scale,
@@ -52,17 +52,17 @@ collider::collider(transform2d offset,
              rect_size.x * scale,
              rect_size.y * scale })
 {
-    vb = create_vertex_buffer();
-    ib = create_index_buffer();
+    vb = prip_engine::create_vertex_buffer();
+    ib = prip_engine::create_index_buffer();
 
-    vertex2d_color vertices[4];
+    prip_engine::vertex2d_color vertices[4];
     vertices[0] = { 0.f, 0.f, color };
     vertices[1] = { rect.size.x, 0.f, color };
     vertices[2] = { rect.size.x, rect.size.y, color };
     vertices[3] = { 0.f, rect.size.y, color };
 
     vb->buffer_data(vertices, static_cast<size_t>(4));
-    ib->add_indexes(primitives::line, 1);
+    ib->add_indexes(prip_engine::primitives::line, 1);
 }
 
 void collider::change_pos(int direction)
@@ -70,17 +70,17 @@ void collider::change_pos(int direction)
     rect.pos.x = direction == 0 ? offset.x : -1 * (rect.size.x + offset.x);
 }
 
-rectangle& collider::get_rectangle()
+prip_engine::rectangle& collider::get_rectangle()
 {
     return rect;
 }
 
-vertex_buffer* collider::get_vertex_buffer()
+prip_engine::vertex_buffer* collider::get_vertex_buffer()
 {
     return vb;
 }
 
-index_buffer* collider::get_index_buffer()
+prip_engine::index_buffer* collider::get_index_buffer()
 {
     return ib;
 }
@@ -91,15 +91,16 @@ collider::~collider()
     delete ib;
 }
 
-bool map_with_game_object(map*             map,
-                          transform2d&     game_object_pos,
-                          const rectangle& collider,
-                          direction        direction)
+bool map_with_game_object(map*                          map,
+                          prip_engine::transform2d&     game_object_pos,
+                          const prip_engine::rectangle& collider,
+                          direction                     direction)
 {
     for (auto& type : collision_tiles_dirs[direction])
     {
-        const vertex2d_uv* map_tile_vertices = map->get_vertices(type).data();
-        const size_t map_tile_vertices_num   = map->get_vertices(type).size();
+        const prip_engine::vertex2d_uv* map_tile_vertices =
+            map->get_vertices(type).data();
+        const size_t map_tile_vertices_num = map->get_vertices(type).size();
 
         for (size_t j = 0; j < map_tile_vertices_num / 4;
              j++, map_tile_vertices += 4)
@@ -163,10 +164,11 @@ bool map_with_game_object(map*             map,
     return false;
 }
 
-bool game_object_with_game_object(const transform2d& game_object1_pos,
-                                  const rectangle&   game_object1_collider,
-                                  const transform2d& game_object2_pos,
-                                  const rectangle&   game_object2_collider)
+bool game_object_with_game_object(
+    const prip_engine::transform2d& game_object1_pos,
+    const prip_engine::rectangle&   game_object1_collider,
+    const prip_engine::transform2d& game_object2_pos,
+    const prip_engine::rectangle&   game_object2_collider)
 {
     bool collision_x = game_object1_pos.x + game_object1_collider.pos.x +
                                game_object1_collider.size.x >=

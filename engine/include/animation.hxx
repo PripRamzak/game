@@ -4,6 +4,8 @@
 
 #include <chrono>
 
+namespace prip_engine
+{
 class animation
 {
 public:
@@ -24,3 +26,4 @@ private:
     std::chrono::milliseconds animation_time;
     std::chrono::milliseconds delta_time;
 };
+} // namespace prip_engine

@@ -7,6 +7,8 @@
 
 #include <SDL3/SDL_events.h>
 
+namespace prip_engine
+{
 static std::array<std::string_view, 3> event_names = {
     { "Pressed", "Released", "Turn off" }
 };
@@ -43,11 +45,11 @@ std::array<bind, 7> key_bindings = {
       { SDLK_ESCAPE, "Menu", key::menu, event::released } }
 };
 
-bool is_key_down(key key_)
+bool is_key_down(key key)
 {
     const auto it = std::find_if(begin(key_bindings),
                                  key_bindings.end(),
-                                 [&](const bind& b) { return b.key_ == key_; });
+                                 [&](const bind& b) { return b.key_ == key; });
 
     if (it != key_bindings.end())
     {
@@ -192,3 +194,4 @@ bool check_pressing_button(SDL_Event             sdl_event,
 
     return false;
 }*/
+} // namespace prip_engine

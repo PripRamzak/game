@@ -2,6 +2,8 @@
 
 using namespace std::chrono_literals;
 
+namespace prip_engine
+{
 animation::animation(sprite*                   sprite,
                      int                       frame_quantity,
                      std::chrono::milliseconds animation_time)
@@ -51,3 +53,4 @@ animation::~animation()
 {
     delete anim_sprite;
 }
+} // namespace prip_engine

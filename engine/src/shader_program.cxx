@@ -14,6 +14,8 @@
 #include "glad/glad.h"
 #endif
 
+namespace prip_engine
+{
 void gl_check()
 {
     const int error = static_cast<int>(glGetError());
@@ -221,3 +223,4 @@ shader_program* create_shader_program()
 {
     return new opengl_shader_program;
 }
+} // namespace prip_engine

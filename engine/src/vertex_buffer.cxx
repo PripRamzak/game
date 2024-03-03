@@ -8,6 +8,8 @@
 #include "glad/glad.h"
 #endif
 
+namespace prip_engine
+{
 void gl_check();
 
 class opengl_vertex_buffer final : public vertex_buffer
@@ -50,3 +52,4 @@ vertex_buffer* create_vertex_buffer()
 {
     return new opengl_vertex_buffer;
 }
+} // namespace prip_engine

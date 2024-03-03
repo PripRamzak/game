@@ -6,14 +6,14 @@
 class hero : public character
 {
 public:
-    hero(transform2d global_pos,
-         float       speed,
-         float       size,
-         int         direction,
-         map*        level_map,
-         int         health,
-         float       jump_force,
-         float       jump_height);
+    hero(prip_engine::transform2d global_pos,
+         float                    speed,
+         float                    size,
+         int                      direction,
+         map*                     level_map,
+         int                      health,
+         float                    jump_force,
+         float                    jump_height);
     void move(float dx, float dy);
     void jump();
     void attack(character* enemy);

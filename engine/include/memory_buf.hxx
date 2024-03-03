@@ -3,6 +3,8 @@
 #include <iostream>
 #include <memory>
 
+namespace prip_engine
+{
 class memory_buf : public std::streambuf
 {
     std::unique_ptr<char[]> buf;
@@ -20,3 +22,4 @@ public:
 };
 
 memory_buf load_file(std::string_view path);
+} // namespace prip_engine

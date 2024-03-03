@@ -8,6 +8,8 @@
 
 #include <vector>
 
+namespace prip_engine
+{
 void gl_check();
 
 class opengl_index_buffer final : public index_buffer
@@ -87,3 +89,4 @@ index_buffer* create_index_buffer()
 {
     return new opengl_index_buffer;
 }
+} // namespace prip_engine

@@ -1,10 +1,10 @@
 #include "include/game_object.hxx"
 
-game_object::game_object(transform2d global_pos,
-                         float       speed,
-                         float       size,
-                         int         direction,
-                         map*        level_map)
+game_object::game_object(prip_engine::transform2d global_pos,
+                         float                    speed,
+                         float                    size,
+                         int                      direction,
+                         map*                     level_map)
     : global_pos(global_pos)
     , speed(speed)
     , size(size)
@@ -13,7 +13,7 @@ game_object::game_object(transform2d global_pos,
 {
 }
 
-transform2d game_object::get_global_pos()
+prip_engine::transform2d game_object::get_global_pos()
 {
     return global_pos;
 }

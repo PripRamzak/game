@@ -6,7 +6,7 @@
 class enemy : public character
 {
 public:
-    enemy(transform2d               global_pos,
+    enemy(prip_engine::transform2d  global_pos,
           float                     speed,
           float                     size,
           int                       direction,
@@ -34,7 +34,7 @@ protected:
 class skeleton_warrior : public enemy
 {
 public:
-    skeleton_warrior(transform2d               global_pos,
+    skeleton_warrior(prip_engine::transform2d  global_pos,
                      float                     speed,
                      float                     size,
                      int                       direction,
@@ -51,7 +51,7 @@ private:
 class skeleton_spearman : public enemy
 {
 public:
-    skeleton_spearman(transform2d               global_pos,
+    skeleton_spearman(prip_engine::transform2d  global_pos,
                       float                     speed,
                       float                     size,
                       int                       direction,
@@ -75,7 +75,7 @@ private:
 class skeleton_archer : public enemy
 {
 public:
-    skeleton_archer(transform2d               global_pos,
+    skeleton_archer(prip_engine::transform2d  global_pos,
                     float                     speed,
                     float                     size,
                     int                       direction,

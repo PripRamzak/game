@@ -1,12 +1,12 @@
 #include "include/character.hxx"
 
-character::character(transform2d     global_pos,
-                     float           speed,
-                     float           size,
-                     int             direction,
-                     map*            level_map,
-                     int             health,
-                     character_state state)
+character::character(prip_engine::transform2d global_pos,
+                     float                    speed,
+                     float                    size,
+                     int                      direction,
+                     map*                     level_map,
+                     int                      health,
+                     character_state          state)
     : game_object(global_pos, speed, size, direction, level_map)
     , health(health)
     , state(state)
@@ -54,7 +54,7 @@ collision::collider* character::get_attack_collider()
     return attack_collider;
 }
 
-animation* character::get_animation()
+prip_engine::animation* character::get_animation()
 {
     return sprites[state];
 }

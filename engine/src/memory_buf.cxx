@@ -2,6 +2,8 @@
 
 #include <SDL3/SDL_rwops.h>
 
+namespace prip_engine
+{
 memory_buf::memory_buf()
     : std::streambuf()
     , buf()
@@ -78,3 +80,4 @@ memory_buf load_file(std::string_view path)
 
     return memory_buf(std::move(mem), size);
 }
+} // namespace prip_engine

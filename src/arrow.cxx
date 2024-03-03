@@ -1,13 +1,16 @@
 #include "include/arrow.hxx"
 #include "include/resources.hxx"
 
-arrow::arrow(transform2d global_pos, int size, int direction, map* level_map)
+arrow::arrow(prip_engine::transform2d global_pos,
+             int                      size,
+             int                      direction,
+             map*                     level_map)
     : game_object(global_pos, 15.f, size, direction, level_map)
     , spr(resources::arrow)
 {
     hitbox = new collision::collider({ 14.f, -8.f },
                                      { 10.f, 16.f },
-                                     { e_color::RED, 0.6f },
+                                     { prip_engine::e_color::RED, 0.6f },
                                      size,
                                      direction);
 }
@@ -39,7 +42,7 @@ bool arrow::is_destroyed()
     return destroyed;
 }
 
-sprite* arrow::get_sprite()
+prip_engine::sprite* arrow::get_sprite()
 {
     return spr;
 }

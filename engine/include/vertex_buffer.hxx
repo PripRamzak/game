@@ -4,6 +4,8 @@
 
 #include <cstddef>
 
+namespace prip_engine
+{
 class vertex_buffer
 {
 public:
@@ -14,3 +16,4 @@ public:
 };
 
 vertex_buffer* create_vertex_buffer();
+} // namespace prip_engine

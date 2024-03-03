@@ -6,6 +6,8 @@
 
 #include <SDL3/SDL.h>
 
+namespace prip_engine
+{
 class game_sound_buffer final : public sound_buffer
 {
     uint8_t*   buffer        = nullptr;
@@ -91,3 +93,4 @@ sound_buffer* create_sound_buffer(const char* file_path, void* audio_spec)
     return new game_sound_buffer(file_path,
                                  reinterpret_cast<SDL_AudioSpec*>(audio_spec));
 }
+} // namespace prip_engine

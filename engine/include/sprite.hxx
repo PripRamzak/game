@@ -4,6 +4,8 @@
 #include "texture.hxx"
 #include "vertex_buffer.hxx"
 
+namespace prip_engine
+{
 class sprite
 {
 public:
@@ -20,3 +22,4 @@ private:
     texture*       textures = nullptr;
     vertex_buffer* vb       = nullptr;
 };
+} // namespace prip_engine

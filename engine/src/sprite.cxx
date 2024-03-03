@@ -1,5 +1,7 @@
 #include "include/sprite.hxx"
 
+namespace prip_engine
+{
 sprite::sprite(texture* textures, transform2d size)
     : textures(textures)
     , size(size)
@@ -48,3 +50,4 @@ sprite::~sprite()
     delete textures;
     delete vb;
 }
+} // namespace prip_engine

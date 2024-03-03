@@ -12,6 +12,8 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "include/stb_image.h"
 
+namespace prip_engine
+{
 void gl_check();
 
 class opengl_texture final : public texture
@@ -118,3 +120,4 @@ texture* create_texture(unsigned char* pixels, int width, int height)
 {
     return new opengl_texture(pixels, width, height);
 }
+} // namespace prip_engine

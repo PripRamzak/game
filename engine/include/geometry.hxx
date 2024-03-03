@@ -3,6 +3,8 @@
 #include "color.hxx"
 #include "transform2d.hxx"
 
+namespace prip_engine
+{
 enum class primitives
 {
     line,
@@ -26,3 +28,4 @@ struct rectangle
     transform2d pos;
     transform2d size;
 };
+} // namespace prip_engine
