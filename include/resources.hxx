@@ -1,5 +1,6 @@
 #pragma once
 
+#include "engine/include/sound_buffer.hxx"
 #include "engine/include/sprite.hxx"
 
 namespace resources
@@ -35,4 +36,7 @@ extern prip_engine::sprite* skeleton_archer_shot;
 extern prip_engine::sprite* skeleton_archer_dead;
 
 extern prip_engine::sprite* arrow;
+
+extern prip_engine::sound_buffer* main_theme;
+extern prip_engine::sound_buffer* warrior_attack_sound;
 } // namespace resources

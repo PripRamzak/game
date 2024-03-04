@@ -21,18 +21,17 @@ enum class gui_type
     in_game_menu
 };
 
-bool          init();
-bool          read_input(event& e);
-sound_buffer* create_sound_buffer(const char* file_path);
-void          render(animation* anim_sprite, int direction, float* matrix);
-void          render(sprite* sprite, int direction, float* matrix);
-void          render(texture*       texture,
-                     vertex_buffer* vertex_buffer,
-                     index_buffer*  index_buffer,
-                     transform2d    min_uv,
-                     transform2d    max_uv,
-                     float*         matrix);
-void          render(vertex_buffer* vb, index_buffer* ib, float* matrix);
+bool init();
+bool read_input(event& e);
+void render(animation* anim_sprite, int direction, float* matrix);
+void render(sprite* sprite, int direction, float* matrix);
+void render(texture*       texture,
+            vertex_buffer* vertex_buffer,
+            index_buffer*  index_buffer,
+            transform2d    min_uv,
+            transform2d    max_uv,
+            float*         matrix);
+void render(vertex_buffer* vb, index_buffer* ib, float* matrix);
 // virtual void      render_buttons(float* matrix)                     = 0;
 bool                 render_gui(bool& show_menu_window, gui_type type);
 bool                 swap_buffers();

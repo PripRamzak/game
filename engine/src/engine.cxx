@@ -76,10 +76,6 @@ static shader_program* collider_program;
 
 static index_buffer* solo_objects_index_buffer;
 
-static SDL_AudioDeviceID          audio_device;
-static SDL_AudioSpec              device_audio_spec;
-static std::vector<sound_buffer*> sounds;
-
 static std::vector<buttons> mobile_buttons;
 static index_buffer*        buttons_index_buffer;
 
@@ -87,50 +83,6 @@ static std::chrono::high_resolution_clock timer;
 
 static std::basic_streambuf<char>* cout_buf = nullptr;
 static std::basic_streambuf<char>* cerr_buf = nullptr;
-
-static void audio_callback(void*, uint8_t* stream, int stream_size)
-{
-    std::fill_n(stream, stream_size, '\0');
-
-    for (sound_buffer* snd : sounds)
-    {
-        snd->lock_thread();
-        if (snd->get_playing_status())
-        {
-            uint32_t rest = snd->get_length() - snd->get_current_index();
-            uint8_t* current_buff =
-                &snd->get_buffer()[snd->get_current_index()];
-
-            if (rest <= static_cast<uint32_t>(stream_size))
-            {
-                SDL_MixAudioFormat(stream,
-                                   current_buff,
-                                   device_audio_spec.format,
-                                   rest,
-                                   SDL_MIX_MAXVOLUME);
-                snd->update_buffer(rest);
-            }
-            else
-            {
-                SDL_MixAudioFormat(stream,
-                                   current_buff,
-                                   device_audio_spec.format,
-                                   static_cast<uint32_t>(stream_size),
-                                   SDL_MIX_MAXVOLUME);
-                snd->update_buffer(static_cast<uint32_t>(stream_size));
-            }
-
-            if (snd->get_current_index() == snd->get_length())
-            {
-                if (snd->get_loop_property())
-                    snd->replay();
-                else
-                    snd->stop();
-            }
-        }
-        snd->unlock_thread();
-    }
-}
 
 bool init()
 {
@@ -415,33 +367,7 @@ bool init()
     ImGui_ImplSDL3_InitForOpenGL(window, context);
     ImGui_ImplOpenGL3_Init("#version 100");
 
-    SDL_AudioSpec desired_audio_spec{};
-    desired_audio_spec.freq     = 44100;
-    desired_audio_spec.format   = AUDIO_S16LSB;
-    desired_audio_spec.channels = 2;
-    desired_audio_spec.samples  = 1024;
-    desired_audio_spec.callback = audio_callback;
-    desired_audio_spec.userdata = nullptr;
-
-    const char* audio_device_name = nullptr;
-    const int   num_audio_devices = SDL_GetNumAudioDevices(SDL_FALSE);
-    for (int i = 0; i < num_audio_devices; i++)
-    {
-        std::cout << "audio device #" << i << ": "
-                  << SDL_GetAudioDeviceName(i, SDL_FALSE) << '\n';
-    }
-    audio_device_name = SDL_GetAudioDeviceName(0, SDL_FALSE);
-
-    if (platform == "Windows"sv)
-        audio_device_name = SDL_GetAudioDeviceName(1, SDL_FALSE);
-
-    audio_device = SDL_OpenAudioDevice(audio_device_name,
-                                       SDL_FALSE,
-                                       &desired_audio_spec,
-                                       &device_audio_spec,
-                                       SDL_AUDIO_ALLOW_ANY_CHANGE);
-
-    if (audio_device == 0)
+    if (!sound_buffer::init(platform))
     {
         ImGui_ImplOpenGL3_Shutdown();
         ImGui_ImplSDL3_Shutdown();
@@ -450,8 +376,6 @@ bool init()
         SDL_Quit();
         return false;
     }
-
-    SDL_PlayAudioDevice(audio_device);
 
     /*mobile_buttons.resize(2);
 
@@ -551,16 +475,6 @@ bool read_input(event& event)
         }
     }
     return false;
-}
-
-sound_buffer* create_sound_buffer(const char* file_path)
-{
-    sound_buffer* sound_buffer = create_sound_buffer(
-        file_path, reinterpret_cast<void*>(&device_audio_spec));
-    sound_buffer->lock_thread();
-    sounds.push_back(sound_buffer);
-    sound_buffer->unlock_thread();
-    return sound_buffer;
 }
 
 void render(animation* anim_sprite, int direction, float* matrix)

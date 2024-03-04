@@ -14,6 +14,7 @@ enum class audio_properties
 class sound_buffer
 {
 public:
+    static bool      init(std::string_view platform);
     virtual void     update_buffer(uint32_t rest)      = 0;
     virtual void     play(audio_properties properties) = 0;
     virtual void     replay()                          = 0;
@@ -28,5 +29,5 @@ public:
     virtual ~sound_buffer();
 };
 
-sound_buffer* create_sound_buffer(const char* file_path, void* audio_spec);
+sound_buffer* create_sound_buffer(const char* file_path);
 } // namespace prip_engine

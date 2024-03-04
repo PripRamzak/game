@@ -34,6 +34,9 @@ prip_engine::sprite* skeleton_archer_dead{ nullptr };
 
 prip_engine::sprite* arrow{ nullptr };
 
+prip_engine::sound_buffer* main_theme{ nullptr };
+prip_engine::sound_buffer* warrior_attack_sound{ nullptr };
+
 static bool res_init = false;
 
 void init()
@@ -129,6 +132,9 @@ void init()
         new prip_engine::sprite(t_skeleton_archer_dead, { 128.f, 64.f });
 
     arrow = new prip_engine::sprite(t_arrow, { 48, 16 });
+
+    main_theme = prip_engine::create_sound_buffer("sound/dungeon_music.wav");
+    warrior_attack_sound = prip_engine::create_sound_buffer("sound/attack.wav");
 
     res_init = true;
 }

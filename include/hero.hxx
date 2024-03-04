@@ -1,5 +1,7 @@
 #pragma once
 
+#include "engine/include/sound_buffer.hxx"
+
 #include "character.hxx"
 #include "map.hxx"
 
@@ -22,8 +24,9 @@ private:
     void jump();
     void attack(character* enemy);
 
-    bool  attacked       = false;
-    float jump_force     = 0.f;
-    float jump_height    = 0.f;
-    float jump_height_dt = 0.f;
+    prip_engine::sound_buffer* sound_attack   = nullptr;
+    bool                       attacked       = false;
+    float                      jump_force     = 0.f;
+    float                      jump_height    = 0.f;
+    float                      jump_height_dt = 0.f;
 };

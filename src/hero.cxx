@@ -20,6 +20,7 @@ hero::hero(prip_engine::transform2d global_pos,
                 level_map,
                 health,
                 character_state::idle)
+    , sound_attack(resources::warrior_attack_sound)
     , jump_height(jump_height)
     , jump_force(jump_force)
 {
@@ -89,12 +90,7 @@ void hero::update(std::chrono::milliseconds delta_time, character* enemy)
 {
     if (prip_engine::is_key_down(prip_engine::key::attack) &&
         state != character_state::jump && state != character_state::fall)
-    {
         set_state(character_state::melee_attack);
-
-        /*if (get_animation()->get_current_frame_number() == 2)
-            sound_attack->play(prip_engine::audio_properties::once);*/
-    }
     else
     {
         float dx = 0.f;
@@ -232,6 +228,9 @@ void hero::attack(character* enemy)
     int anim_current_number = attack_anim->get_current_frame_number();
     int anim_quantity       = attack_anim->get_frames_quantity();
 
+    if (get_animation()->get_current_frame_number() == 2 &&
+        !sound_attack->get_playing_status())
+        sound_attack->play(prip_engine::audio_properties::once);
     if (!attacked && anim_current_number == anim_quantity - 1)
     {
         if (collision::game_object_with_game_object(

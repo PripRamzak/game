@@ -71,11 +71,7 @@ int main(int /*argc*/, char** /*argv*/)
 
     // Sound
 
-    prip_engine::sound_buffer* music =
-        prip_engine::create_sound_buffer("sound/dungeon_music.wav");
-    music->play(prip_engine::audio_properties::looped);
-    /*prip_engine::sound_buffer* sound_attack =
-        prip_engine::create_sound_buffer("sound/attack.wav");*/
+    resources::main_theme->play(prip_engine::audio_properties::looped);
 
     bool               quit                     = false;
     bool               show_menu_window         = true;
