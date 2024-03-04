@@ -41,18 +41,17 @@ int main(int /*argc*/, char** /*argv*/)
     map* dungeon_map = new map(64.f, 64.f, "data/level_1.txt");
 
     // Warrior creating
-    hero* warrior =
-        new hero({ 300.f, 464.f }, 10.f, 2.f, 0, dungeon_map, 4, 12.f, 300.f);
+    hero* warrior = new hero({ 300.f, 464.f }, 0, dungeon_map);
 
     // Skeleton creating
 
-    // std::vector<enemy*> enemies;
-    /*enemy* skel = new skeleton_spearman(
-        { 800.f, 418.f }, 4, 4.f, 2.f, 2000ms, 400.f, 2000ms);*/
-    /*enemy* skel = new skeleton_warrior({ 800.f, 450.f }, 4, 5.f, 2.f,
-     * 2000ms);*/
-    enemy* skel = new skeleton_archer(
-        { 800, 450.f }, 4.f, 2.f, 1, dungeon_map, 4, 2000ms);
+    std::vector<enemy*> enemies;
+    enemies.push_back(
+        new skeleton_spearman({ 800.f, 418.f }, 0, dungeon_map, warrior));
+    enemies.push_back(
+        new skeleton_warrior({ 1700.f, 450.f }, 0, dungeon_map, warrior));
+    enemies.push_back(
+        new skeleton_archer({ 2500, 450.f }, 1, dungeon_map, warrior));
 
     // Interface
 
@@ -117,8 +116,9 @@ int main(int /*argc*/, char** /*argv*/)
 
             if (!show_in_game_menu_window)
             {
-                warrior->update(frame_time_dif, skel);
-                skel->update(frame_time_dif, warrior);
+                warrior->update(frame_time_dif);
+                for (auto enemy : enemies)
+                    enemy->update(frame_time_dif);
             }
 
             camera->look_at(warrior->get_global_pos());
@@ -128,7 +128,8 @@ int main(int /*argc*/, char** /*argv*/)
             glm::mat4 projection_view = projection * view;
 
             dungeon_map->draw(&projection_view[0][0]);
-            skel->draw(&projection_view[0][0]);
+            for (auto enemy : enemies)
+                enemy->draw(&projection_view[0][0]);
             warrior->draw(&projection_view[0][0]);
 
             switch (warrior->get_health())

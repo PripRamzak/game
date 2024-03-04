@@ -8,21 +8,15 @@
 class hero : public character
 {
 public:
-    hero(prip_engine::transform2d global_pos,
-         float                    speed,
-         float                    size,
-         int                      direction,
-         map*                     level_map,
-         int                      health,
-         float                    jump_force,
-         float                    jump_height);
-    void update(std::chrono::milliseconds, character* enemy) override;
+    hero(prip_engine::transform2d global_pos, int direction, map* level_map);
+    void update(std::chrono::milliseconds) override;
+    bool is_attacked();
     ~hero();
 
 private:
     void move(float dx, float dy);
     void jump();
-    void attack(character* enemy);
+    void attack();
 
     prip_engine::sound_buffer* sound_attack   = nullptr;
     bool                       attacked       = false;

@@ -5,31 +5,24 @@
 
 using namespace std::chrono_literals;
 
-hero::hero(prip_engine::transform2d global_pos,
-           float                    speed,
-           float                    size,
-           int                      direction,
-           map*                     level_map,
-           int                      health,
-           float                    jump_force,
-           float                    jump_height)
+hero::hero(prip_engine::transform2d global_pos, int direction, map* level_map)
     : character(global_pos,
-                speed,
-                size,
+                10.f,
+                2.25f,
                 direction,
                 level_map,
-                health,
+                4,
                 character_state::idle)
     , sound_attack(resources::warrior_attack_sound)
-    , jump_height(jump_height)
-    , jump_force(jump_force)
+    , jump_height(300.f)
+    , jump_force(12.f)
 {
     prip_engine::animation* anim_warrior_idle =
         new prip_engine::animation(resources::warrior_idle, 6, 100ms);
     prip_engine::animation* anim_warrior_run =
         new prip_engine::animation(resources::warrior_run, 6, 100ms);
     prip_engine::animation* anim_warrior_attack =
-        new prip_engine::animation(resources::warrior_attack, 4, 125ms);
+        new prip_engine::animation(resources::warrior_attack, 4, 100ms);
     prip_engine::animation* anim_warrior_jump =
         new prip_engine::animation(resources::warrior_jump, 1, 250ms);
     prip_engine::animation* anim_warrior_fall =
@@ -86,7 +79,7 @@ hero::hero(prip_engine::transform2d global_pos,
                                  direction };
 }
 
-void hero::update(std::chrono::milliseconds delta_time, character* enemy)
+void hero::update(std::chrono::milliseconds delta_time)
 {
     if (prip_engine::is_key_down(prip_engine::key::attack) &&
         state != character_state::jump && state != character_state::fall)
@@ -120,9 +113,14 @@ void hero::update(std::chrono::milliseconds delta_time, character* enemy)
     }
 
     if (state == character_state::melee_attack)
-        attack(enemy);
+        attack();
 
     get_animation()->play(delta_time);
+}
+
+bool hero::is_attacked()
+{
+    return attacked;
 }
 
 void hero::move(float dx, float dy)
@@ -219,11 +217,8 @@ void hero::jump()
     }
 }
 
-void hero::attack(character* enemy)
+void hero::attack()
 {
-    if (enemy->get_state() == character_state::dead)
-        return;
-
     prip_engine::animation* attack_anim = sprites[state];
     int anim_current_number = attack_anim->get_current_frame_number();
     int anim_quantity       = attack_anim->get_frames_quantity();
@@ -232,15 +227,7 @@ void hero::attack(character* enemy)
         !sound_attack->get_playing_status())
         sound_attack->play(prip_engine::audio_properties::once);
     if (!attacked && anim_current_number == anim_quantity - 1)
-    {
-        if (collision::game_object_with_game_object(
-                global_pos,
-                attack_collider->get_rectangle(),
-                enemy->get_global_pos(),
-                enemy->get_hitbox()->get_rectangle()))
-            enemy->hurt();
         attacked = true;
-    }
 
     if (attacked && anim_current_number == 0)
         attacked = false;

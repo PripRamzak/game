@@ -70,6 +70,11 @@ collision::collider* character::get_hitbox()
     return hitboxes[state];
 }
 
+collision::collider* character::get_attack_collider()
+{
+    return attack_collider;
+}
+
 prip_engine::animation* character::get_animation()
 {
     return sprites[state];

@@ -5,6 +5,8 @@
 
 using namespace std::chrono_literals;
 
+static float enemy_size = 1.8f;
+
 enemy::enemy(prip_engine::transform2d  global_pos,
              float                     speed,
              float                     size,
@@ -12,8 +14,12 @@ enemy::enemy(prip_engine::transform2d  global_pos,
              map*                      level_map,
              int                       health,
              character_state           state,
+             hero*                     target,
              std::chrono::milliseconds attack_delay)
     : character(global_pos, speed, size, direction, level_map, health, state)
+    , target(target)
+    , invulnerability_cooldown(200ms)
+    , invulnerability_cooldown_dt(0ms)
     , attack_delay(attack_delay)
     , attack_delay_dt(0ms)
 {
@@ -41,7 +47,7 @@ enemy::~enemy()
     delete attack_trigger;
 }
 
-void enemy::attack(character* hero, std::chrono::milliseconds delta_time)
+void enemy::attack(std::chrono::milliseconds delta_time)
 {
     if (state != character_state::melee_attack)
     {
@@ -63,38 +69,60 @@ void enemy::attack(character* hero, std::chrono::milliseconds delta_time)
         if (collision::game_object_with_game_object(
                 global_pos,
                 attack_collider->get_rectangle(),
-                hero->get_global_pos(),
-                hero->get_hitbox()->get_rectangle()))
-            hero->hurt();
+                target->get_global_pos(),
+                target->get_hitbox()->get_rectangle()))
+            target->hurt();
         set_state(character_state::idle);
     }
 }
 
-skeleton_warrior::skeleton_warrior(prip_engine::transform2d  global_pos,
-                                   float                     speed,
-                                   float                     size,
-                                   int                       direction,
-                                   map*                      level_map,
-                                   int                       health,
-                                   std::chrono::milliseconds attack_delay)
+void enemy::is_damaged(std::chrono::milliseconds delta_time)
+{
+    if (target->is_attacked() && !damaged)
+        if (collision::game_object_with_game_object(
+                global_pos,
+                get_hitbox()->get_rectangle(),
+                target->get_global_pos(),
+                target->get_attack_collider()->get_rectangle()))
+        {
+            hurt();
+            damaged = true;
+        }
+
+    if (damaged)
+    {
+        invulnerability_cooldown_dt += delta_time;
+        if (invulnerability_cooldown_dt >= invulnerability_cooldown)
+        {
+            invulnerability_cooldown_dt -= invulnerability_cooldown;
+            damaged = false;
+        }
+    }
+}
+
+skeleton_warrior::skeleton_warrior(prip_engine::transform2d global_pos,
+                                   int                      direction,
+                                   map*                     level_map,
+                                   hero*                    target)
     : enemy(global_pos,
-            speed,
-            size,
+            8.f,
+            enemy_size,
             direction,
             level_map,
-            health,
+            6,
             character_state::idle,
-            attack_delay)
+            target,
+            1000ms)
 {
     prip_engine::animation* anim_skeleton_warrior_idle =
-        new prip_engine::animation(resources::skeleton_warrior_idle, 7, 125ms);
+        new prip_engine::animation(resources::skeleton_warrior_idle, 7, 100ms);
     prip_engine::animation* anim_skeleton_warrior_run =
-        new prip_engine::animation(resources::skeleton_warrior_run, 8, 125ms);
+        new prip_engine::animation(resources::skeleton_warrior_run, 8, 100ms);
     prip_engine::animation* anim_skeleton_warrior_attack =
         new prip_engine::animation(
-            resources::skeleton_warrior_attack, 4, 125ms);
+            resources::skeleton_warrior_attack, 4, 100ms);
     prip_engine::animation* anim_skeleton_warrior_dead =
-        new prip_engine::animation(resources::skeleton_warrior_dead, 4, 125ms);
+        new prip_engine::animation(resources::skeleton_warrior_dead, 4, 100ms);
 
     sprites.emplace(character_state::idle, anim_skeleton_warrior_idle);
     sprites.emplace(character_state::move, anim_skeleton_warrior_run);
@@ -144,23 +172,24 @@ skeleton_warrior::skeleton_warrior(prip_engine::transform2d  global_pos,
                                             direction };
 }
 
-void skeleton_warrior::update(std::chrono::milliseconds delta_time,
-                              character*                hero)
+void skeleton_warrior::update(std::chrono::milliseconds delta_time)
 {
     if (is_alive())
     {
+        is_damaged(delta_time);
+
         if (agro)
         {
-            change_direction(global_pos.x < hero->get_global_pos().x ? 0 : 1);
+            change_direction(global_pos.x < target->get_global_pos().x ? 0 : 1);
             attack_trigger->change_pos(direction);
 
             if (collision::game_object_with_game_object(
                     global_pos,
                     attack_trigger->get_rectangle(),
-                    hero->get_global_pos(),
-                    hero->get_hitbox()->get_rectangle()) ||
+                    target->get_global_pos(),
+                    target->get_hitbox()->get_rectangle()) ||
                 state == character_state::melee_attack)
-                attack(hero, delta_time);
+                attack(delta_time);
             else if (state != character_state::melee_attack)
             {
                 move();
@@ -170,8 +199,8 @@ void skeleton_warrior::update(std::chrono::milliseconds delta_time,
         else if (collision::game_object_with_game_object(
                      global_pos,
                      agro_trigger->get_rectangle(),
-                     hero->get_global_pos(),
-                     hero->get_hitbox()->get_rectangle()))
+                     target->get_global_pos(),
+                     target->get_hitbox()->get_rectangle()))
             agro = true;
     }
     else if (get_animation()->get_current_frame_number() ==
@@ -194,37 +223,33 @@ skeleton_warrior::~skeleton_warrior()
     delete agro_trigger;
 }
 
-skeleton_spearman::skeleton_spearman(prip_engine::transform2d  global_pos,
-                                     float                     speed,
-                                     float                     size,
-                                     int                       direction,
-                                     map*                      level_map,
-                                     int                       health,
-                                     std::chrono::milliseconds attack_delay,
-                                     float                     patrol_area,
-                                     std::chrono::milliseconds patrol_time)
+skeleton_spearman::skeleton_spearman(prip_engine::transform2d global_pos,
+                                     int                      direction,
+                                     map*                     level_map,
+                                     hero*                    target)
     : enemy(global_pos,
-            speed,
-            size,
+            3.f,
+            enemy_size,
             direction,
             level_map,
-            health,
+            4,
             character_state::move,
-            attack_delay)
-    , patrol_area(patrol_area)
-    , patrol_area_dt(patrol_area / 2.f)
-    , patrol_time(patrol_time)
+            target,
+            1000ms)
+    , patrol_area(400.f)
+    , patrol_area_dt(400.f / 2.f)
+    , patrol_time(2000ms)
     , patrol_time_dt(0ms)
 {
     prip_engine::animation* anim_skeleton_spearman_idle =
-        new prip_engine::animation(resources::skeleton_spearman_idle, 7, 125ms);
+        new prip_engine::animation(resources::skeleton_spearman_idle, 7, 100ms);
     prip_engine::animation* anim_skeleton_spearman_walk =
-        new prip_engine::animation(resources::skeleton_spearman_walk, 7, 125ms);
+        new prip_engine::animation(resources::skeleton_spearman_walk, 7, 100ms);
     prip_engine::animation* anim_skeleton_spearman_attack =
         new prip_engine::animation(
-            resources::skeleton_spearman_attack, 4, 125ms);
+            resources::skeleton_spearman_attack, 4, 100ms);
     prip_engine::animation* anim_skeleton_spearman_dead =
-        new prip_engine::animation(resources::skeleton_spearman_dead, 5, 125ms);
+        new prip_engine::animation(resources::skeleton_spearman_dead, 5, 100ms);
 
     sprites.emplace(character_state::idle, anim_skeleton_spearman_idle);
     sprites.emplace(character_state::move, anim_skeleton_spearman_walk);
@@ -269,21 +294,22 @@ skeleton_spearman::skeleton_spearman(prip_engine::transform2d  global_pos,
                                  direction };
 }
 
-void skeleton_spearman::update(std::chrono::milliseconds delta_time,
-                               character*                hero)
+void skeleton_spearman::update(std::chrono::milliseconds delta_time)
 {
     if (is_alive())
     {
+        is_damaged(delta_time);
+
         if (collision::game_object_with_game_object(
                 global_pos,
                 attack_trigger->get_rectangle(),
-                hero->get_global_pos(),
-                hero->get_hitbox()->get_rectangle()) ||
+                target->get_global_pos(),
+                target->get_hitbox()->get_rectangle()) ||
             state == character_state::melee_attack)
         {
-            change_direction(global_pos.x < hero->get_global_pos().x ? 0 : 1);
+            change_direction(global_pos.x < target->get_global_pos().x ? 0 : 1);
             attack_trigger->change_pos(direction);
-            attack(hero, delta_time);
+            attack(delta_time);
         }
         else
         {
@@ -325,34 +351,32 @@ void skeleton_spearman::move()
         patrol_area_dt -= speed;
 }
 
-skeleton_archer::skeleton_archer(prip_engine::transform2d  global_pos,
-                                 float                     speed,
-                                 float                     size,
-                                 int                       direction,
-                                 map*                      level_map,
-                                 int                       health,
-                                 std::chrono::milliseconds attack_delay)
+skeleton_archer::skeleton_archer(prip_engine::transform2d global_pos,
+                                 int                      direction,
+                                 map*                     level_map,
+                                 hero*                    target)
     : enemy(global_pos,
-            speed,
-            size,
+            12.f,
+            enemy_size,
             direction,
             level_map,
-            health,
-            character_state::range_attack,
-            attack_delay)
-    , shot_cooldown(1500ms)
+            3,
+            character_state::idle,
+            target,
+            1000ms)
+    , shot_cooldown(1200ms)
     , shot_cooldown_dt(0ms)
 {
     prip_engine::animation* anim_skeleton_archer_idle =
-        new prip_engine::animation(resources::skeleton_archer_idle, 7, 125ms);
+        new prip_engine::animation(resources::skeleton_archer_idle, 7, 100ms);
     prip_engine::animation* anim_skeleton_archer_walk =
-        new prip_engine::animation(resources::skeleton_archer_walk, 8, 125ms);
+        new prip_engine::animation(resources::skeleton_archer_walk, 8, 100ms);
     prip_engine::animation* anim_skeleton_archer_attack =
-        new prip_engine::animation(resources::skeleton_archer_attack, 4, 125ms);
+        new prip_engine::animation(resources::skeleton_archer_attack, 4, 100ms);
     prip_engine::animation* anim_skeleton_archer_shot =
         new prip_engine::animation(resources::skeleton_archer_shot, 15, 60ms);
     prip_engine::animation* anim_skeleton_archer_dead =
-        new prip_engine::animation(resources::skeleton_archer_dead, 5, 125ms);
+        new prip_engine::animation(resources::skeleton_archer_dead, 5, 100ms);
 
     sprites.emplace(character_state::idle, anim_skeleton_archer_idle);
     sprites.emplace(character_state::move, anim_skeleton_archer_walk);
@@ -409,30 +433,31 @@ skeleton_archer::skeleton_archer(prip_engine::transform2d  global_pos,
                                            direction);
 }
 
-void skeleton_archer::update(std::chrono::milliseconds delta_time,
-                             character*                hero)
+void skeleton_archer::update(std::chrono::milliseconds delta_time)
 {
     if (is_alive())
     {
+        is_damaged(delta_time);
+
         if (collision::game_object_with_game_object(
                 global_pos,
                 attack_trigger->get_rectangle(),
-                hero->get_global_pos(),
-                hero->get_hitbox()->get_rectangle()) ||
+                target->get_global_pos(),
+                target->get_hitbox()->get_rectangle()) ||
             state == character_state::melee_attack)
         {
-            change_direction(global_pos.x < hero->get_global_pos().x ? 0 : 1);
-            attack(hero, delta_time);
+            change_direction(global_pos.x < target->get_global_pos().x ? 0 : 1);
+            attack(delta_time);
         }
         else if (collision::game_object_with_game_object(
                      global_pos,
                      shot_trigger->get_rectangle(),
-                     hero->get_global_pos(),
-                     hero->get_hitbox()->get_rectangle()) ||
+                     target->get_global_pos(),
+                     target->get_hitbox()->get_rectangle()) ||
                  state == character_state::range_attack)
         {
-            change_direction(global_pos.x < hero->get_global_pos().x ? 0 : 1);
-            shoot(hero, delta_time);
+            change_direction(global_pos.x < target->get_global_pos().x ? 0 : 1);
+            shoot(target, delta_time);
         }
     }
     else if (get_animation()->get_current_frame_number() ==
@@ -441,7 +466,7 @@ void skeleton_archer::update(std::chrono::milliseconds delta_time,
 
     for (auto it = arrows.begin(); it != arrows.end();)
     {
-        (*it)->update(hero);
+        (*it)->update(target);
         if ((*it)->is_destroyed())
             it = arrows.erase(it);
         else

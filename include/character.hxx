@@ -28,8 +28,7 @@ public:
               map*                     level_map,
               int                      health,
               character_state          state);
-    virtual void            update(std::chrono::milliseconds delta_time,
-                                   character*                target) = 0;
+    virtual void            update(std::chrono::milliseconds delta_time) = 0;
     void                    draw(float* matrix) override;
     void                    hurt();
     bool                    is_alive();
@@ -37,6 +36,7 @@ public:
     int                     get_health();
     character_state         get_state();
     collision::collider*    get_hitbox();
+    collision::collider*    get_attack_collider();
     prip_engine::animation* get_animation();
     virtual ~character();
 
