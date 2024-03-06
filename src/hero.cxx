@@ -158,10 +158,10 @@ void hero::draw_health(int sprite_number, int pos_x)
 {
     glm::mat4 projection = glm::make_mat4x4(camera::get_projection());
 
-    glm::mat4 translate =
+    glm::mat4 model =
         glm::translate(glm::mat4{ 1 }, glm::vec3{ pos_x, 34.f, 0.f });
-    glm::mat4 mvp = projection * translate;
-    prip_engine::render(health_interface[sprite_number], 0, &mvp[0][0]);
+    glm::mat4 mvp = projection * model;
+    prip_engine::render(health_interface[sprite_number], &mvp[0][0]);
 }
 
 void hero::move(float dx, float dy)

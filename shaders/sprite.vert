@@ -10,5 +10,5 @@ uniform mat4 mvp;
 void main()
 {
     frag_uv = text_coord;
-    gl_Position = mvp * vec4(vertex_position, 1.0, 1.0);
+    gl_Position = mvp * vec4(vertex_position, 0.0, 1.0);
 }

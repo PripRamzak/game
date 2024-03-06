@@ -477,7 +477,7 @@ bool read_input(event& event)
     return false;
 }
 
-void render(animation* anim_sprite, int direction, float* matrix)
+void render(animation* anim_sprite, float* matrix)
 {
     sprite*  sprite_  = anim_sprite->get_sprite();
     texture* texture_ = sprite_->get_texture();
@@ -487,7 +487,6 @@ void render(animation* anim_sprite, int direction, float* matrix)
         "quantity", static_cast<float>(anim_sprite->get_frames_quantity()));
     hero_program->set_uniform_1f(
         "number", static_cast<float>(anim_sprite->get_current_frame_number()));
-    hero_program->set_uniform_1i("direction", direction);
     hero_program->set_uniform_1i("texture", 0);
     hero_program->set_uniform_matrix4fv("matrix", 1, GL_FALSE, matrix);
 
@@ -524,10 +523,9 @@ void render(animation* anim_sprite, int direction, float* matrix)
     gl_check();
 }
 
-void render(sprite* sprite, int direction, float* matrix)
+void render(sprite* sprite, float* matrix)
 {
     sprite_program->use();
-    sprite_program->set_uniform_1i("direction", direction);
     sprite_program->set_uniform_1i("texture", 0);
     sprite_program->set_uniform_matrix4fv("mvp", 1, GL_FALSE, matrix);
 

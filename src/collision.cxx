@@ -74,10 +74,10 @@ void collider::draw(const prip_engine::transform2d& pos)
 {
     glm::mat4 projection = glm::make_mat4x4(camera::get_projection());
     glm::mat4 view       = glm::make_mat4x4(camera::get_view());
-    glm::mat4 translate  = glm::translate(
+    glm::mat4 model      = glm::translate(
         glm::mat4{ 1 },
         glm::vec3{ pos.x + rect.pos.x, pos.y + rect.pos.y, 0.f });
-    glm::mat4 mvp = projection * view * translate;
+    glm::mat4 mvp = projection * view * model;
     prip_engine::render(vb, ib, &mvp[0][0]);
 }
 

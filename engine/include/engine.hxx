@@ -23,8 +23,8 @@ enum class gui_type
 
 bool init();
 bool read_input(event& e);
-void render(animation* anim_sprite, int direction, float* matrix);
-void render(sprite* sprite, int direction, float* matrix);
+void render(animation* anim_sprite, float* matrix);
+void render(sprite* sprite, float* matrix);
 void render(texture*       texture,
             vertex_buffer* vertex_buffer,
             index_buffer*  index_buffer,

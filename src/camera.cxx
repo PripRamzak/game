@@ -19,7 +19,7 @@ void init(float width, float height)
     camera_width  = width / 2;
     camera_height = height / 2;
 
-    projection = glm::ortho<float>(0.f, width, height, 0.f, -1.f, 1.f);
+    projection = glm::ortho<float>(0.f, width, height, 0.f, -5.f, 5.f);
 }
 
 void look_at(prip_engine::transform2d pos)

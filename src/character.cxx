@@ -23,11 +23,14 @@ void character::draw()
 {
     glm::mat4 projection = glm::make_mat4x4(camera::get_projection());
     glm::mat4 view       = glm::make_mat4x4(camera::get_view());
-    glm::mat4 translate  = glm::translate(
+    glm::mat4 model      = glm::translate(
         glm::mat4{ 1 }, glm::vec3{ global_pos.x, global_pos.y, 0.f });
-    glm::mat  scale = glm::scale(glm::mat4{ 1 }, glm::vec3{ size, size, 1.f });
-    glm::mat4 mvp   = projection * view * translate * scale;
-    prip_engine::render(get_animation(), direction, &mvp[0][0]);
+    if (direction == 1)
+        model =
+            glm::rotate(model, glm::radians(180.f), glm::vec3{ 0.f, 1.f, 0.f });
+    model         = glm::scale(model, glm::vec3{ size, size, 1.f });
+    glm::mat4 mvp = projection * view * model;
+    prip_engine::render(get_animation(), &mvp[0][0]);
 
     if (state != character_state::dead)
     {
