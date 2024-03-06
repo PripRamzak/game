@@ -30,7 +30,7 @@ class map
 {
 public:
     map(float tile_width_, float tile_height_, std::string file_path);
-    void                                   draw(float* matrix);
+    void                                   draw();
     prip_engine::texture*                  get_tileset();
     std::vector<prip_engine::vertex2d_uv>& get_vertices(map_tile_type type);
     prip_engine::vertex_buffer* get_vertex_buffer(map_tile_type type);

@@ -12,7 +12,7 @@ public:
                 float                    size,
                 int                      direction,
                 map*                     level_map);
-    virtual void             draw(float* matrix) = 0;
+    virtual void             draw() = 0;
     prip_engine::transform2d get_global_pos();
     float                    get_size();
     int                      get_direction();

@@ -1,5 +1,6 @@
 #include "engine/include/engine.hxx"
 
+#include "include/camera.hxx"
 #include "include/collision.hxx"
 
 #include "glm/gtc/type_ptr.hpp"
@@ -69,13 +70,14 @@ collider::collider(prip_engine::transform2d offset,
     ib->add_indexes(prip_engine::primitives::line, 1);
 }
 
-void collider::draw(const prip_engine::transform2d& pos, float* matrix)
+void collider::draw(const prip_engine::transform2d& pos)
 {
-    glm::mat4 projection_view = glm::make_mat4x4(matrix);
-    glm::mat4 translate       = glm::translate(
+    glm::mat4 projection = glm::make_mat4x4(camera::get_projection());
+    glm::mat4 view       = glm::make_mat4x4(camera::get_view());
+    glm::mat4 translate  = glm::translate(
         glm::mat4{ 1 },
         glm::vec3{ pos.x + rect.pos.x, pos.y + rect.pos.y, 0.f });
-    glm::mat4 mvp = projection_view * translate;
+    glm::mat4 mvp = projection * view * translate;
     prip_engine::render(vb, ib, &mvp[0][0]);
 }
 

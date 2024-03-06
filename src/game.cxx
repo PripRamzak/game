@@ -30,10 +30,7 @@ int main(int /*argc*/, char** /*argv*/)
     float window_height =
         static_cast<float>(prip_engine::get_window_height_pixels());
 
-    glm::mat4 projection =
-        glm::ortho<float>(0.f, window_width, window_height, 0.f, -1.f, 1.f);
-
-    camera* camera = create_camera(window_width / 2, window_height / 2);
+    camera::init(window_width, window_height);
 
     using namespace std::chrono_literals;
 
@@ -52,21 +49,6 @@ int main(int /*argc*/, char** /*argv*/)
         new skeleton_warrior({ 1700.f, 450.f }, 0, dungeon_map, warrior));
     enemies.push_back(
         new skeleton_archer({ 2500, 450.f }, 1, dungeon_map, warrior));
-
-    // Interface
-
-    std::vector<interface*> health;
-    health.resize(2);
-
-    health[0] = create_interface(10.f, 10.f, 64.f, 64.f);
-    health[0]->add_texture(resources::heart_full);
-    health[0]->add_texture(resources::heart_half);
-    health[0]->add_texture(resources::heart_empty);
-
-    health[1] = create_interface(84.f, 10.f, 64.f, 64.f);
-    health[1]->add_texture(resources::heart_full);
-    health[1]->add_texture(resources::heart_half);
-    health[1]->add_texture(resources::heart_half);
 
     // Sound
 
@@ -121,43 +103,13 @@ int main(int /*argc*/, char** /*argv*/)
                     enemy->update(frame_time_dif);
             }
 
-            camera->look_at(warrior->get_global_pos());
-
             // Render
-            glm::mat4 view            = glm::make_mat4x4(camera->get_view());
-            glm::mat4 projection_view = projection * view;
+            camera::look_at(warrior->get_global_pos());
 
-            dungeon_map->draw(&projection_view[0][0]);
+            dungeon_map->draw();
             for (auto enemy : enemies)
-                enemy->draw(&projection_view[0][0]);
-            warrior->draw(&projection_view[0][0]);
-
-            switch (warrior->get_health())
-            {
-                case 0:
-                    health[0]->set_texture(2);
-                case 1:
-                    health[0]->set_texture(1);
-                    break;
-                case 2:
-                    health[0]->set_texture(0);
-                    health[1]->set_texture(2);
-                    break;
-                case 3:
-                    health[1]->set_texture(1);
-                    break;
-                case 4:
-                    health[1]->set_texture(0);
-                    break;
-                default:
-                    health[1]->set_texture(0);
-            }
-
-            /*for (auto heart : health)
-                prip_engine->render(heart->get_tileset(),
-                               heart->get_vertex_buffer(),
-                               solo_objects_index_buffer,
-                               &projection[0][0]);*/
+                enemy->draw();
+            warrior->draw();
 
             if (!show_in_game_menu_window)
             {

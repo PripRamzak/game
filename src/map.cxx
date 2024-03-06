@@ -1,13 +1,14 @@
 #include "engine/include/engine.hxx"
 #include "engine/include/memory_buf.hxx"
 
+#include "include/camera.hxx"
 #include "include/map.hxx"
 #include "include/resources.hxx"
 
 #include <algorithm>
 #include <iostream>
 
-#include <glm/matrix.hpp>
+#include "glm/gtc/type_ptr.hpp"
 
 std::istream& operator>>(std::istream& is, map_tile_type& type)
 {
@@ -98,15 +99,19 @@ map::map(float tile_width_, float tile_height_, std::string file_path)
     }
 }
 
-void map::draw(float* matrix)
+void map::draw()
 {
+    glm::mat4 projection      = glm::make_mat4x4(camera::get_projection());
+    glm::mat4 view            = glm::make_mat4x4(camera::get_view());
+    glm::mat4 projection_view = projection * view;
+
     for (auto& tile : tiles)
         prip_engine::render(tileset,
                             tile.second->tile_vertex_buffer,
                             tile.second->tile_index_buffer,
                             tile.second->min_uv,
                             tile.second->max_uv,
-                            matrix);
+                            &projection_view[0][0]);
 }
 
 prip_engine::texture* map::get_tileset()

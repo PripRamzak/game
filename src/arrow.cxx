@@ -1,6 +1,7 @@
 #include "engine/include/engine.hxx"
 
 #include "include/arrow.hxx"
+#include "include/camera.hxx"
 #include "include/resources.hxx"
 
 #include "glm/gtc/type_ptr.hpp"
@@ -41,16 +42,17 @@ void arrow::update(character* hero)
         global_pos.x += direction == 0 ? speed : -speed;
 }
 
-void arrow::draw(float* matrix)
+void arrow::draw()
 {
-    glm::mat4 projection_view = glm::make_mat4x4(matrix);
-    glm::mat4 translate       = glm::translate(
+    glm::mat4 projection = glm::make_mat4x4(camera::get_projection());
+    glm::mat4 view       = glm::make_mat4x4(camera::get_view());
+    glm::mat4 translate  = glm::translate(
         glm::mat4{ 1 }, glm::vec3{ global_pos.x, global_pos.y, 0.f });
     glm::mat4 scale = glm::scale(glm::mat4{ 1 }, glm::vec3(size, size, 1.f));
-    glm::mat4 mvp   = projection_view * translate * scale;
+    glm::mat4 mvp   = projection * view * translate * scale;
     prip_engine::render(spr, direction, &mvp[0][0]);
 
-    hitbox->draw(global_pos, matrix);
+    hitbox->draw(global_pos);
 }
 
 bool arrow::is_destroyed()

@@ -25,12 +25,12 @@ enemy::enemy(prip_engine::transform2d  global_pos,
 {
 }
 
-void enemy::draw(float* matrix)
+void enemy::draw()
 {
-    character::draw(matrix);
+    character::draw();
 
     if (state != character_state::dead)
-        attack_trigger->draw(global_pos, matrix);
+        attack_trigger->draw(global_pos);
 }
 
 void enemy::move()
@@ -210,12 +210,12 @@ void skeleton_warrior::update(std::chrono::milliseconds delta_time)
     get_animation()->play(delta_time);
 }
 
-void skeleton_warrior::draw(float* matrix)
+void skeleton_warrior::draw()
 {
-    enemy::draw(matrix);
+    enemy::draw();
 
     if (state != character_state::dead)
-        agro_trigger->draw(global_pos, matrix);
+        agro_trigger->draw(global_pos);
 }
 
 skeleton_warrior::~skeleton_warrior()
@@ -476,15 +476,15 @@ void skeleton_archer::update(std::chrono::milliseconds delta_time)
     get_animation()->play(delta_time);
 }
 
-void skeleton_archer::draw(float* matrix)
+void skeleton_archer::draw()
 {
     for (auto it = arrows.begin(); it != arrows.end(); ++it)
-        (*it)->draw(matrix);
+        (*it)->draw();
 
-    enemy::draw(matrix);
+    enemy::draw();
 
     if (state != character_state::dead)
-        shot_trigger->draw(global_pos, matrix);
+        shot_trigger->draw(global_pos);
 }
 
 skeleton_archer::~skeleton_archer()

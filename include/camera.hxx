@@ -2,11 +2,10 @@
 
 #include "engine/include/transform2d.hxx"
 
-class camera
+namespace camera
 {
-public:
-    virtual void   look_at(prip_engine::transform2d pos) = 0;
-    virtual float* get_view()                            = 0;
-};
-
-camera* create_camera(float width, float height);
+void   init(float width, float height);
+void   look_at(prip_engine::transform2d pos);
+float* get_view();
+float* get_projection();
+}; // namespace camera

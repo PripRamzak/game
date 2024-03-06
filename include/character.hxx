@@ -29,7 +29,7 @@ public:
               int                      health,
               character_state          state);
     virtual void            update(std::chrono::milliseconds delta_time) = 0;
-    void                    draw(float* matrix) override;
+    void                    draw() override;
     void                    hurt();
     bool                    is_alive();
     void                    set_state(character_state state_);
@@ -46,6 +46,7 @@ protected:
     std::unordered_map<character_state, prip_engine::animation*> sprites;
     std::unordered_map<character_state, collision::collider*>    hitboxes;
     collision::collider* attack_collider;
-    int                  health = 0;
+    int                  max_health = 0;
+    int                  health     = 0;
     character_state      state;
 };

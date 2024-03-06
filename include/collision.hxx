@@ -13,8 +13,8 @@ public:
              prip_engine::color       color,
              float                    scale,
              int                      direction);
-    void draw(const prip_engine::transform2d& pos, float* matrix);
-    void change_pos(int direction);
+    void                        draw(const prip_engine::transform2d& pos);
+    void                        change_pos(int direction);
     prip_engine::rectangle&     get_rectangle();
     prip_engine::vertex_buffer* get_vertex_buffer();
     prip_engine::index_buffer*  get_index_buffer();

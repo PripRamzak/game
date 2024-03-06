@@ -15,7 +15,7 @@ public:
           character_state           state,
           hero*                     target,
           std::chrono::milliseconds attack_delay);
-    void draw(float* matrix) override;
+    void draw() override;
     virtual ~enemy();
 
 protected:
@@ -40,7 +40,7 @@ public:
                      map*                     level_map,
                      hero*                    target);
     void update(std::chrono::milliseconds delta_time) override;
-    void draw(float* matrix) override;
+    void draw() override;
     ~skeleton_warrior();
 
 private:
@@ -76,7 +76,7 @@ public:
                     map*                     level_map,
                     hero*                    target);
     void update(std::chrono::milliseconds delta_time) override;
-    void draw(float* matrix) override;
+    void draw() override;
     ~skeleton_archer();
 
 private:

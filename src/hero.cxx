@@ -1,7 +1,10 @@
 #include "engine/include/engine.hxx"
 
+#include "include/camera.hxx"
 #include "include/hero.hxx"
 #include "include/resources.hxx"
+
+#include "glm/gtc/type_ptr.hpp"
 
 using namespace std::chrono_literals;
 
@@ -77,6 +80,13 @@ hero::hero(prip_engine::transform2d global_pos, int direction, map* level_map)
                                  { prip_engine::e_color::ORANGE, 0.6f },
                                  size,
                                  direction };
+
+    health_interface.push_back(
+        new prip_engine::sprite{ resources::heart_full, { 48.f, 48.f } });
+    health_interface.push_back(
+        new prip_engine::sprite{ resources::heart_half, { 48.f, 48.f } });
+    health_interface.push_back(
+        new prip_engine::sprite{ resources::heart_empty, { 48.f, 48.f } });
 }
 
 void hero::update(std::chrono::milliseconds delta_time)
@@ -86,6 +96,8 @@ void hero::update(std::chrono::milliseconds delta_time)
         set_state(character_state::melee_attack);
     else
     {
+        attacked = false;
+
         float dx = 0.f;
         float dy = 0.f;
 
@@ -118,9 +130,38 @@ void hero::update(std::chrono::milliseconds delta_time)
     get_animation()->play(delta_time);
 }
 
+void hero::draw()
+{
+    character::draw();
+
+    float pos_x = 34.f;
+
+    for (int i = 0; i < health / 2; i++, pos_x += 53.f)
+        draw_health(0, pos_x);
+
+    if (health % 2 == 1)
+    {
+        draw_health(1, pos_x);
+        pos_x += 53.f;
+    }
+
+    for (int i = 0; i < (max_health - health) / 2; i++, pos_x += 53.f)
+        draw_health(2, pos_x);
+}
+
 bool hero::is_attacked()
 {
     return attacked;
+}
+
+void hero::draw_health(int sprite_number, int pos_x)
+{
+    glm::mat4 projection = glm::make_mat4x4(camera::get_projection());
+
+    glm::mat4 translate =
+        glm::translate(glm::mat4{ 1 }, glm::vec3{ pos_x, 34.f, 0.f });
+    glm::mat4 mvp = projection * translate;
+    prip_engine::render(health_interface[sprite_number], 0, &mvp[0][0]);
 }
 
 void hero::move(float dx, float dy)

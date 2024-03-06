@@ -1,5 +1,6 @@
 #include "engine/include/engine.hxx"
 
+#include "include/camera.hxx"
 #include "include/character.hxx"
 
 #include "glm/gtc/type_ptr.hpp"
@@ -12,25 +13,27 @@ character::character(prip_engine::transform2d global_pos,
                      int                      health,
                      character_state          state)
     : game_object(global_pos, speed, size, direction, level_map)
+    , max_health(health)
     , health(health)
     , state(state)
 {
 }
 
-void character::draw(float* matrix)
+void character::draw()
 {
-    glm::mat4 projection_view = glm::make_mat4x4(matrix);
-    glm::mat4 translate       = glm::translate(
+    glm::mat4 projection = glm::make_mat4x4(camera::get_projection());
+    glm::mat4 view       = glm::make_mat4x4(camera::get_view());
+    glm::mat4 translate  = glm::translate(
         glm::mat4{ 1 }, glm::vec3{ global_pos.x, global_pos.y, 0.f });
     glm::mat  scale = glm::scale(glm::mat4{ 1 }, glm::vec3{ size, size, 1.f });
-    glm::mat4 mvp   = projection_view * translate * scale;
+    glm::mat4 mvp   = projection * view * translate * scale;
     prip_engine::render(get_animation(), direction, &mvp[0][0]);
 
     if (state != character_state::dead)
     {
-        get_hitbox()->draw(global_pos, matrix);
+        get_hitbox()->draw(global_pos);
         if (state == character_state::melee_attack)
-            attack_collider->draw(global_pos, matrix);
+            attack_collider->draw(global_pos);
     }
 }
 

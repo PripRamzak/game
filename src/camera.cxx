@@ -1,33 +1,42 @@
 #include "include/camera.hxx"
 
-#include <glm/ext/matrix_transform.hpp>
+#include "glm/gtc/type_ptr.hpp"
 
-class game_camera : public camera
+namespace camera
 {
-    float width;
-    float height;
+static float camera_width  = 0.f;
+static float camera_height = 0.f;
 
-    glm::vec3 position{ 0.f, 0.f, 2.f };
-    glm::vec3 target{ 0.f, 0.f, 0.f };
-    glm::vec3 up{ 0.f, 1.f, 0.f };
-    glm::mat4 view{ 1 };
+static glm::vec3 position{ 0.f, 0.f, 2.f };
+static glm::vec3 target{ 0.f, 0.f, 0.f };
+static glm::vec3 up{ 0.f, 1.f, 0.f };
 
-public:
-    game_camera(float width_, float height_)
-        : width(width_)
-        , height(height_)
-    {
-    }
-    void look_at(prip_engine::transform2d pos) final
-    {
-        position = glm::vec3(pos.x - width, pos.y - height * 1.25f, 2.f);
-        target   = glm::vec3(pos.x - width, pos.y - height * 1.25f, 0.f);
-        view     = glm::lookAt(position, target, up);
-    }
-    float* get_view() final { return &view[0][0]; }
-};
+static glm::mat4 view{ 1 };
+static glm::mat4 projection{ 1 };
 
-camera* create_camera(float width, float height)
+void init(float width, float height)
 {
-    return new game_camera(width, height);
+    camera_width  = width / 2;
+    camera_height = height / 2;
+
+    projection = glm::ortho<float>(0.f, width, height, 0.f, -1.f, 1.f);
 }
+
+void look_at(prip_engine::transform2d pos)
+{
+    position =
+        glm::vec3(pos.x - camera_width, pos.y - camera_height * 1.25f, 2.f);
+    target =
+        glm::vec3(pos.x - camera_width, pos.y - camera_height * 1.25f, 0.f);
+    view = glm::lookAt(position, target, up);
+}
+float* get_view()
+{
+    return &view[0][0];
+}
+
+float* get_projection()
+{
+    return &projection[0][0];
+}
+}; // namespace camera
