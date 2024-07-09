@@ -1,6 +1,6 @@
 #include "include/memory_buf.hxx"
 
-#include <SDL3/SDL_rwops.h>
+#include <SDL3/SDL_iostream.h>
 
 namespace prip_engine
 {
@@ -59,23 +59,23 @@ size_t memory_buf::size() const
 
 memory_buf load_file(std::string_view path)
 {
-    SDL_RWops* io = SDL_RWFromFile(path.data(), "rb");
+    SDL_IOStream* io = SDL_IOFromFile(path.data(), "rb");
     if (!io)
         throw std::runtime_error("can't load file: " + std::string(path));
 
-    Sint64 file_size = io->size(io);
+    Sint64 file_size = SDL_GetIOSize(io);
     if (-1 == file_size)
         throw std::runtime_error("can't determine size of file: " +
                                  std::string(path));
     const size_t            size = static_cast<size_t>(file_size);
     std::unique_ptr<char[]> mem  = std::make_unique<char[]>(size);
 
-    const size_t num_read_objects = io->read(io, mem.get(), size);
+    const size_t num_read_objects = SDL_ReadIO(io, mem.get(), size);
     if (num_read_objects != size)
         throw std::runtime_error("can't read all content from file: " +
                                  std::string(path));
 
-    if (0 != io->close(io))
+    if (SDL_CloseIO(io) != 0)
         throw std::runtime_error("failed close file: " + std::string(path));
 
     return memory_buf(std::move(mem), size);

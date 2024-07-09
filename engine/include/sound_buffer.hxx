@@ -11,10 +11,11 @@ enum class audio_properties
     looped
 };
 
+bool init_sound();
+
 class sound_buffer
 {
 public:
-    static bool      init(std::string_view platform);
     virtual void     update_buffer(uint32_t rest)      = 0;
     virtual void     play(audio_properties properties) = 0;
     virtual void     replay()                          = 0;

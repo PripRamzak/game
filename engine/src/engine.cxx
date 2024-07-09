@@ -8,7 +8,7 @@
 #include <stdexcept>
 
 #include <SDL3/SDL.h>
-#include <SDL3/SDL_syswm.h>
+// #include <SDL3/SDL_syswm.h>
 
 #ifdef __ANDROID__
 #include <GLES2/gl2.h>
@@ -99,7 +99,7 @@ bool init()
     std::cerr.rdbuf(&logcat);
 #endif
 
-    if (SDL_Init(SDL_INIT_EVERYTHING) != 0)
+    if (SDL_Init(SDL_INIT_AUDIO | SDL_INIT_VIDEO) != 0)
     {
         std::cerr << "Init error : " << SDL_GetError() << std::endl;
         return false;
@@ -367,7 +367,7 @@ bool init()
     ImGui_ImplSDL3_InitForOpenGL(window, context);
     ImGui_ImplOpenGL3_Init("#version 100");
 
-    if (!sound_buffer::init(platform))
+    if (!init_sound())
     {
         ImGui_ImplOpenGL3_Shutdown();
         ImGui_ImplSDL3_Shutdown();

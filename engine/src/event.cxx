@@ -36,12 +36,12 @@ struct bind
 };
 
 std::array<bind, 7> key_bindings = {
-    { { SDLK_w, "Up", key::up, event::released },
-      { SDLK_s, "Down", key::down, event::released },
-      { SDLK_a, "Left", key::left, event::released },
-      { SDLK_d, "Right", key::right, event::released },
+    { { SDLK_W, "Up", key::up, event::released },
+      { SDLK_S, "Down", key::down, event::released },
+      { SDLK_A, "Left", key::left, event::released },
+      { SDLK_D, "Right", key::right, event::released },
       { SDLK_SPACE, "Jump", key::jump, event::released },
-      { SDLK_j, "Attack", key::attack, event::released },
+      { SDLK_J, "Attack", key::attack, event::released },
       { SDLK_ESCAPE, "Menu", key::menu, event::released } }
 };
 
@@ -53,8 +53,9 @@ bool is_key_down(key key)
 
     if (it != key_bindings.end())
     {
-        const uint8_t* state         = SDL_GetKeyboardState(nullptr);
-        int            sdl_scan_code = SDL_GetScancodeFromKey(it->keycode);
+        const uint8_t* state = SDL_GetKeyboardState(nullptr);
+
+        int sdl_scan_code = SDL_GetScancodeFromKey(it->keycode, SDL_KMOD_NONE);
         return state[sdl_scan_code];
     }
 
@@ -63,10 +64,10 @@ bool is_key_down(key key)
 
 bool check_pressing_key(SDL_Event sdl_event, event& event)
 {
-    const auto it = std::find_if(
-        key_bindings.begin(),
-        key_bindings.end(),
-        [&](const bind& b) { return b.keycode == sdl_event.key.keysym.sym; });
+    const auto it = std::find_if(key_bindings.begin(),
+                                 key_bindings.end(),
+                                 [&](const bind& b)
+                                 { return b.keycode == sdl_event.key.key; });
 
     if (it != key_bindings.end())
     {
