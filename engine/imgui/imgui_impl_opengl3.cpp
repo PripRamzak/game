@@ -1192,7 +1192,7 @@ bool ImGui_ImplOpenGL3_CreateDeviceObjects()
         vertex_shader   = vertex_shader_glsl_410_core;
         fragment_shader = fragment_shader_glsl_410_core;
     }
-    else if (glsl_version == 300)
+    else if (glsl_version >= 300)
     {
         vertex_shader   = vertex_shader_glsl_300_es;
         fragment_shader = fragment_shader_glsl_300_es;

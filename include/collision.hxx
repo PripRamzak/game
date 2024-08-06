@@ -13,18 +13,16 @@ public:
              prip_engine::color       color,
              float                    scale,
              int                      direction);
-    void                        draw(const prip_engine::transform2d& pos);
-    void                        change_pos(int direction);
-    prip_engine::rectangle&     get_rectangle();
-    prip_engine::vertex_buffer* get_vertex_buffer();
-    prip_engine::index_buffer*  get_index_buffer();
+    void                    draw(const prip_engine::transform2d& pos);
+    void                    change_pos(int direction);
+    prip_engine::rectangle& get_rectangle();
+    prip_engine::vertex_array* get_vertex_array();
     ~collider();
 
 private:
-    prip_engine::rectangle      rect;
-    prip_engine::transform2d    offset;
-    prip_engine::vertex_buffer* vb;
-    prip_engine::index_buffer*  ib;
+    prip_engine::rectangle     rect;
+    prip_engine::transform2d   offset;
+    prip_engine::vertex_array* vao;
 };
 
 enum class direction

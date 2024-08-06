@@ -21,6 +21,8 @@ add_library(engine SHARED
         src/texture.cxx
         include/texture.hxx
         include/transform2d.hxx
+        src/vertex_array.cxx
+        include/vertex_array.hxx
         src/vertex_buffer.cxx
         include/vertex_buffer.hxx
         include/stb_image.h)

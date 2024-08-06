@@ -91,9 +91,19 @@ map::map(float tile_width_, float tile_height_, std::string file_path)
 
     for (auto& tile : tiles)
     {
-        tile.second->tile_vertex_buffer->buffer_data(
-            tile.second->vertices.data(), tile.second->vertices.size());
-        tile.second->tile_index_buffer->add_indexes(
+        tile.second->vao->bind();
+
+        prip_engine::vertex_buffer* vbo = tile.second->vao->get_vertex_buffer();
+
+        vbo->buffer_data(tile.second->vertices.data(),
+                         tile.second->vertices.size());
+        vbo->set_attrib_pointer(0, 2, sizeof(prip_engine::vertex2d_uv), 0);
+        vbo->set_attrib_pointer(1,
+                                2,
+                                sizeof(prip_engine::vertex2d_uv),
+                                offsetof(prip_engine::vertex2d_uv, uv));
+
+        tile.second->vao->get_index_buffer()->add_indexes(
             prip_engine::primitives::triangle,
             tile.second->vertices.size() / 4);
     }
@@ -107,8 +117,7 @@ void map::draw()
 
     for (auto& tile : tiles)
         prip_engine::render(tileset,
-                            tile.second->tile_vertex_buffer,
-                            tile.second->tile_index_buffer,
+                            tile.second->vao,
                             tile.second->min_uv,
                             tile.second->max_uv,
                             &projection_view[0][0]);
@@ -122,16 +131,6 @@ prip_engine::texture* map::get_tileset()
 std::vector<prip_engine::vertex2d_uv>& map::get_vertices(map_tile_type type)
 {
     return tiles[type]->vertices;
-}
-
-prip_engine::vertex_buffer* map::get_vertex_buffer(map_tile_type type)
-{
-    return tiles[type]->tile_vertex_buffer;
-}
-
-prip_engine::index_buffer* map::get_index_buffer(map_tile_type type)
-{
-    return tiles[type]->tile_index_buffer;
 }
 
 prip_engine::transform2d map::get_tile_min_uv(map_tile_type type)
@@ -151,8 +150,8 @@ map::tile::tile()
     max_uv.x = 1.f;
     max_uv.y = 1.f;
 
-    tile_vertex_buffer = prip_engine::create_vertex_buffer();
-    tile_index_buffer  = prip_engine::create_index_buffer();
+    vao = prip_engine::create_vertex_array(prip_engine::create_vertex_buffer(),
+                                           prip_engine::create_index_buffer());
 };
 
 map::tile::tile(prip_engine::transform2d min_uv,
@@ -160,8 +159,8 @@ map::tile::tile(prip_engine::transform2d min_uv,
     : min_uv(min_uv)
     , max_uv(max_uv)
 {
-    tile_vertex_buffer = prip_engine::create_vertex_buffer();
-    tile_index_buffer  = prip_engine::create_index_buffer();
+    vao = prip_engine::create_vertex_array(prip_engine::create_vertex_buffer(),
+                                           prip_engine::create_index_buffer());
 }
 
 void map::draw_vertical_line(float         start_x,
@@ -287,7 +286,6 @@ map::~map()
     delete tileset;
     for (auto& tile : tiles)
     {
-        delete tile.second->tile_vertex_buffer;
-        delete tile.second->tile_index_buffer;
+        delete tile.second->vao;
     }
 }

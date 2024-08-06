@@ -4,6 +4,7 @@
 #include "engine/include/index_buffer.hxx"
 #include "engine/include/texture.hxx"
 #include "engine/include/vertex_buffer.hxx"
+#include "engine/include/vertex_array.hxx"
 
 #include <unordered_map>
 
@@ -33,8 +34,6 @@ public:
     void                                   draw();
     prip_engine::texture*                  get_tileset();
     std::vector<prip_engine::vertex2d_uv>& get_vertices(map_tile_type type);
-    prip_engine::vertex_buffer* get_vertex_buffer(map_tile_type type);
-    prip_engine::index_buffer*  get_index_buffer(map_tile_type type);
     prip_engine::transform2d    get_tile_min_uv(map_tile_type type);
     prip_engine::transform2d    get_tile_max_uv(map_tile_type type);
     ~map();
@@ -45,8 +44,7 @@ private:
         prip_engine::transform2d              min_uv;
         prip_engine::transform2d              max_uv;
         std::vector<prip_engine::vertex2d_uv> vertices;
-        prip_engine::vertex_buffer*           tile_vertex_buffer;
-        prip_engine::index_buffer*            tile_index_buffer;
+        prip_engine::vertex_array* vao;
 
         tile();
         tile(prip_engine::transform2d min_uv, prip_engine::transform2d max_uv);

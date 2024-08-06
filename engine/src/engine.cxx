@@ -69,10 +69,10 @@ static int         window_width_pixels  = 0;
 static int         window_height_pixels = 0;
 
 static SDL_GLContext   context;
-static shader_program* hero_program;
-static shader_program* map_program;
-static shader_program* sprite_program;
-static shader_program* collider_program;
+static shader_program* shader_animation;
+static shader_program* shader_map;
+static shader_program* shader_sprite;
+static shader_program* shader_collider;
 
 static index_buffer* solo_objects_index_buffer;
 
@@ -143,14 +143,14 @@ bool init()
     int gl_profile_mask;
     if (platform == "Windows"sv)
     {
-        gl_major_version = 2;
-        gl_minor_version = 1;
+        gl_major_version = 4;
+        gl_minor_version = 3;
         gl_profile_mask  = SDL_GL_CONTEXT_PROFILE_CORE;
     }
     else
     {
-        gl_major_version = 2;
-        gl_minor_version = 0;
+        gl_major_version = 3;
+        gl_minor_version = 2;
         gl_profile_mask  = SDL_GL_CONTEXT_PROFILE_ES;
     }
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, gl_major_version);
@@ -176,19 +176,19 @@ bool init()
     }
 
     if (platform == "Linux"sv &&
-        (gl_major_version != 2 || gl_minor_version != 0 ||
+        (gl_major_version != 3 || gl_minor_version != 2 ||
          gl_profile_mask != SDL_GL_CONTEXT_PROFILE_ES))
     {
         std::cerr << "Current OpenGL version: " << gl_major_version << '.'
                   << gl_minor_version << " ES" << std::endl;
-        std::cerr << "Need OpenGL version: 2.0 ES" << std::endl;
+        std::cerr << "Need OpenGL version: 3.2 ES" << std::endl;
         SDL_GL_DeleteContext(context);
         SDL_DestroyWindow(window);
         SDL_Quit();
         return false;
     }
-    else if (platform == "Windows"sv && gl_major_version < 2 &&
-             gl_minor_version < 1)
+    else if (platform == "Windows"sv && gl_major_version < 4 &&
+             gl_minor_version < 3)
     {
         std::cerr << "Current OpenGL version: " << gl_major_version << '.'
                   << gl_minor_version << std::endl;
@@ -221,101 +221,8 @@ bool init()
     }
 #endif
 
-    hero_program = create_shader_program();
-    if (!hero_program->create_shader("shaders/vertex_hero_shader.glsl",
-                                     shader_type::vertex))
-    {
-        SDL_GL_DeleteContext(context);
-        SDL_DestroyWindow(window);
-        SDL_Quit();
-        return false;
-    }
-
-    hero_program->bind("vertex_position", 0);
-    hero_program->bind("texture_coordinates", 1);
-
-    if (!hero_program->create_shader("shaders/fragment_hero_shader.glsl",
-                                     shader_type::fragment))
-    {
-        SDL_GL_DeleteContext(context);
-        SDL_DestroyWindow(window);
-        SDL_Quit();
-        return false;
-    }
-
-    if (!hero_program->link())
-    {
-        SDL_GL_DeleteContext(context);
-        SDL_DestroyWindow(window);
-        SDL_Quit();
-        return false;
-    }
-
-    map_program = create_shader_program();
-
-    if (!map_program->create_shader("shaders/vertex_map_shader.glsl",
-                                    shader_type::vertex))
-    {
-        SDL_GL_DeleteContext(context);
-        SDL_DestroyWindow(window);
-        SDL_Quit();
-        return false;
-    }
-
-    map_program->bind("vertex_position", 0);
-    map_program->bind("texture_coordinates", 1);
-
-    if (!map_program->create_shader("shaders/fragment_map_shader.glsl",
-                                    shader_type::fragment))
-    {
-        SDL_GL_DeleteContext(context);
-        SDL_DestroyWindow(window);
-        SDL_Quit();
-        return false;
-    }
-
-    if (!map_program->link())
-    {
-        SDL_GL_DeleteContext(context);
-        SDL_DestroyWindow(window);
-        SDL_Quit();
-        return false;
-    }
-
-    sprite_program = create_shader_program();
-
-    if (!sprite_program->create_shader("shaders/sprite.vert",
-                                       shader_type::vertex))
-    {
-        SDL_GL_DeleteContext(context);
-        SDL_DestroyWindow(window);
-        SDL_Quit();
-        return false;
-    }
-
-    if (!sprite_program->create_shader("shaders/sprite.frag",
-                                       shader_type::fragment))
-    {
-        SDL_GL_DeleteContext(context);
-        SDL_DestroyWindow(window);
-        SDL_Quit();
-        return false;
-    }
-
-    sprite_program->bind("vertex_position", 0);
-    sprite_program->bind("text_coord", 1);
-
-    if (!sprite_program->link())
-    {
-        SDL_GL_DeleteContext(context);
-        SDL_DestroyWindow(window);
-        SDL_Quit();
-        return false;
-    }
-
-    collider_program = create_shader_program();
-
-    if (!collider_program->create_shader("shaders/collider.vert",
+    shader_animation = create_shader_program();
+    if (!shader_animation->create_shader("shaders/animation.vs",
                                          shader_type::vertex))
     {
         SDL_GL_DeleteContext(context);
@@ -324,10 +231,7 @@ bool init()
         return false;
     }
 
-    collider_program->bind("vertex_position", 0);
-    collider_program->bind("vertex_color", 1);
-
-    if (!collider_program->create_shader("shaders/collider.frag",
+    if (!shader_animation->create_shader("shaders/animation.fs",
                                          shader_type::fragment))
     {
         SDL_GL_DeleteContext(context);
@@ -336,7 +240,88 @@ bool init()
         return false;
     }
 
-    if (!collider_program->link())
+    if (!shader_animation->link())
+    {
+        SDL_GL_DeleteContext(context);
+        SDL_DestroyWindow(window);
+        SDL_Quit();
+        return false;
+    }
+
+    shader_map = create_shader_program();
+
+    if (!shader_map->create_shader("shaders/map.vs", shader_type::vertex))
+    {
+        SDL_GL_DeleteContext(context);
+        SDL_DestroyWindow(window);
+        SDL_Quit();
+        return false;
+    }
+
+    if (!shader_map->create_shader("shaders/map.fs", shader_type::fragment))
+    {
+        SDL_GL_DeleteContext(context);
+        SDL_DestroyWindow(window);
+        SDL_Quit();
+        return false;
+    }
+
+    if (!shader_map->link())
+    {
+        SDL_GL_DeleteContext(context);
+        SDL_DestroyWindow(window);
+        SDL_Quit();
+        return false;
+    }
+
+    shader_sprite = create_shader_program();
+
+    if (!shader_sprite->create_shader("shaders/sprite.vs", shader_type::vertex))
+    {
+        SDL_GL_DeleteContext(context);
+        SDL_DestroyWindow(window);
+        SDL_Quit();
+        return false;
+    }
+
+    if (!shader_sprite->create_shader("shaders/sprite.fs",
+                                      shader_type::fragment))
+    {
+        SDL_GL_DeleteContext(context);
+        SDL_DestroyWindow(window);
+        SDL_Quit();
+        return false;
+    }
+
+    if (!shader_sprite->link())
+    {
+        SDL_GL_DeleteContext(context);
+        SDL_DestroyWindow(window);
+        SDL_Quit();
+        return false;
+    }
+
+    shader_collider = create_shader_program();
+
+    if (!shader_collider->create_shader("shaders/collider.vs",
+                                        shader_type::vertex))
+    {
+        SDL_GL_DeleteContext(context);
+        SDL_DestroyWindow(window);
+        SDL_Quit();
+        return false;
+    }
+
+    if (!shader_collider->create_shader("shaders/collider.fs",
+                                        shader_type::fragment))
+    {
+        SDL_GL_DeleteContext(context);
+        SDL_DestroyWindow(window);
+        SDL_Quit();
+        return false;
+    }
+
+    if (!shader_collider->link())
     {
         SDL_GL_DeleteContext(context);
         SDL_DestroyWindow(window);
@@ -365,7 +350,7 @@ bool init()
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGui_ImplSDL3_InitForOpenGL(window, context);
-    ImGui_ImplOpenGL3_Init("#version 100");
+    ImGui_ImplOpenGL3_Init("#version 320 es");
 
     if (!init_sound())
     {
@@ -479,45 +464,24 @@ bool read_input(event& event)
 
 void render(animation* anim_sprite, float* matrix)
 {
-    sprite*  sprite_  = anim_sprite->get_sprite();
-    texture* texture_ = sprite_->get_texture();
+    sprite*  spr = anim_sprite->get_sprite();
+    texture* tex = spr->get_texture();
 
-    hero_program->use();
-    hero_program->set_uniform_1f(
+    spr->get_vertex_array()->bind();
+
+    shader_animation->use();
+    shader_animation->set_uniform_1f(
         "quantity", static_cast<float>(anim_sprite->get_frames_quantity()));
-    hero_program->set_uniform_1f(
+    shader_animation->set_uniform_1f(
         "number", static_cast<float>(anim_sprite->get_current_frame_number()));
-    hero_program->set_uniform_1i("texture", 0);
-    hero_program->set_uniform_matrix4fv("matrix", 1, GL_FALSE, matrix);
+    shader_animation->set_uniform_1i("texture", 0);
+    shader_animation->set_uniform_matrix4fv("matrix", 1, GL_FALSE, matrix);
 
-    texture_->active(0);
-    texture_->bind();
-
-    sprite_->get_vertex_buffer()->bind();
-    solo_objects_index_buffer->bind();
-
-    glVertexAttribPointer(0,
-                          2,
-                          GL_FLOAT,
-                          GL_FALSE,
-                          sizeof(vertex2d_uv),
-                          reinterpret_cast<void*>(0));
-    gl_check();
-    glEnableVertexAttribArray(0);
-    gl_check();
-
-    glVertexAttribPointer(1,
-                          2,
-                          GL_FLOAT,
-                          GL_FALSE,
-                          sizeof(vertex2d_uv),
-                          reinterpret_cast<void*>(2 * sizeof(float)));
-    gl_check();
-    glEnableVertexAttribArray(1);
-    gl_check();
+    tex->active(0);
+    tex->bind();
 
     glDrawElements(GL_TRIANGLES,
-                   solo_objects_index_buffer->get_size(),
+                   spr->get_vertex_array()->get_index_buffer()->get_size(),
                    GL_UNSIGNED_SHORT,
                    0);
     gl_check();
@@ -525,118 +489,55 @@ void render(animation* anim_sprite, float* matrix)
 
 void render(sprite* sprite, float* matrix)
 {
-    sprite_program->use();
-    sprite_program->set_uniform_1i("texture", 0);
-    sprite_program->set_uniform_matrix4fv("mvp", 1, GL_FALSE, matrix);
+    sprite->get_vertex_array()->bind();
+
+    shader_sprite->use();
+    shader_sprite->set_uniform_1i("texture", 0);
+    shader_sprite->set_uniform_matrix4fv("mvp", 1, GL_FALSE, matrix);
 
     sprite->get_texture()->active(0);
     sprite->get_texture()->bind();
 
-    sprite->get_vertex_buffer()->bind();
-    solo_objects_index_buffer->bind();
-
-    glVertexAttribPointer(0,
-                          2,
-                          GL_FLOAT,
-                          GL_FALSE,
-                          sizeof(vertex2d_uv),
-                          reinterpret_cast<void*>(0));
-    gl_check();
-    glEnableVertexAttribArray(0);
-    gl_check();
-
-    glVertexAttribPointer(1,
-                          2,
-                          GL_FLOAT,
-                          GL_FALSE,
-                          sizeof(vertex2d_uv),
-                          reinterpret_cast<void*>(2 * sizeof(float)));
-    gl_check();
-    glEnableVertexAttribArray(1);
-    gl_check();
-
     glDrawElements(GL_TRIANGLES,
-                   solo_objects_index_buffer->get_size(),
+                   sprite->get_vertex_array()->get_index_buffer()->get_size(),
                    GL_UNSIGNED_SHORT,
                    0);
     gl_check();
 }
 
-void render(texture*       texture,
-            vertex_buffer* vertex_buffer,
-            index_buffer*  index_buffer,
-            transform2d    min_uv,
-            transform2d    max_uv,
-            float*         matrix)
+void render(texture*      texture,
+            vertex_array* vertex_array,
+            transform2d   min_uv,
+            transform2d   max_uv,
+            float*        matrix)
 {
-    map_program->use();
-    map_program->set_uniform_1i("texture", 0);
-    map_program->set_uniform_2fv("min_uv", 1, min_uv);
-    map_program->set_uniform_2fv("max_uv", 1, max_uv);
-    map_program->set_uniform_matrix4fv("matrix", 1, GL_FALSE, matrix);
+    vertex_array->bind();
+
+    shader_map->use();
+    shader_map->set_uniform_1i("texture", 0);
+    shader_map->set_uniform_2fv("min_uv", 1, min_uv);
+    shader_map->set_uniform_2fv("max_uv", 1, max_uv);
+    shader_map->set_uniform_matrix4fv("matrix", 1, GL_FALSE, matrix);
 
     texture->active(0);
     texture->bind();
 
-    vertex_buffer->bind();
-    index_buffer->bind();
-
-    glVertexAttribPointer(0,
-                          2,
-                          GL_FLOAT,
-                          GL_FALSE,
-                          sizeof(vertex2d_uv),
-                          reinterpret_cast<void*>(0));
-    gl_check();
-    glEnableVertexAttribArray(0);
-    gl_check();
-
-    glVertexAttribPointer(1,
-                          2,
-                          GL_FLOAT,
-                          GL_FALSE,
-                          sizeof(vertex2d_uv),
-                          reinterpret_cast<void*>(2 * sizeof(float)));
-    gl_check();
-    glEnableVertexAttribArray(1);
-    gl_check();
-
-    glDrawElements(
-        GL_TRIANGLES, index_buffer->get_size(), GL_UNSIGNED_SHORT, 0);
+    glDrawElements(GL_TRIANGLES,
+                   vertex_array->get_index_buffer()->get_size(),
+                   GL_UNSIGNED_SHORT,
+                   0);
     gl_check();
 }
 
-void render(vertex_buffer* vertex_buffer,
-            index_buffer*  index_buffer,
+void render(vertex_array* vertex_array,
             float*         matrix)
 {
-    collider_program->use();
-    collider_program->set_uniform_matrix4fv("matrix", 1, GL_FALSE, matrix);
+    vertex_array->bind();
 
-    vertex_buffer->bind();
-    index_buffer->bind();
+    shader_collider->use();
+    shader_collider->set_uniform_matrix4fv("matrix", 1, GL_FALSE, matrix);
 
-    glVertexAttribPointer(0,
-                          2,
-                          GL_FLOAT,
-                          GL_FALSE,
-                          sizeof(vertex2d_color),
-                          reinterpret_cast<void*>(0));
-    gl_check();
-    glEnableVertexAttribArray(0);
-    gl_check();
-
-    glVertexAttribPointer(1,
-                          4,
-                          GL_FLOAT,
-                          GL_FALSE,
-                          sizeof(vertex2d_color),
-                          reinterpret_cast<void*>(2 * sizeof(float)));
-    gl_check();
-    glEnableVertexAttribArray(1);
-    gl_check();
-
-    glDrawElements(GL_LINES, index_buffer->get_size(), GL_UNSIGNED_SHORT, 0);
+    glDrawElements(GL_LINES, vertex_array->get_index_buffer()->get_size(), GL_UNSIGNED_SHORT, 0);
     gl_check();
 }
 
@@ -745,10 +646,10 @@ void destroy()
 
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplSDL3_Shutdown();
-    delete hero_program;
-    delete map_program;
-    delete collider_program;
-    delete sprite_program;
+    delete shader_animation;
+    delete shader_map;
+    delete shader_collider;
+    delete shader_sprite;
 
     SDL_GL_DeleteContext(context);
     SDL_DestroyWindow(window);

@@ -36,6 +36,14 @@ public:
         glBufferData(GL_ARRAY_BUFFER, buffer_size, vertices, GL_STATIC_DRAW);
         gl_check();
     }
+    void set_attrib_pointer(int index, int size, size_t stride, size_t offset)
+    {
+        glEnableVertexAttribArray(index);
+        gl_check();
+
+        glVertexAttribPointer(index, size, GL_FLOAT, GL_FALSE, stride, reinterpret_cast<void*>(offset));
+        gl_check();
+    }
     void bind()
     {
         glBindBuffer(GL_ARRAY_BUFFER, VBO);
@@ -50,6 +58,6 @@ vertex_buffer::~vertex_buffer() = default;
 
 vertex_buffer* create_vertex_buffer()
 {
-    return new opengl_vertex_buffer;
+    return new opengl_vertex_buffer();
 }
 } // namespace prip_engine

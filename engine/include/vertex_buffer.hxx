@@ -11,6 +11,10 @@ class vertex_buffer
 public:
     virtual void buffer_data(const vertex2d_uv* vertices, size_t size)    = 0;
     virtual void buffer_data(const vertex2d_color* vertices, size_t size) = 0;
+    virtual void set_attrib_pointer(int    index,
+                                    int    size,
+                                    size_t stride,
+                                    size_t offset)                        = 0;
     virtual void bind()                                                   = 0;
     virtual ~vertex_buffer();
 };

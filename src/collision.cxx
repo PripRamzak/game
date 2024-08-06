@@ -41,8 +41,8 @@ static std::unordered_map<direction, std::vector<map_tile_type>>
 
 collider::collider()
 {
-    vb = prip_engine::create_vertex_buffer();
-    ib = prip_engine::create_index_buffer();
+    vao = prip_engine::create_vertex_array(prip_engine::create_vertex_buffer(),
+                                           prip_engine::create_index_buffer());
 }
 
 collider::collider(prip_engine::transform2d offset,
@@ -57,8 +57,9 @@ collider::collider(prip_engine::transform2d offset,
              rect_size.x * scale,
              rect_size.y * scale })
 {
-    vb = prip_engine::create_vertex_buffer();
-    ib = prip_engine::create_index_buffer();
+    prip_engine::vertex_buffer* vbo = prip_engine::create_vertex_buffer();
+    prip_engine::index_buffer*  ebo = prip_engine::create_index_buffer();
+    vao = prip_engine::create_vertex_array(vbo, ebo);
 
     prip_engine::vertex2d_color vertices[4];
     vertices[0] = { 0.f, 0.f, color };
@@ -66,8 +67,16 @@ collider::collider(prip_engine::transform2d offset,
     vertices[2] = { rect.size.x, rect.size.y, color };
     vertices[3] = { 0.f, rect.size.y, color };
 
-    vb->buffer_data(vertices, static_cast<size_t>(4));
-    ib->add_indexes(prip_engine::primitives::line, 1);
+    vao->bind();
+
+    vbo->buffer_data(vertices, static_cast<size_t>(4));
+    vbo->set_attrib_pointer(0, 2, sizeof(prip_engine::vertex2d_color), 0);
+    vbo->set_attrib_pointer(1,
+                            4,
+                            sizeof(prip_engine::vertex2d_color),
+                            offsetof(prip_engine::vertex2d_color, col));
+
+    ebo->add_indexes(prip_engine::primitives::line, 1);
 }
 
 void collider::draw(const prip_engine::transform2d& pos)
@@ -78,7 +87,7 @@ void collider::draw(const prip_engine::transform2d& pos)
         glm::mat4{ 1 },
         glm::vec3{ pos.x + rect.pos.x, pos.y + rect.pos.y, 0.f });
     glm::mat4 mvp = projection * view * model;
-    prip_engine::render(vb, ib, &mvp[0][0]);
+    prip_engine::render(vao, &mvp[0][0]);
 }
 
 void collider::change_pos(int direction)
@@ -91,20 +100,14 @@ prip_engine::rectangle& collider::get_rectangle()
     return rect;
 }
 
-prip_engine::vertex_buffer* collider::get_vertex_buffer()
+prip_engine::vertex_array* collider::get_vertex_array()
 {
-    return vb;
-}
-
-prip_engine::index_buffer* collider::get_index_buffer()
-{
-    return ib;
+    return vao;
 }
 
 collider::~collider()
 {
-    delete vb;
-    delete ib;
+    delete vao;
 }
 
 bool map_with_game_object(map*                          map,
