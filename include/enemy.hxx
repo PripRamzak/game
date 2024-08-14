@@ -27,7 +27,7 @@ protected:
     bool                      damaged;
     std::chrono::milliseconds invulnerability_cooldown;
     std::chrono::milliseconds invulnerability_cooldown_dt;
-    collision::collider*      attack_trigger;
+    prip_engine::collider*      attack_trigger;
     std::chrono::milliseconds attack_delay;
     std::chrono::milliseconds attack_delay_dt;
 };
@@ -45,7 +45,7 @@ public:
 
 private:
     bool                 agro = false;
-    collision::collider* agro_trigger;
+    prip_engine::collider* agro_trigger;
 };
 
 class skeleton_spearman : public enemy
@@ -83,7 +83,7 @@ private:
     void shoot(game_object* hero, std::chrono::milliseconds delta_time);
 
     std::vector<std::unique_ptr<arrow>> arrows;
-    collision::collider*                shot_trigger;
+    prip_engine::collider*                shot_trigger;
     std::chrono::milliseconds           shot_cooldown;
     std::chrono::milliseconds           shot_cooldown_dt;
 };

@@ -1,9 +1,13 @@
 add_library(engine SHARED
         src/engine.cxx
         include/engine.hxx
-        include/animation.hxx
         src/animation.cxx
+        include/animation.hxx
         include/buttons.hxx
+        src/camera.cxx
+        include/camera.hxx
+        src/collision.cxx
+        include/collision.hxx
         include/color.hxx
         src/event.cxx
         include/event.hxx
@@ -21,6 +25,8 @@ add_library(engine SHARED
         src/texture.cxx
         include/texture.hxx
         include/transform2d.hxx
+        src/types.cxx
+        include/types.hxx
         src/vertex_array.cxx
         include/vertex_array.hxx
         src/vertex_buffer.cxx
@@ -49,7 +55,8 @@ if (ANDROID)
 else ()
     target_link_libraries(engine PRIVATE
             SDL3::SDL3-shared
-            glm::glm)
+            glm::glm
+            tinyxml2::tinyxml2)
 endif ()
 
 target_link_libraries(engine PRIVATE imgui)

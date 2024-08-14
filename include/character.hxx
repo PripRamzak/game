@@ -1,8 +1,8 @@
 #pragma once
 
 #include "engine/include/animation.hxx"
+#include "engine/include/collision.hxx"
 
-#include "collision.hxx"
 #include "game_object.hxx"
 
 #include <unordered_map>
@@ -35,18 +35,19 @@ public:
     void                    set_state(character_state state_);
     int                     get_health();
     character_state         get_state();
-    collision::collider*    get_hitbox();
-    collision::collider*    get_attack_collider();
+    prip_engine::collider*  get_hitbox();
+    prip_engine::collider*  get_attack_collider();
     prip_engine::animation* get_animation();
     virtual ~character();
 
 protected:
+    void resolve_map_collision(prip_engine::transform2d& delta_xy);
     void change_direction(int new_dir);
 
     std::unordered_map<character_state, prip_engine::animation*> sprites;
-    std::unordered_map<character_state, collision::collider*>    hitboxes;
-    collision::collider* attack_collider;
-    int                  max_health = 0;
-    int                  health     = 0;
-    character_state      state;
+    std::unordered_map<character_state, prip_engine::collider*>  hitboxes;
+    prip_engine::collider* attack_collider;
+    int                    max_health = 0;
+    int                    health     = 0;
+    character_state        state;
 };

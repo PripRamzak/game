@@ -1,126 +1,169 @@
+#include "engine/include/camera.hxx"
 #include "engine/include/engine.hxx"
 #include "engine/include/memory_buf.hxx"
+#include "engine/include/types.hxx"
 
-#include "include/camera.hxx"
 #include "include/map.hxx"
 #include "include/resources.hxx"
 
 #include <algorithm>
 #include <iostream>
 
+#include <tinyxml2.h>
+
 #include "glm/gtc/type_ptr.hpp"
 
-std::istream& operator>>(std::istream& is, map_tile_type& type)
-{
-    int type_num;
-    is >> type_num;
-    type = static_cast<map_tile_type>(type_num);
-    return is;
-}
-
-map::map(float tile_width_, float tile_height_, std::string file_path)
+map::map(std::string file_path, int tile_size)
     : tileset(resources::dungeon)
-    , tile_width(tile_width_)
-    , tile_height(tile_height_)
+    , tile_size(tile_size)
 {
-    tile* brick_top          = new tile{ { 32.f / 240.f, 224.f / 288.f },
-                                         { 48.f / 240.f, 240.f / 288.f } };
-    tile* brick_bottom       = new tile{ { 32.f / 240.f, 256.f / 288.f },
-                                         { 48.f / 240.f, 272.f / 288.f } };
-    tile* brick_left         = new tile{ { 48.f / 240.f, 240.f / 288.f },
-                                         { 64.f / 240.f, 256.f / 288.f } };
-    tile* brick_right        = new tile{ { 16.f / 240.f, 240.f / 288.f },
-                                         { 32.f / 240.f, 256.f / 288.f } };
-    tile* brick_top_left     = new tile{ { 96.f / 240.f, 224.f / 288.f },
-                                         { 112.f / 240.f, 240.f / 288.f } };
-    tile* brick_top_right    = new tile{ { 80.f / 240.f, 224.f / 288.f },
-                                         { 96.f / 240.f, 240.f / 288.f } };
-    tile* brick_bottom_left  = new tile{ { 96.f / 240.f, 240.f / 288.f },
-                                         { 112.f / 240.f, 256.f / 288.f } };
-    tile* brick_bottom_right = new tile{ { 80.f / 240.f, 240.f / 288.f },
-                                         { 96.f / 240.f, 256.f / 288.f } };
-    tile* plate_top_left     = new tile{ { 48.f / 240.f, 160.f / 288.f },
-                                         { 64.f / 240.f, 172.f / 288.f } };
-    tile* plate_top_right    = new tile{ { 16.f / 240.f, 160.f / 288.f },
-                                         { 32.f / 240.f, 172.f / 288.f } };
-    tile* plate_bottom_left  = new tile{ { 48.f / 240.f, 192.f / 288.f },
-                                         { 64.f / 240.f, 208.f / 288.f } };
-    tile* plate_bottom_right = new tile{ { 16.f / 240.f, 192.f / 288.f },
-                                         { 32.f / 240.f, 208.f / 288.f } };
+    shader = prip_engine::create_shader_program();
 
-    tiles.emplace(map_tile_type::brick_top, brick_top);
-    tiles.emplace(map_tile_type::brick_bottom, brick_bottom);
-    tiles.emplace(map_tile_type::brick_left, brick_left);
-    tiles.emplace(map_tile_type::brick_right, brick_right);
-    tiles.emplace(map_tile_type::brick_top_left, brick_top_left);
-    tiles.emplace(map_tile_type::brick_top_right, brick_top_right);
-    tiles.emplace(map_tile_type::brick_bottom_left, brick_bottom_left);
-    tiles.emplace(map_tile_type::brick_bottom_right, brick_bottom_right);
-    tiles.emplace(map_tile_type::plate_top_left, plate_top_left);
-    tiles.emplace(map_tile_type::plate_top_right, plate_top_right);
-    tiles.emplace(map_tile_type::plate_bottom_left, plate_bottom_left);
-    tiles.emplace(map_tile_type::plate_bottom_right, plate_bottom_right);
+    if (!shader->create_shader("shaders/map.vs",
+                               prip_engine::shader_type::vertex))
+        throw std::runtime_error("Failed to create map");
+
+    if (!shader->create_shader("shaders/map.gs",
+                               prip_engine::shader_type::geometry))
+        throw std::runtime_error("Failed to create map");
+
+    if (!shader->create_shader("shaders/map.fs",
+                               prip_engine::shader_type::fragment))
+        throw std::runtime_error("Failed to create map");
+
+    if (!shader->link())
+        throw std::runtime_error("Failed to create map");
 
     prip_engine::memory_buf buf_level = prip_engine::load_file(file_path);
     std::istream            data_level(&buf_level);
-    int                     method_to_draw_number;
-    float                   start_x, start_y;
-    int                     length;
-    map_tile_type           type;
+    std::stringstream       ss;
+    ss << data_level.rdbuf();
 
-    while (data_level >> method_to_draw_number)
+    std::string level_xml = ss.str();
+
+    tinyxml2::XMLDocument level_doc;
+    if (level_doc.Parse(level_xml.c_str(), level_xml.length()) != 0)
+        throw std::runtime_error("Failed to read level file");
+
+    tinyxml2::XMLElement* element_map = level_doc.RootElement();
+    int                   width, height;
+    width  = element_map->IntAttribute("width");
+    height = element_map->IntAttribute("height");
+
+    prip_engine::transform2d tile_sz{ element_map->FloatAttribute("tilewidth"),
+                                      element_map->FloatAttribute(
+                                          "tileheight") };
+    prip_engine::transform2d tile_scale{ tile_size / tile_sz.x,
+                                         tile_size / tile_sz.y };
+
+    tinyxml2::XMLElement* element_tileset =
+        element_map->FirstChildElement("tileset");
+    int gid = element_tileset->IntAttribute("firstgid");
+
+    tinyxml2::XMLElement* element_layer =
+        element_map->FirstChildElement("layer");
+
+    if (!element_layer)
+        throw std::runtime_error("Failed to read level file");
+
+    while (element_layer->FirstChildElement("data"))
     {
-        data_level >> type >> start_x >> start_y >> length;
-        switch (method_to_draw_number)
-        {
-            case 1:
-                draw_vertical_line(start_x, start_y, length, type);
-                break;
-            case 2:
-                draw_horizontal_line(start_x, start_y, length, type);
-                break;
-            case 3:
-                int width;
-                data_level >> width;
-                fill_rectangle(start_x, start_y, width, length, type);
-                break;
-            default:
-                break;
-        }
+        tinyxml2::XMLElement* element_data;
+        element_data = element_layer->FirstChildElement("data");
+
+        std::string tile_ids = element_data->GetText();
+        std::replace_if(
+            tile_ids.begin(),
+            tile_ids.end(),
+            [](const char c) { return c == ','; },
+            ' ');
+        std::stringstream stream_number(tile_ids);
+
+        layer layer;
+        for (int y = 0; y < height; y++)
+            for (int x = 0; x < width; x++)
+            {
+                int tile_id;
+                stream_number >> tile_id;
+                if (tile_id > 0)
+                {
+                    layer::object obj{ { static_cast<float>(x * tile_size),
+                                         static_cast<float>(y * tile_size) },
+                                       tile_id - gid };
+                    layer.objects.push_back(obj);
+                }
+            }
+
+        prip_engine::vertex_buffer* vbo = prip_engine::create_vertex_buffer();
+        layer.vao = prip_engine::create_vertex_array(vbo, nullptr);
+        layer.vao->bind();
+
+        vbo->buffer_data(layer.objects.data(),
+                         layer.objects.size() * sizeof(layer::object));
+
+        vbo->set_attrib_pointer(
+            0, 2, prip_engine::t_float, false, sizeof(layer::object), 0);
+        vbo->set_attrib_ipointer(1,
+                                 1,
+                                 prip_engine::t_int,
+                                 sizeof(layer::object),
+                                 offsetof(layer::object, tile_id));
+
+        layers.push_back(layer);
+
+        element_layer = element_layer->NextSiblingElement();
     }
 
-    for (auto& tile : tiles)
+    tinyxml2::XMLElement* element_object_group =
+        element_map->FirstChildElement("objectgroup");
+    tinyxml2::XMLElement* element_object =
+        element_object_group->FirstChildElement("object");
+
+    while (element_object)
     {
-        tile.second->vao->bind();
+        prip_engine::transform2d collider_pos{
+            element_object->FloatAttribute("x") * tile_scale.x,
+            element_object->FloatAttribute("y") * tile_scale.y
+        };
+        prip_engine::transform2d collider_size{
+            element_object->FloatAttribute("width") * tile_scale.x,
+            element_object->FloatAttribute("height") * tile_scale.y
+        };
+        colliders.push_back(
+            new prip_engine::collider(collider_pos,
+                                      { 0.f, 0.f },
+                                      collider_size,
+                                      { prip_engine::e_color::GREEN, 0.6f },
+                                      1.f,
+                                      0,
+                                      false));
 
-        prip_engine::vertex_buffer* vbo = tile.second->vao->get_vertex_buffer();
-
-        vbo->buffer_data(tile.second->vertices.data(),
-                         tile.second->vertices.size());
-        vbo->set_attrib_pointer(0, 2, sizeof(prip_engine::vertex2d_uv), 0);
-        vbo->set_attrib_pointer(1,
-                                2,
-                                sizeof(prip_engine::vertex2d_uv),
-                                offsetof(prip_engine::vertex2d_uv, uv));
-
-        tile.second->vao->get_index_buffer()->add_indexes(
-            prip_engine::primitives::triangle,
-            tile.second->vertices.size() / 4);
+        element_object = element_object->NextSiblingElement();
     }
 }
 
 void map::draw()
 {
-    glm::mat4 projection      = glm::make_mat4x4(camera::get_projection());
-    glm::mat4 view            = glm::make_mat4x4(camera::get_view());
-    glm::mat4 projection_view = projection * view;
+    shader->use();
+    shader->set_uniform_matrix4fv(
+        "view", 1, false, prip_engine::camera::get_view());
+    shader->set_uniform_matrix4fv(
+        "projection", 1, false, prip_engine::camera::get_projection());
+    shader->set_uniform_1i("tile_size", tile_size);
+    shader->set_uniform_2i(
+        "texture_size", tileset->get_width(), tileset->get_height());
 
-    for (auto& tile : tiles)
-        prip_engine::render(tileset,
-                            tile.second->vao,
-                            tile.second->min_uv,
-                            tile.second->max_uv,
-                            &projection_view[0][0]);
+    tileset->bind();
+
+    for (auto layer : layers)
+    {
+        layer.vao->bind();
+        prip_engine::draw_arrays(
+            prip_engine::primitives::point, 0, layer.objects.size());
+    }
+
+    for (auto collider : colliders)
+        collider->draw();
 }
 
 prip_engine::texture* map::get_tileset()
@@ -128,164 +171,23 @@ prip_engine::texture* map::get_tileset()
     return tileset;
 }
 
-std::vector<prip_engine::vertex2d_uv>& map::get_vertices(map_tile_type type)
+const std::vector<prip_engine::collider*>& map::get_colliders()
 {
-    return tiles[type]->vertices;
+    return colliders;
 }
 
-prip_engine::transform2d map::get_tile_min_uv(map_tile_type type)
+map::layer::object::object(prip_engine::transform2d pos, int tile_id)
+    : pos(pos)
+    , tile_id(tile_id)
 {
-    return tiles[type]->min_uv;
 }
-
-prip_engine::transform2d map::get_tile_max_uv(map_tile_type type)
-{
-    return tiles[type]->max_uv;
-}
-
-map::tile::tile()
-{
-    min_uv.x = 0.f;
-    min_uv.y = 0.f;
-    max_uv.x = 1.f;
-    max_uv.y = 1.f;
-
-    vao = prip_engine::create_vertex_array(prip_engine::create_vertex_buffer(),
-                                           prip_engine::create_index_buffer());
-};
-
-map::tile::tile(prip_engine::transform2d min_uv,
-                prip_engine::transform2d max_uv)
-    : min_uv(min_uv)
-    , max_uv(max_uv)
-{
-    vao = prip_engine::create_vertex_array(prip_engine::create_vertex_buffer(),
-                                           prip_engine::create_index_buffer());
-}
-
-void map::draw_vertical_line(float         start_x,
-                             float         start_y,
-                             int           length,
-                             map_tile_type type)
-{
-    tile* tile = tiles[type];
-    tile->vertices.push_back(
-        { start_x, start_y, 0.f, static_cast<float>(length) });
-    tile->vertices.push_back(
-        { start_x + tile_width, start_y, 1.f, static_cast<float>(length) });
-    tile->vertices.push_back(
-        { start_x + tile_width, start_y + length * tile_height, 1.f, 0.f });
-    tile->vertices.push_back(
-        { start_x, start_y + length * tile_width, 0.f, 0.f });
-}
-
-void map::draw_horizontal_line(float         start_x,
-                               float         start_y,
-                               int           length,
-                               map_tile_type type)
-{
-    tile* tile = tiles[type];
-    tile->vertices.push_back({ start_x, start_y, 0.f, 1.f });
-    tile->vertices.push_back({ start_x + length * tile_width,
-                               start_y,
-                               static_cast<float>(length),
-                               1.f });
-    tile->vertices.push_back({ start_x + length * tile_width,
-                               start_y + tile_height,
-                               static_cast<float>(length),
-                               0.f });
-    tile->vertices.push_back({ start_x, start_y + tile_height, 0.f, 0.f });
-}
-
-void map::fill_rectangle(
-    float start_x, float start_y, int width, int height, map_tile_type type)
-{
-    tile* tile = tiles[type];
-    tile->vertices.push_back(
-        { start_x, start_y, 0.f, static_cast<float>(height) });
-    tile->vertices.push_back({ start_x + width * tile_width,
-                               start_y,
-                               static_cast<float>(width),
-                               static_cast<float>(height) });
-    tile->vertices.push_back({ start_x + width * tile_width,
-                               start_y + height * tile_height,
-                               static_cast<float>(width),
-                               0.f });
-    tile->vertices.push_back(
-        { start_x, start_y + height * tile_height, 0.f, 0.f });
-}
-
-/*void delete_tiles_horizontal(int      start_x,
-                             int      start_y,
-                             int      length,
-                             map_tile type) final
-{
-    auto tile_it = find_tile(type);
-
-    if (tile_it != tiles.end())
-    {
-        for (int i = start_x - 1; i < start_x + length - 1; i++)
-        {
-            auto vertex_it = std::find_if(
-                tile_it->vertices.begin(),
-                tile_it->vertices.end(),
-                [&](const vertex2d_uv vertex)
-                {
-                    return vertex.x == static_cast<float>(i) * tile_width &&
-                           vertex.y == (static_cast<float>(start_y) - 1.f) *
-                                           tile_height &&
-                           vertex.u == 0.f && vertex.v == 1.0;
-                });
-
-            if (vertex_it != tile_it->vertices.end())
-                tile_it->vertices.erase(vertex_it, vertex_it + 4);
-        }
-
-        tile_it->tile_vertex_buffer->buffer_data(tile_it->vertices.data(),
-                                                 tile_it->vertices.size());
-        tile_it->tile_index_buffer->delete_indexes(
-            static_cast<size_t>(length));
-    }
-}
-void delete_tiles_vertical(int      start_x,
-                           int      start_y,
-                           int      length,
-                           map_tile type) final
-{
-    auto tile_it = find_tile(type);
-
-    if (tile_it != tiles.end())
-    {
-        for (int i = start_y - 1; i < start_y + length - 1; i++)
-        {
-            auto vertex_it = std::find_if(
-                tile_it->vertices.begin(),
-                tile_it->vertices.end(),
-                [&](const vertex2d_uv vertex)
-                {
-                    return vertex.x == (static_cast<float>(start_x) - 1.f) *
-                                           tile_width &&
-                           vertex.y ==
-                               static_cast<float>(i) * tile_height &&
-                           vertex.u == 0.f && vertex.v == 1.0;
-                });
-
-            if (vertex_it != tile_it->vertices.end())
-                tile_it->vertices.erase(vertex_it, vertex_it + 4);
-        }
-
-        tile_it->tile_vertex_buffer->buffer_data(tile_it->vertices.data(),
-                                                 tile_it->vertices.size());
-        tile_it->tile_index_buffer->delete_indexes(
-            static_cast<size_t>(length));
-    }
-}*/
 
 map::~map()
 {
-    delete tileset;
-    for (auto& tile : tiles)
-    {
-        delete tile.second->vao;
-    }
+
+    for (auto layer : layers)
+        delete layer.vao;
+    for (auto collider : colliders)
+        delete collider;
+    delete shader;
 }

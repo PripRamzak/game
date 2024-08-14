@@ -20,33 +20,51 @@ public:
         glGenBuffers(1, &VBO);
         gl_check();
     }
-    void buffer_data(const vertex2d_uv* vertices, size_t size)
+    ~opengl_vertex_buffer()
     {
-        bind();
-        GLsizeiptr buffer_size =
-            static_cast<GLsizeiptr>(size * sizeof(vertex2d_uv));
-        glBufferData(GL_ARRAY_BUFFER, buffer_size, vertices, GL_STATIC_DRAW);
-        gl_check();
-    }
-    void buffer_data(const vertex2d_color* vertices, size_t size)
-    {
-        bind();
-        GLsizeiptr buffer_size =
-            static_cast<GLsizeiptr>(size * sizeof(vertex2d_color));
-        glBufferData(GL_ARRAY_BUFFER, buffer_size, vertices, GL_STATIC_DRAW);
-        gl_check();
-    }
-    void set_attrib_pointer(int index, int size, size_t stride, size_t offset)
-    {
-        glEnableVertexAttribArray(index);
-        gl_check();
-
-        glVertexAttribPointer(index, size, GL_FLOAT, GL_FALSE, stride, reinterpret_cast<void*>(offset));
+        glDeleteBuffers(1, &VBO);
         gl_check();
     }
     void bind()
     {
         glBindBuffer(GL_ARRAY_BUFFER, VBO);
+        gl_check();
+    }
+    void buffer_data(const void* data, size_t size)
+    {
+        bind();
+        glBufferData(GL_ARRAY_BUFFER,
+                     static_cast<GLsizeiptr>(size),
+                     data,
+                     GL_STATIC_DRAW);
+        gl_check();
+    }
+    void set_attrib_pointer(int    index,
+                            int    size,
+                            type   type,
+                            bool   normalized,
+                            size_t stride,
+                            size_t offset)
+    {
+        glEnableVertexAttribArray(index);
+        gl_check();
+
+        glVertexAttribPointer(index,
+                              size,
+                              type,
+                              normalized,
+                              stride,
+                              reinterpret_cast<void*>(offset));
+        gl_check();
+    }
+    void set_attrib_ipointer(
+        int index, int size, type type, size_t stride, size_t offset)
+    {
+        glEnableVertexAttribArray(index);
+        gl_check();
+
+        glVertexAttribIPointer(
+            index, size, type, stride, reinterpret_cast<void*>(offset));
         gl_check();
     }
 

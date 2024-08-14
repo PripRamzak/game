@@ -17,6 +17,7 @@ endif ()
 if (NOT ANDROID)
     find_package(SDL3 REQUIRED)
     find_package(glm REQUIRED)
+    find_package(tinyxml2 REQUIRED)
 endif ()
 
 add_subdirectory(engine)
@@ -31,12 +32,8 @@ target_sources(game PRIVATE
         src/game.cxx
         src/arrow.cxx
         include/arrow.hxx
-        src/camera.cxx
-        include/camera.hxx
         src/character.cxx
         include/character.hxx
-        include/collision.hxx
-        src/collision.cxx
         src/enemy.cxx
         include/enemy.hxx
         src/game_object.cxx
@@ -50,5 +47,5 @@ target_sources(game PRIVATE
         src/resources.cxx
         include/resources.hxx)
 target_compile_features(game PRIVATE cxx_std_20)
-target_link_libraries(game PRIVATE engine SDL3::SDL3-shared glm::glm)
+target_link_libraries(game PRIVATE engine SDL3::SDL3-shared glm::glm tinyxml2::tinyxml2)
 target_include_directories(game PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})

@@ -2,6 +2,8 @@
 
 #include "glm/gtc/type_ptr.hpp"
 
+namespace prip_engine
+{
 namespace camera
 {
 static float camera_width  = 0.f;
@@ -40,3 +42,4 @@ float* get_projection()
     return &projection[0][0];
 }
 }; // namespace camera
+} // namespace prip_engine

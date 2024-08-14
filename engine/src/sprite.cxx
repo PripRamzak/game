@@ -1,10 +1,15 @@
 #include "include/sprite.hxx"
+#include "include/camera.hxx"
+#include "include/engine.hxx"
+
+#include <glm/gtc/type_ptr.hpp>
 
 namespace prip_engine
 {
+shader_program* sprite::shader = nullptr;
 
-sprite::sprite(texture* textures, transform2d size)
-    : textures(textures)
+sprite::sprite(texture* texture, transform2d size)
+    : tex(texture)
     , size(size)
 {
     vertex2d_uv vertices[4];
@@ -19,16 +24,16 @@ sprite::sprite(texture* textures, transform2d size)
 
     vao->bind();
 
-    vbo->buffer_data(vertices, static_cast<size_t>(4));
-    vbo->set_attrib_pointer(0, 2, sizeof(vertex2d_uv), 0);
+    vbo->buffer_data(vertices, static_cast<size_t>(4 * sizeof(vertex2d_uv)));
+    vbo->set_attrib_pointer(0, 2, t_float, false, sizeof(vertex2d_uv), 0);
     vbo->set_attrib_pointer(
-        1, 2, sizeof(vertex2d_uv), offsetof(vertex2d_uv, uv));
+        1, 2, t_float, false, sizeof(vertex2d_uv), offsetof(vertex2d_uv, uv));
 
     ebo->add_indexes(primitives::triangle, 1);
 }
 
-sprite::sprite(texture* textures, transform2d size, transform2d origin)
-    : textures(textures)
+sprite::sprite(texture* texture, transform2d size, transform2d origin)
+    : tex(texture)
     , size(size)
 {
     vertex2d_uv vertices[4];
@@ -43,12 +48,35 @@ sprite::sprite(texture* textures, transform2d size, transform2d origin)
 
     vao->bind();
 
-    vbo->buffer_data(vertices, static_cast<size_t>(4));
-    vbo->set_attrib_pointer(0, 2, sizeof(vertex2d_uv), 0);
+    vbo->buffer_data(vertices, static_cast<size_t>(4 * sizeof(vertex2d_uv)));
+    vbo->set_attrib_pointer(0, 2, t_float, false, sizeof(vertex2d_uv), 0);
     vbo->set_attrib_pointer(
-        1, 2, sizeof(vertex2d_uv), offsetof(vertex2d_uv, uv));
+        1, 2, t_float, false, sizeof(vertex2d_uv), offsetof(vertex2d_uv, uv));
 
     ebo->add_indexes(primitives::triangle, 1);
+}
+
+void sprite::draw(float* m_model, bool camera_relative)
+{
+    shader->use();
+
+    shader->set_uniform_matrix4fv("model", 1, false, m_model);
+
+    if (camera_relative)
+        shader->set_uniform_matrix4fv("view", 1, false, camera::get_view());
+    else
+    {
+        glm::mat4 one{ 1.f };
+        shader->set_uniform_matrix4fv("view", 1, false, glm::value_ptr(one));
+    }
+    
+    shader->set_uniform_matrix4fv(
+        "projection", 1, false, camera::get_projection());
+
+    tex->bind();
+
+    vao->bind();
+    draw_elements(primitives::triangle, vao->get_index_buffer()->get_size());
 }
 
 transform2d sprite::get_size()
@@ -58,7 +86,7 @@ transform2d sprite::get_size()
 
 texture* sprite::get_texture()
 {
-    return textures;
+    return tex;
 }
 
 vertex_array* sprite::get_vertex_array()
@@ -68,7 +96,7 @@ vertex_array* sprite::get_vertex_array()
 
 sprite::~sprite()
 {
-    delete textures;
+    delete tex;
     delete vao;
 }
 } // namespace prip_engine

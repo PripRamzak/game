@@ -1,79 +1,37 @@
 #pragma once
 
 #include "engine/include/geometry.hxx"
-#include "engine/include/index_buffer.hxx"
+#include "engine/include/shader_program.hxx"
 #include "engine/include/texture.hxx"
-#include "engine/include/vertex_buffer.hxx"
 #include "engine/include/vertex_array.hxx"
-
-#include <unordered_map>
-
-enum class map_tile_type
-{
-    brick_top,
-    brick_bottom,
-    brick_left,
-    brick_right,
-    brick_top_left,
-    brick_top_right,
-    brick_bottom_left,
-    brick_bottom_right,
-    plate_top_left,
-    plate_top_right,
-    plate_bottom_left,
-    plate_bottom_right,
-    coin
-};
-
-std::istream& operator>>(std::istream& is, map_tile_type& type);
+#include "engine/include/collision.hxx"
 
 class map
 {
 public:
-    map(float tile_width_, float tile_height_, std::string file_path);
-    void                                   draw();
-    prip_engine::texture*                  get_tileset();
-    std::vector<prip_engine::vertex2d_uv>& get_vertices(map_tile_type type);
-    prip_engine::transform2d    get_tile_min_uv(map_tile_type type);
-    prip_engine::transform2d    get_tile_max_uv(map_tile_type type);
+    map(std::string file_path, int tile_size);
+    void                                    draw();
+    prip_engine::texture*                   get_tileset();
+    const std::vector<prip_engine::collider*>& get_colliders();
     ~map();
 
 private:
-    struct tile
+    struct layer
     {
-        prip_engine::transform2d              min_uv;
-        prip_engine::transform2d              max_uv;
-        std::vector<prip_engine::vertex2d_uv> vertices;
-        prip_engine::vertex_array* vao;
+        struct object
+        {
+            object(prip_engine::transform2d pos, int tile_id);
 
-        tile();
-        tile(prip_engine::transform2d min_uv, prip_engine::transform2d max_uv);
+            prip_engine::transform2d pos;
+            int                      tile_id;
+        };
+        prip_engine::vertex_array* vao = nullptr;
+        std::vector<object>        objects;
     };
 
-    void draw_vertical_line(float         start_x,
-                            float         start_y,
-                            int           length,
-                            map_tile_type type);
-    void draw_horizontal_line(float         start_x,
-                              float         start_y,
-                              int           length,
-                              map_tile_type type);
-    void fill_rectangle(float         start_x,
-                        float         start_y,
-                        int           width,
-                        int           height,
-                        map_tile_type type);
-    /*virtual void           delete_tiles_horizontal(int      start_x,
-                                                   int      start_y,
-                                                   int      length,
-                                                   map_tile type)         = 0;
-    virtual void           delete_tiles_vertical(int      start_x,
-                                                 int      start_y,
-                                                 int      length,
-                                                 map_tile type)           = 0;*/
-
-    prip_engine::texture*                    tileset = nullptr;
-    std::unordered_map<map_tile_type, tile*> tiles;
-    float                                    tile_width  = 0;
-    float                                    tile_height = 0;
+    prip_engine::texture*             tileset = nullptr;
+    prip_engine::shader_program*      shader  = nullptr;
+    std::vector<layer>                layers;
+    std::vector<prip_engine::collider*> colliders;
+    int                               tile_size = 0;
 };

@@ -46,10 +46,6 @@ void gl_check()
 
 class opengl_shader_program final : public shader_program
 {
-    GLuint program         = 0;
-    GLuint vertex_shader   = 0;
-    GLuint fragment_shader = 0;
-
 public:
     opengl_shader_program()
     {
@@ -79,10 +75,16 @@ public:
 
             glDeleteShader(vertex_shader);
             gl_check();
+
+            glDeleteShader(geometry_shader);
+            gl_check();
+
             glDeleteShader(fragment_shader);
             gl_check();
+
             glDeleteProgram(program);
             gl_check();
+
             return false;
         }
 
@@ -91,6 +93,10 @@ public:
 
         glDeleteShader(vertex_shader);
         gl_check();
+
+        glDeleteShader(geometry_shader);
+        gl_check();
+
         glDeleteShader(fragment_shader);
         gl_check();
 
@@ -99,17 +105,27 @@ public:
     bool create_shader(const char* file_path, shader_type type) final
     {
         GLuint shader;
-        if (type == shader_type::vertex)
+
+        switch (type)
         {
-            shader = glCreateShader(GL_VERTEX_SHADER);
-            gl_check();
-            vertex_shader = shader;
-        }
-        else if (type == shader_type::fragment)
-        {
-            shader = glCreateShader(GL_FRAGMENT_SHADER);
-            gl_check();
-            fragment_shader = shader;
+            case shader_type::vertex:
+                shader = glCreateShader(GL_VERTEX_SHADER);
+                gl_check();
+                vertex_shader = shader;
+                break;
+            case shader_type::geometry:
+                shader = glCreateShader(GL_GEOMETRY_SHADER);
+                gl_check();
+                geometry_shader = shader;
+                break;
+            case shader_type::fragment:
+                shader = glCreateShader(GL_FRAGMENT_SHADER);
+                gl_check();
+                fragment_shader = shader;
+                break;
+            default:
+                std::cerr << "Wrong shader type" << std::endl;
+                return false;
         }
 
         std::stringstream ss;
@@ -155,25 +171,33 @@ public:
     }
     void set_uniform_1i(const char* name, int value) final
     {
-        GLint location = glGetUniformLocation(program, name);
-        gl_check();
+        int location = glGetUniformLocation(program, name);
         assert(location != -1);
+
         glUniform1i(location, value);
         gl_check();
     }
     void set_uniform_1f(const char* name, float value) final
     {
-        GLint location = glGetUniformLocation(program, name);
-        gl_check();
+        int location = get_uniform_location(name);
         assert(location != -1);
+
         glUniform1f(location, value);
+        gl_check();
+    }
+    void set_uniform_2i(const char* name, int v1, int v2) 
+    {
+        int location = get_uniform_location(name);
+        assert(location != -1);
+
+        glUniform2i(location, v1, v2);
         gl_check();
     }
     void set_uniform_2fv(const char* name, int count, transform2d value) final
     {
-        GLint location = glGetUniformLocation(program, name);
-        gl_check();
+        int location = get_uniform_location(name);
         assert(location != -1);
+
         glUniform2fv(location, count, &value.x);
         gl_check();
     }
@@ -182,9 +206,9 @@ public:
                                bool        transpose,
                                float*      value) final
     {
-        GLint location = glGetUniformLocation(program, name);
-        gl_check();
+        int location = get_uniform_location(name);
         assert(location != -1);
+
         glUniformMatrix3fv(location, count, transpose, value);
         gl_check();
     }
@@ -193,9 +217,9 @@ public:
                                bool        transpose,
                                float*      value) final
     {
-        GLint location = glGetUniformLocation(program, name);
-        gl_check();
+        int location = get_uniform_location(name);
         assert(location != -1);
+
         glUniformMatrix4fv(location, count, transpose, value);
         gl_check();
     }
@@ -215,6 +239,21 @@ public:
         glDeleteProgram(program);
         gl_check();
     }
+
+protected:
+    int get_uniform_location(const char* name) override
+    {
+        int location = glGetUniformLocation(program, name);
+        gl_check();
+        
+        return location;
+    }
+
+private:
+    GLuint program         = 0;
+    GLuint vertex_shader   = 0;
+    GLuint geometry_shader = 0;
+    GLuint fragment_shader = 0;
 };
 
 shader_program::~shader_program() = default;

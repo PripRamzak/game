@@ -7,6 +7,7 @@ namespace prip_engine
 {
 enum class primitives
 {
+    point,
     line,
     triangle
 };

@@ -1,9 +1,7 @@
 #pragma once
 
-#include "animation.hxx"
 #include "event.hxx"
 #include "sound_buffer.hxx"
-#include "sprite.hxx"
 #include "texture.hxx"
 #include "vertex_array.hxx"
 
@@ -22,14 +20,8 @@ enum class gui_type
 
 bool init();
 bool read_input(event& e);
-void render(animation* anim_sprite, float* matrix);
-void render(sprite* sprite, float* matrix);
-void render(texture*      texture,
-            vertex_array* vertex_array,
-            transform2d   min_uv,
-            transform2d   max_uv,
-            float*        matrix);
-void render(vertex_array* vertex_array, float* matrix);
+void draw_arrays(primitives primitive, int start, int count);
+void draw_elements(primitives primitive, int count);
 // virtual void      render_buttons(float* matrix)                     = 0;
 bool                 render_gui(bool& show_menu_window, gui_type type);
 bool                 swap_buffers();

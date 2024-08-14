@@ -15,8 +15,8 @@ public:
     ~hero();
 
 private:
-    void move(float dx, float dy);
-    void jump();
+    void move(int dx, int dy);
+    bool jump();
     void attack();
     void draw_health(int sprite_number, int pos_x);
 

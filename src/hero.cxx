@@ -1,6 +1,5 @@
 #include "engine/include/engine.hxx"
 
-#include "include/camera.hxx"
 #include "include/hero.hxx"
 #include "include/resources.hxx"
 
@@ -37,36 +36,46 @@ hero::hero(prip_engine::transform2d global_pos, int direction, map* level_map)
     sprites.emplace(character_state::jump, anim_warrior_jump);
     sprites.emplace(character_state::fall, anim_warrior_fall);
 
-    collision::collider* idle_hitbox =
-        new collision::collider({ -14.f, -20.f },
-                                { 34.f, 44.f },
-                                { prip_engine::e_color::GREEN, 0.6f },
-                                size,
-                                direction);
-    collision::collider* run_hitbox =
-        new collision::collider({ -12.f, -20.f },
-                                { 32.f, 44.f },
-                                { prip_engine::e_color::GREEN, 0.6f },
-                                size,
-                                direction);
-    collision::collider* attack_hitbox =
-        new collision::collider({ -15.f, -20.f },
-                                { 26.f, 44.f },
-                                { prip_engine::e_color::GREEN, 0.6f },
-                                size,
-                                direction);
-    collision::collider* jump_hitbox =
-        new collision::collider({ -24.f, -24.f },
-                                { 48.f, 48.f },
-                                { prip_engine::e_color::GREEN, 0.6f },
-                                size,
-                                direction);
-    collision::collider* fall_hitbox =
-        new collision::collider({ -24.f, -24.f },
-                                { 48.f, 48.f },
-                                { prip_engine::e_color::GREEN, 0.6f },
-                                size,
-                                direction);
+    prip_engine::collider* idle_hitbox =
+        new prip_engine::collider(this->global_pos,
+                                  { -14.f, -20.f },
+                                  { 34.f, 44.f },
+                                  { prip_engine::e_color::GREEN, 0.6f },
+                                  size,
+                                  direction,
+                                  true);
+    prip_engine::collider* run_hitbox =
+        new prip_engine::collider(this->global_pos,
+                                  { -12.f, -20.f },
+                                  { 32.f, 44.f },
+                                  { prip_engine::e_color::GREEN, 0.6f },
+                                  size,
+                                  direction,
+                                  true);
+    prip_engine::collider* attack_hitbox =
+        new prip_engine::collider(this->global_pos,
+                                  { -15.f, -20.f },
+                                  { 26.f, 44.f },
+                                  { prip_engine::e_color::GREEN, 0.6f },
+                                  size,
+                                  direction,
+                                  true);
+    prip_engine::collider* jump_hitbox =
+        new prip_engine::collider(this->global_pos,
+                                  { -24.f, -24.f },
+                                  { 48.f, 48.f },
+                                  { prip_engine::e_color::GREEN, 0.6f },
+                                  size,
+                                  direction,
+                                  true);
+    prip_engine::collider* fall_hitbox =
+        new prip_engine::collider(this->global_pos,
+                                  { -24.f, -24.f },
+                                  { 48.f, 48.f },
+                                  { prip_engine::e_color::GREEN, 0.6f },
+                                  size,
+                                  direction,
+                                  true);
 
     hitboxes.emplace(character_state::idle, idle_hitbox);
     hitboxes.emplace(character_state::move, run_hitbox);
@@ -75,11 +84,13 @@ hero::hero(prip_engine::transform2d global_pos, int direction, map* level_map)
     hitboxes.emplace(character_state::fall, fall_hitbox);
 
     attack_collider =
-        new collision::collider{ { 11.f, -10.f },
-                                 { 32.f, 34.f },
-                                 { prip_engine::e_color::ORANGE, 0.6f },
-                                 size,
-                                 direction };
+        new prip_engine::collider{ global_pos,
+                                   { 11.f, -10.f },
+                                   { 32.f, 34.f },
+                                   { prip_engine::e_color::ORANGE, 0.6f },
+                                   size,
+                                   direction,
+                                   true };
 
     health_interface.push_back(
         new prip_engine::sprite{ resources::heart_full, { 48.f, 48.f } });
@@ -98,19 +109,18 @@ void hero::update(std::chrono::milliseconds delta_time)
     {
         attacked = false;
 
-        float dx = 0.f;
-        float dy = 0.f;
+        int dx = 0;
+        int dy = 0;
 
         if (prip_engine::is_key_down(prip_engine::key::jump) &&
             state != character_state::jump && state != character_state::fall)
             set_state(character_state::jump);
 
         if (state == character_state::jump)
-        {
-            dy--;
-            jump();
-        }
-        else if (state == character_state::fall)
+            if (jump())
+                dy--;
+
+        if (state == character_state::fall)
             dy++;
 
         if (prip_engine::is_key_down(prip_engine::key::left))
@@ -156,94 +166,28 @@ bool hero::is_attacked()
 
 void hero::draw_health(int sprite_number, int pos_x)
 {
-    glm::mat4 projection = glm::make_mat4x4(camera::get_projection());
-
     glm::mat4 model =
         glm::translate(glm::mat4{ 1 }, glm::vec3{ pos_x, 34.f, 0.f });
-    glm::mat4 mvp = projection * model;
-    prip_engine::render(health_interface[sprite_number], &mvp[0][0]);
+    health_interface[sprite_number]->draw(glm::value_ptr(model), false);
 }
 
-void hero::move(float dx, float dy)
+void hero::move(int dx, int dy)
 {
-    float delta_x = dx * speed;
-    float delta_y = dy * speed;
+    prip_engine::transform2d delta_pos(static_cast<float>(dx) * speed,
+                                       static_cast<float>(dy) * speed);
 
-    global_pos.x += delta_x;
+    global_pos.x += delta_pos.x;
+    global_pos.y += delta_pos.y;
 
-    if (delta_x < 0.f)
-    {
-        change_direction(1);
-        if (collision::map_with_game_object(level_map,
-                                            global_pos,
-                                            hitboxes[state]->get_rectangle(),
-                                            collision::direction::left))
-        {
-            if (state != character_state::jump &&
-                state != character_state::fall)
-            {
-                set_state(character_state::idle);
-                return;
-            }
-        }
-    }
-    else if (delta_x > 0.f)
-    {
+    if (delta_pos.x > 0.f)
         change_direction(0);
-        if (collision::map_with_game_object(level_map,
-                                            global_pos,
-                                            hitboxes[state]->get_rectangle(),
-                                            collision::direction::right))
-        {
-            if (state != character_state::jump &&
-                state != character_state::fall)
-            {
-                set_state(character_state::idle);
-                return;
-            }
-        }
-    }
+    else if (delta_pos.x < 0.f)
+        change_direction(1);
 
-    if (state != character_state::jump && state != character_state::fall &&
-        !collision::map_with_game_object(level_map,
-                                         global_pos,
-                                         hitboxes[state]->get_rectangle(),
-                                         collision::direction::down))
-    {
-        set_state(character_state::fall);
-        delta_y += speed;
-    }
-
-    global_pos.y += delta_y;
-
-    if (delta_y > 0.f)
-    {
-        if (collision::map_with_game_object(level_map,
-                                            global_pos,
-                                            hitboxes[state]->get_rectangle(),
-                                            collision::direction::down))
-        {
-            set_state(character_state::idle);
-            return;
-        }
-        else
-            set_state(character_state::fall);
-    }
-    else if (delta_y < 0.f)
-        if (collision::map_with_game_object(level_map,
-                                            global_pos,
-                                            hitboxes[state]->get_rectangle(),
-                                            collision::direction::up))
-        {
-            set_state(character_state::fall);
-            jump_height_dt = 0.f;
-        }
-
-    if (state != character_state::jump && state != character_state::fall)
-        set_state(character_state::move);
+    resolve_map_collision(delta_pos);
 }
 
-void hero::jump()
+bool hero::jump()
 {
     set_state(character_state::jump);
 
@@ -251,11 +195,14 @@ void hero::jump()
 
     jump_height_dt += jump_force;
 
-    if (jump_height_dt >= jump_height)
+    if (jump_height_dt > jump_height)
     {
         set_state(character_state::fall);
         jump_height_dt = 0.f;
+        return false;
     }
+
+    return true;
 }
 
 void hero::attack()

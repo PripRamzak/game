@@ -1,7 +1,7 @@
 #include "engine/include/buttons.hxx"
+#include "engine/include/camera.hxx"
 #include "engine/include/engine.hxx"
 
-#include "include/camera.hxx"
 #include "include/enemy.hxx"
 #include "include/hero.hxx"
 #include "include/interface.hxx"
@@ -12,11 +12,11 @@
 #include <memory>
 #include <thread>
 
+#include <variant>
+
 #ifdef __ANDROID__
 #include <SDL3/SDL_main.h>
 #endif
-
-#include <glm/gtc/type_ptr.hpp>
 
 int main(int /*argc*/, char** /*argv*/)
 {
@@ -25,30 +25,21 @@ int main(int /*argc*/, char** /*argv*/)
 
     resources::init();
 
-    float window_width =
-        static_cast<float>(prip_engine::get_window_width_pixels());
-    float window_height =
-        static_cast<float>(prip_engine::get_window_height_pixels());
-
-    camera::init(window_width, window_height);
-
-    using namespace std::chrono_literals;
-
     // Map creating
-    map* dungeon_map = new map(64.f, 64.f, "data/level_1.txt");
+    map* dungeon_map = new map("data/level1.tmx", 64);
 
     // Warrior creating
-    hero* warrior = new hero({ 300.f, 464.f }, 0, dungeon_map);
+    hero* warrior = new hero({ 300.f, 256.f }, 0, dungeon_map);
 
     // Skeleton creating
 
     std::vector<enemy*> enemies;
-    enemies.push_back(
-        new skeleton_spearman({ 800.f, 418.f }, 0, dungeon_map, warrior));
-    enemies.push_back(
-        new skeleton_warrior({ 1700.f, 450.f }, 0, dungeon_map, warrior));
-    enemies.push_back(
-        new skeleton_archer({ 2500, 450.f }, 1, dungeon_map, warrior));
+    // enemies.push_back(
+    //     new skeleton_spearman({ 800.f, 418.f }, 0, dungeon_map, warrior));
+    // enemies.push_back(
+    //     new skeleton_warrior({ 1700.f, 450.f }, 0, dungeon_map, warrior));
+    // enemies.push_back(
+    //     new skeleton_archer({ 2500, 450.f }, 1, dungeon_map, warrior));
 
     // Sound
 
@@ -104,7 +95,7 @@ int main(int /*argc*/, char** /*argv*/)
             }
 
             // Render
-            camera::look_at(warrior->get_global_pos());
+            prip_engine::camera::look_at(warrior->get_global_pos());
 
             dungeon_map->draw();
             for (auto enemy : enemies)

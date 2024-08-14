@@ -30,7 +30,7 @@ void enemy::draw()
     character::draw();
 
     if (state != character_state::dead)
-        attack_trigger->draw(global_pos);
+        attack_trigger->draw();
 }
 
 void enemy::move()
@@ -66,11 +66,7 @@ void enemy::attack(std::chrono::milliseconds delta_time)
 
     if (anim_current_number == anim_quantity - 1)
     {
-        if (collision::game_object_with_game_object(
-                global_pos,
-                attack_collider->get_rectangle(),
-                target->get_global_pos(),
-                target->get_hitbox()->get_rectangle()))
+        if (attack_collider->detect(target->get_hitbox()))
             target->hurt();
         set_state(character_state::idle);
     }
@@ -79,11 +75,7 @@ void enemy::attack(std::chrono::milliseconds delta_time)
 void enemy::is_damaged(std::chrono::milliseconds delta_time)
 {
     if (target->is_attacked() && !damaged)
-        if (collision::game_object_with_game_object(
-                global_pos,
-                get_hitbox()->get_rectangle(),
-                target->get_global_pos(),
-                target->get_attack_collider()->get_rectangle()))
+        if (get_hitbox()->detect(target->get_attack_collider()))
         {
             hurt();
             damaged = true;
@@ -130,46 +122,59 @@ skeleton_warrior::skeleton_warrior(prip_engine::transform2d global_pos,
                     anim_skeleton_warrior_attack);
     sprites.emplace(character_state::dead, anim_skeleton_warrior_dead);
 
-    collision::collider* idle_hitbox =
-        new collision::collider({ -15.f, -26.f },
-                                { 34.f, 58.f },
-                                { prip_engine::e_color::GREEN, 0.6f },
-                                size,
-                                direction);
-    collision::collider* run_hitbox =
-        new collision::collider({ -19.f, -26.f },
-                                { 34.f, 58.f },
-                                { prip_engine::e_color::GREEN, 0.6f },
-                                size,
-                                direction);
-    collision::collider* attack_hitbox =
-        new collision::collider({ -23.f, -30.f },
-                                { 40.f, 62.f },
-                                { prip_engine::e_color::GREEN, 0.6f },
-                                size,
-                                direction);
+    prip_engine::collider* idle_hitbox =
+        new prip_engine::collider(global_pos,
+                                  { -15.f, -26.f },
+                                  { 34.f, 58.f },
+                                  { prip_engine::e_color::GREEN, 0.6f },
+                                  size,
+                                  direction,
+                                  true);
+    prip_engine::collider* run_hitbox =
+        new prip_engine::collider(global_pos,
+                                  { -19.f, -26.f },
+                                  { 34.f, 58.f },
+                                  { prip_engine::e_color::GREEN, 0.6f },
+                                  size,
+                                  direction,
+                                  true);
+    prip_engine::collider* attack_hitbox =
+        new prip_engine::collider(global_pos,
+                                  { -23.f, -30.f },
+                                  { 40.f, 62.f },
+                                  { prip_engine::e_color::GREEN, 0.6f },
+                                  size,
+                                  direction,
+                                  true);
 
     hitboxes.emplace(character_state::idle, idle_hitbox);
     hitboxes.emplace(character_state::move, run_hitbox);
     hitboxes.emplace(character_state::melee_attack, attack_hitbox);
 
     attack_collider =
-        new collision::collider{ { 17.f, -30.f },
-                                 { 40.f, 62.f },
-                                 { prip_engine::e_color::ORANGE, 0.6f },
-                                 size,
-                                 direction };
+        new prip_engine::collider{ global_pos,
+                                   { 17.f, -30.f },
+                                   { 40.f, 62.f },
+                                   { prip_engine::e_color::ORANGE, 0.6f },
+                                   size,
+                                   direction,
+                                   true };
     attack_trigger =
-        new collision::collider{ { -22.f, -50.f },
-                                 { 70.f, 100.f },
-                                 { prip_engine::e_color::YELLOW, 0.6f },
-                                 size,
-                                 direction };
-    agro_trigger = new collision::collider{ { -300.f, -50.f },
-                                            { 600.f, 100.f },
-                                            { prip_engine::e_color::RED, 0.6f },
-                                            1.f,
-                                            direction };
+        new prip_engine::collider{ global_pos,
+                                   { -22.f, -50.f },
+                                   { 70.f, 100.f },
+                                   { prip_engine::e_color::YELLOW, 0.6f },
+                                   size,
+                                   direction,
+                                   true };
+    agro_trigger =
+        new prip_engine::collider{ global_pos,
+                                   { -300.f, -50.f },
+                                   { 600.f, 100.f },
+                                   { prip_engine::e_color::RED, 0.6f },
+                                   1.f,
+                                   direction,
+                                   true };
 }
 
 void skeleton_warrior::update(std::chrono::milliseconds delta_time)
@@ -183,11 +188,7 @@ void skeleton_warrior::update(std::chrono::milliseconds delta_time)
             change_direction(global_pos.x < target->get_global_pos().x ? 0 : 1);
             attack_trigger->change_pos(direction);
 
-            if (collision::game_object_with_game_object(
-                    global_pos,
-                    attack_trigger->get_rectangle(),
-                    target->get_global_pos(),
-                    target->get_hitbox()->get_rectangle()) ||
+            if (attack_trigger->detect(target->get_hitbox()) ||
                 state == character_state::melee_attack)
                 attack(delta_time);
             else if (state != character_state::melee_attack)
@@ -196,11 +197,7 @@ void skeleton_warrior::update(std::chrono::milliseconds delta_time)
                 attack_delay_dt = 0ms;
             }
         }
-        else if (collision::game_object_with_game_object(
-                     global_pos,
-                     agro_trigger->get_rectangle(),
-                     target->get_global_pos(),
-                     target->get_hitbox()->get_rectangle()))
+        else if (agro_trigger->detect(target->get_hitbox()))
             agro = true;
     }
     else if (get_animation()->get_current_frame_number() ==
@@ -215,7 +212,7 @@ void skeleton_warrior::draw()
     enemy::draw();
 
     if (state != character_state::dead)
-        agro_trigger->draw(global_pos);
+        agro_trigger->draw();
 }
 
 skeleton_warrior::~skeleton_warrior()
@@ -257,41 +254,51 @@ skeleton_spearman::skeleton_spearman(prip_engine::transform2d global_pos,
                     anim_skeleton_spearman_attack);
     sprites.emplace(character_state::dead, anim_skeleton_spearman_dead);
 
-    collision::collider* idle_hitbox =
-        new collision::collider({ -14.f, -16.f },
-                                { 28.f, 64.f },
-                                { prip_engine::e_color::GREEN, 0.6f },
-                                size,
-                                direction);
-    collision::collider* walk_hitbox =
-        new collision::collider({ -16.f, -17.f },
-                                { 24.f, 64.f },
-                                { prip_engine::e_color::GREEN, 0.6f },
-                                size,
-                                direction);
-    collision::collider* attack_hitbox =
-        new collision::collider({ -32.f, -8.f },
-                                { 32.f, 54.f },
-                                { prip_engine::e_color::GREEN, 0.6f },
-                                size,
-                                direction);
+    prip_engine::collider* idle_hitbox =
+        new prip_engine::collider(global_pos,
+                                  { -14.f, -16.f },
+                                  { 28.f, 64.f },
+                                  { prip_engine::e_color::GREEN, 0.6f },
+                                  size,
+                                  direction,
+                                  true);
+    prip_engine::collider* walk_hitbox =
+        new prip_engine::collider(global_pos,
+                                  { -16.f, -17.f },
+                                  { 24.f, 64.f },
+                                  { prip_engine::e_color::GREEN, 0.6f },
+                                  size,
+                                  direction,
+                                  true);
+    prip_engine::collider* attack_hitbox =
+        new prip_engine::collider(global_pos,
+                                  { -32.f, -8.f },
+                                  { 32.f, 54.f },
+                                  { prip_engine::e_color::GREEN, 0.6f },
+                                  size,
+                                  direction,
+                                  true);
 
     hitboxes.emplace(character_state::idle, idle_hitbox);
     hitboxes.emplace(character_state::move, walk_hitbox);
     hitboxes.emplace(character_state::melee_attack, attack_hitbox);
 
     attack_collider =
-        new collision::collider{ { 0.f, 5.f },
-                                 { 52.f, 20.f },
-                                 { prip_engine::e_color::ORANGE, 0.6f },
-                                 size,
-                                 direction };
+        new prip_engine::collider{ global_pos,
+                                   { 0.f, 5.f },
+                                   { 52.f, 20.f },
+                                   { prip_engine::e_color::ORANGE, 0.6f },
+                                   size,
+                                   direction,
+                                   true };
     attack_trigger =
-        new collision::collider{ { -35.f, -50.f },
-                                 { 70.f, 100.f },
-                                 { prip_engine::e_color::YELLOW, 0.6f },
-                                 size,
-                                 direction };
+        new prip_engine::collider{ global_pos,
+                                   { -35.f, -50.f },
+                                   { 70.f, 100.f },
+                                   { prip_engine::e_color::YELLOW, 0.6f },
+                                   size,
+                                   direction,
+                                   true };
 }
 
 void skeleton_spearman::update(std::chrono::milliseconds delta_time)
@@ -300,11 +307,7 @@ void skeleton_spearman::update(std::chrono::milliseconds delta_time)
     {
         is_damaged(delta_time);
 
-        if (collision::game_object_with_game_object(
-                global_pos,
-                attack_trigger->get_rectangle(),
-                target->get_global_pos(),
-                target->get_hitbox()->get_rectangle()) ||
+        if (attack_trigger->detect(target->get_hitbox()) ||
             state == character_state::melee_attack)
         {
             change_direction(global_pos.x < target->get_global_pos().x ? 0 : 1);
@@ -384,30 +387,38 @@ skeleton_archer::skeleton_archer(prip_engine::transform2d global_pos,
     sprites.emplace(character_state::range_attack, anim_skeleton_archer_shot);
     sprites.emplace(character_state::dead, anim_skeleton_archer_dead);
 
-    collision::collider* idle_hitbox =
-        new collision::collider({ -18.f, -32.f },
-                                { 28.f, 64.f },
-                                { prip_engine::e_color::GREEN, 0.6f },
-                                size,
-                                direction);
-    collision::collider* walk_hitbox =
-        new collision::collider({ -12.f, -32.f },
-                                { 24.f, 64.f },
-                                { prip_engine::e_color::GREEN, 0.6f },
-                                size,
-                                direction);
-    collision::collider* attack_hitbox =
-        new collision::collider({ -22.f, -33.f },
-                                { 30.f, 66.f },
-                                { prip_engine::e_color::GREEN, 0.6f },
-                                size,
-                                direction);
-    collision::collider* shot_hitbox =
-        new collision::collider({ -18.f, -34.f },
-                                { 28.f, 66.f },
-                                { prip_engine::e_color::GREEN, 0.6f },
-                                size,
-                                direction);
+    prip_engine::collider* idle_hitbox =
+        new prip_engine::collider(global_pos,
+                                  { -18.f, -32.f },
+                                  { 28.f, 64.f },
+                                  { prip_engine::e_color::GREEN, 0.6f },
+                                  size,
+                                  direction,
+                                  true);
+    prip_engine::collider* walk_hitbox =
+        new prip_engine::collider(global_pos,
+                                  { -12.f, -32.f },
+                                  { 24.f, 64.f },
+                                  { prip_engine::e_color::GREEN, 0.6f },
+                                  size,
+                                  direction,
+                                  true);
+    prip_engine::collider* attack_hitbox =
+        new prip_engine::collider(global_pos,
+                                  { -22.f, -33.f },
+                                  { 30.f, 66.f },
+                                  { prip_engine::e_color::GREEN, 0.6f },
+                                  size,
+                                  direction,
+                                  true);
+    prip_engine::collider* shot_hitbox =
+        new prip_engine::collider(global_pos,
+                                  { -18.f, -34.f },
+                                  { 28.f, 66.f },
+                                  { prip_engine::e_color::GREEN, 0.6f },
+                                  size,
+                                  direction,
+                                  true);
 
     hitboxes.emplace(character_state::idle, idle_hitbox);
     hitboxes.emplace(character_state::move, walk_hitbox);
@@ -415,22 +426,29 @@ skeleton_archer::skeleton_archer(prip_engine::transform2d global_pos,
     hitboxes.emplace(character_state::range_attack, shot_hitbox);
 
     attack_collider =
-        new collision::collider({ 10.f, -5.f },
-                                { 24.f, 24.f },
-                                { prip_engine::e_color::ORANGE, 0.6f },
-                                size,
-                                direction);
+        new prip_engine::collider(global_pos,
+                                  { 10.f, -5.f },
+                                  { 24.f, 24.f },
+                                  { prip_engine::e_color::ORANGE, 0.6f },
+                                  size,
+                                  direction,
+                                  true);
     attack_trigger =
-        new collision::collider({ -20.f, -33.f },
-                                { 40.f, 66.f },
-                                { prip_engine::e_color::YELLOW, 0.6f },
-                                size,
-                                direction);
-    shot_trigger = new collision::collider({ -500.f, -33.f },
-                                           { 1000.f, 66.f },
-                                           { prip_engine::e_color::RED, 0.6f },
-                                           1.f,
-                                           direction);
+        new prip_engine::collider(global_pos,
+                                  { -20.f, -33.f },
+                                  { 40.f, 66.f },
+                                  { prip_engine::e_color::YELLOW, 0.6f },
+                                  size,
+                                  direction,
+                                  true);
+    shot_trigger =
+        new prip_engine::collider(global_pos,
+                                  { -500.f, -33.f },
+                                  { 1000.f, 66.f },
+                                  { prip_engine::e_color::RED, 0.6f },
+                                  1.f,
+                                  direction,
+                                  true);
 }
 
 void skeleton_archer::update(std::chrono::milliseconds delta_time)
@@ -439,21 +457,13 @@ void skeleton_archer::update(std::chrono::milliseconds delta_time)
     {
         is_damaged(delta_time);
 
-        if (collision::game_object_with_game_object(
-                global_pos,
-                attack_trigger->get_rectangle(),
-                target->get_global_pos(),
-                target->get_hitbox()->get_rectangle()) ||
+        if (attack_trigger->detect(target->get_hitbox()) ||
             state == character_state::melee_attack)
         {
             change_direction(global_pos.x < target->get_global_pos().x ? 0 : 1);
             attack(delta_time);
         }
-        else if (collision::game_object_with_game_object(
-                     global_pos,
-                     shot_trigger->get_rectangle(),
-                     target->get_global_pos(),
-                     target->get_hitbox()->get_rectangle()) ||
+        else if (shot_trigger->detect(target->get_hitbox()) ||
                  state == character_state::range_attack)
         {
             change_direction(global_pos.x < target->get_global_pos().x ? 0 : 1);
@@ -484,7 +494,7 @@ void skeleton_archer::draw()
     enemy::draw();
 
     if (state != character_state::dead)
-        shot_trigger->draw(global_pos);
+        shot_trigger->draw();
 }
 
 skeleton_archer::~skeleton_archer()
