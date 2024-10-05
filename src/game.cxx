@@ -29,7 +29,7 @@ int main(int /*argc*/, char** /*argv*/)
     map* dungeon_map = new map("data/level1.tmx", 64);
 
     // Warrior creating
-    hero* warrior = new hero({ 300.f, 256.f }, 0, dungeon_map);
+    hero* warrior = new hero({ 300.f, 260.f }, 0, dungeon_map);
 
     // Skeleton creating
 

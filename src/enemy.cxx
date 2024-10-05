@@ -123,7 +123,7 @@ skeleton_warrior::skeleton_warrior(prip_engine::transform2d global_pos,
     sprites.emplace(character_state::dead, anim_skeleton_warrior_dead);
 
     prip_engine::collider* idle_hitbox =
-        new prip_engine::collider(global_pos,
+        new prip_engine::collider(this->global_pos,
                                   { -15.f, -26.f },
                                   { 34.f, 58.f },
                                   { prip_engine::e_color::GREEN, 0.6f },
@@ -131,7 +131,7 @@ skeleton_warrior::skeleton_warrior(prip_engine::transform2d global_pos,
                                   direction,
                                   true);
     prip_engine::collider* run_hitbox =
-        new prip_engine::collider(global_pos,
+        new prip_engine::collider(this->global_pos,
                                   { -19.f, -26.f },
                                   { 34.f, 58.f },
                                   { prip_engine::e_color::GREEN, 0.6f },
@@ -139,7 +139,7 @@ skeleton_warrior::skeleton_warrior(prip_engine::transform2d global_pos,
                                   direction,
                                   true);
     prip_engine::collider* attack_hitbox =
-        new prip_engine::collider(global_pos,
+        new prip_engine::collider(this->global_pos,
                                   { -23.f, -30.f },
                                   { 40.f, 62.f },
                                   { prip_engine::e_color::GREEN, 0.6f },
@@ -152,7 +152,7 @@ skeleton_warrior::skeleton_warrior(prip_engine::transform2d global_pos,
     hitboxes.emplace(character_state::melee_attack, attack_hitbox);
 
     attack_collider =
-        new prip_engine::collider{ global_pos,
+        new prip_engine::collider{ this->global_pos,
                                    { 17.f, -30.f },
                                    { 40.f, 62.f },
                                    { prip_engine::e_color::ORANGE, 0.6f },
@@ -160,7 +160,7 @@ skeleton_warrior::skeleton_warrior(prip_engine::transform2d global_pos,
                                    direction,
                                    true };
     attack_trigger =
-        new prip_engine::collider{ global_pos,
+        new prip_engine::collider{ this->global_pos,
                                    { -22.f, -50.f },
                                    { 70.f, 100.f },
                                    { prip_engine::e_color::YELLOW, 0.6f },
@@ -168,7 +168,7 @@ skeleton_warrior::skeleton_warrior(prip_engine::transform2d global_pos,
                                    direction,
                                    true };
     agro_trigger =
-        new prip_engine::collider{ global_pos,
+        new prip_engine::collider{ this->global_pos,
                                    { -300.f, -50.f },
                                    { 600.f, 100.f },
                                    { prip_engine::e_color::RED, 0.6f },
@@ -255,7 +255,7 @@ skeleton_spearman::skeleton_spearman(prip_engine::transform2d global_pos,
     sprites.emplace(character_state::dead, anim_skeleton_spearman_dead);
 
     prip_engine::collider* idle_hitbox =
-        new prip_engine::collider(global_pos,
+        new prip_engine::collider(this->global_pos,
                                   { -14.f, -16.f },
                                   { 28.f, 64.f },
                                   { prip_engine::e_color::GREEN, 0.6f },
@@ -263,7 +263,7 @@ skeleton_spearman::skeleton_spearman(prip_engine::transform2d global_pos,
                                   direction,
                                   true);
     prip_engine::collider* walk_hitbox =
-        new prip_engine::collider(global_pos,
+        new prip_engine::collider(this->global_pos,
                                   { -16.f, -17.f },
                                   { 24.f, 64.f },
                                   { prip_engine::e_color::GREEN, 0.6f },
@@ -271,7 +271,7 @@ skeleton_spearman::skeleton_spearman(prip_engine::transform2d global_pos,
                                   direction,
                                   true);
     prip_engine::collider* attack_hitbox =
-        new prip_engine::collider(global_pos,
+        new prip_engine::collider(this->global_pos,
                                   { -32.f, -8.f },
                                   { 32.f, 54.f },
                                   { prip_engine::e_color::GREEN, 0.6f },
@@ -284,7 +284,7 @@ skeleton_spearman::skeleton_spearman(prip_engine::transform2d global_pos,
     hitboxes.emplace(character_state::melee_attack, attack_hitbox);
 
     attack_collider =
-        new prip_engine::collider{ global_pos,
+        new prip_engine::collider{ this->global_pos,
                                    { 0.f, 5.f },
                                    { 52.f, 20.f },
                                    { prip_engine::e_color::ORANGE, 0.6f },
@@ -292,7 +292,7 @@ skeleton_spearman::skeleton_spearman(prip_engine::transform2d global_pos,
                                    direction,
                                    true };
     attack_trigger =
-        new prip_engine::collider{ global_pos,
+        new prip_engine::collider{ this->global_pos,
                                    { -35.f, -50.f },
                                    { 70.f, 100.f },
                                    { prip_engine::e_color::YELLOW, 0.6f },
@@ -388,7 +388,7 @@ skeleton_archer::skeleton_archer(prip_engine::transform2d global_pos,
     sprites.emplace(character_state::dead, anim_skeleton_archer_dead);
 
     prip_engine::collider* idle_hitbox =
-        new prip_engine::collider(global_pos,
+        new prip_engine::collider(this->global_pos,
                                   { -18.f, -32.f },
                                   { 28.f, 64.f },
                                   { prip_engine::e_color::GREEN, 0.6f },
@@ -396,7 +396,7 @@ skeleton_archer::skeleton_archer(prip_engine::transform2d global_pos,
                                   direction,
                                   true);
     prip_engine::collider* walk_hitbox =
-        new prip_engine::collider(global_pos,
+        new prip_engine::collider(this->global_pos,
                                   { -12.f, -32.f },
                                   { 24.f, 64.f },
                                   { prip_engine::e_color::GREEN, 0.6f },
@@ -404,7 +404,7 @@ skeleton_archer::skeleton_archer(prip_engine::transform2d global_pos,
                                   direction,
                                   true);
     prip_engine::collider* attack_hitbox =
-        new prip_engine::collider(global_pos,
+        new prip_engine::collider(this->global_pos,
                                   { -22.f, -33.f },
                                   { 30.f, 66.f },
                                   { prip_engine::e_color::GREEN, 0.6f },
@@ -412,7 +412,7 @@ skeleton_archer::skeleton_archer(prip_engine::transform2d global_pos,
                                   direction,
                                   true);
     prip_engine::collider* shot_hitbox =
-        new prip_engine::collider(global_pos,
+        new prip_engine::collider(this->global_pos,
                                   { -18.f, -34.f },
                                   { 28.f, 66.f },
                                   { prip_engine::e_color::GREEN, 0.6f },
@@ -426,7 +426,7 @@ skeleton_archer::skeleton_archer(prip_engine::transform2d global_pos,
     hitboxes.emplace(character_state::range_attack, shot_hitbox);
 
     attack_collider =
-        new prip_engine::collider(global_pos,
+        new prip_engine::collider(this->global_pos,
                                   { 10.f, -5.f },
                                   { 24.f, 24.f },
                                   { prip_engine::e_color::ORANGE, 0.6f },
@@ -434,7 +434,7 @@ skeleton_archer::skeleton_archer(prip_engine::transform2d global_pos,
                                   direction,
                                   true);
     attack_trigger =
-        new prip_engine::collider(global_pos,
+        new prip_engine::collider(this->global_pos,
                                   { -20.f, -33.f },
                                   { 40.f, 66.f },
                                   { prip_engine::e_color::YELLOW, 0.6f },
@@ -442,7 +442,7 @@ skeleton_archer::skeleton_archer(prip_engine::transform2d global_pos,
                                   direction,
                                   true);
     shot_trigger =
-        new prip_engine::collider(global_pos,
+        new prip_engine::collider(this->global_pos,
                                   { -500.f, -33.f },
                                   { 1000.f, 66.f },
                                   { prip_engine::e_color::RED, 0.6f },

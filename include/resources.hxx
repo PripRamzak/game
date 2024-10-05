@@ -13,11 +13,12 @@ extern prip_engine::texture* heart_full;
 extern prip_engine::texture* heart_half;
 extern prip_engine::texture* heart_empty;
 
-extern prip_engine::sprite* warrior_idle;
-extern prip_engine::sprite* warrior_run;
-extern prip_engine::sprite* warrior_attack;
-extern prip_engine::sprite* warrior_jump;
-extern prip_engine::sprite* warrior_fall;
+extern prip_engine::sprite* hero_idle;
+extern prip_engine::sprite* hero_run;
+extern prip_engine::sprite* hero_attack;
+extern prip_engine::sprite* hero_jump;
+extern prip_engine::sprite* hero_fall;
+extern prip_engine::sprite* hero_dead;
 
 extern prip_engine::sprite* skeleton_warrior_idle;
 extern prip_engine::sprite* skeleton_warrior_run;

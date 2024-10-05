@@ -1,6 +1,8 @@
 #include "include/animation.hxx"
 #include "include/camera.hxx"
 
+#include <glm/gtc/type_ptr.hpp>
+
 using namespace std::chrono_literals;
 
 namespace prip_engine
@@ -37,17 +39,27 @@ void animation::reset()
     delta_time           = 0ms;
 }
 
-void animation::draw(float* m_model)
+void animation::draw(transform2d pos, transform2d scale, float rotation_angle)
 {
+    transform2d origin = anim_sprite->get_origin();
+
+    glm::mat4 model =
+        glm::translate(glm::mat4{ 1.f }, glm::vec3(pos.x, pos.y, 0.f));
+    model = glm::rotate(
+        model, glm::radians(rotation_angle), glm::vec3{ 0.f, 1.f, 0.f });
+    model = glm::translate(model, glm::vec3(origin.x, origin.y, 0.f));
+    model           = glm::scale(model, glm::vec3{ scale.x, scale.y, 0.f });
+
     shader->use();
 
-    shader->set_uniform_matrix4fv("model", 1, false, m_model);
+    shader->set_uniform_matrix4fv("model", 1, false, glm::value_ptr(model));
     shader->set_uniform_matrix4fv("view", 1, false, camera::get_view());
     shader->set_uniform_matrix4fv(
         "projection", 1, false, camera::get_projection());
 
-    shader->set_uniform_1f("quantity", static_cast<float>(frames_quantity));
-    shader->set_uniform_1f("number", static_cast<float>(current_frame_number));
+    shader->set_uniform_1f("offset_u",
+                           1.f / static_cast<float>(frames_quantity) *
+                               static_cast<float>(current_frame_number));
 
     anim_sprite->get_texture()->bind();
 

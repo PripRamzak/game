@@ -75,7 +75,7 @@ memory_buf load_file(std::string_view path)
         throw std::runtime_error("can't read all content from file: " +
                                  std::string(path));
 
-    if (SDL_CloseIO(io) != 0)
+    if (!SDL_CloseIO(io))
         throw std::runtime_error("failed close file: " + std::string(path));
 
     return memory_buf(std::move(mem), size);

@@ -8,10 +8,9 @@
 
 #include <algorithm>
 #include <iostream>
+#include <bitset>
 
 #include <tinyxml2.h>
-
-#include "glm/gtc/type_ptr.hpp"
 
 map::map(std::string file_path, int tile_size)
     : tileset(resources::dungeon)
@@ -68,6 +67,9 @@ map::map(std::string file_path, int tile_size)
 
     while (element_layer->FirstChildElement("data"))
     {
+        layer layer;
+        layer.name = element_layer->Name();
+
         tinyxml2::XMLElement* element_data;
         element_data = element_layer->FirstChildElement("data");
 
@@ -79,7 +81,6 @@ map::map(std::string file_path, int tile_size)
             ' ');
         std::stringstream stream_number(tile_ids);
 
-        layer layer;
         for (int y = 0; y < height; y++)
             for (int x = 0; x < width; x++)
             {
@@ -116,29 +117,70 @@ map::map(std::string file_path, int tile_size)
 
     tinyxml2::XMLElement* element_object_group =
         element_map->FirstChildElement("objectgroup");
-    tinyxml2::XMLElement* element_object =
-        element_object_group->FirstChildElement("object");
 
-    while (element_object)
+    if (!element_object_group)
+        throw std::runtime_error("Failed to read level file");
+
+    while (element_object_group)
     {
-        prip_engine::transform2d collider_pos{
-            element_object->FloatAttribute("x") * tile_scale.x,
-            element_object->FloatAttribute("y") * tile_scale.y
-        };
-        prip_engine::transform2d collider_size{
-            element_object->FloatAttribute("width") * tile_scale.x,
-            element_object->FloatAttribute("height") * tile_scale.y
-        };
-        colliders.push_back(
-            new prip_engine::collider(collider_pos,
-                                      { 0.f, 0.f },
-                                      collider_size,
-                                      { prip_engine::e_color::GREEN, 0.6f },
-                                      1.f,
-                                      0,
-                                      false));
+        tinyxml2::XMLElement* element_object =
+            element_object_group->FirstChildElement("object");
 
-        element_object = element_object->NextSiblingElement();
+        std::string name = element_object_group->Attribute("name");
+
+        if (strcmp(element_object_group->Attribute("name"), "collision") == 0)
+        {
+            while (element_object)
+            {
+                prip_engine::transform2d collider_pos{
+                    element_object->FloatAttribute("x") * tile_scale.x,
+                    element_object->FloatAttribute("y") * tile_scale.y
+                };
+                prip_engine::transform2d collider_size{
+                    element_object->FloatAttribute("width") * tile_scale.x,
+                    element_object->FloatAttribute("height") * tile_scale.y
+                };
+
+                if (strcmp(element_object->Attribute("name"), "collider") == 0)
+                    colliders.push_back(new prip_engine::collider(
+                        collider_pos,
+                        { 0.f, 0.f },
+                        collider_size,
+                        { prip_engine::e_color::GREEN, 0.6f },
+                        1.f,
+                        0,
+                        false));
+                else
+                {
+                    tinyxml2::XMLElement* element_properties =
+                        element_object->FirstChildElement();
+                    tinyxml2::XMLElement* element_property =
+                        element_properties->FirstChildElement("property");
+                    std::string type = element_property->Attribute("value");
+
+                    prip_engine::trigger::type t;
+                    if (type == "damage")
+                        t = prip_engine::trigger::type::damage;
+
+                    triggers.push_back(new prip_engine::trigger(
+                        collider_pos,
+                        { 0.f, 0.f },
+                        collider_size,
+                        { prip_engine::e_color::YELLOW, 0.6f },
+                        1.f,
+                        0,
+                        false,
+                        t));
+                }
+
+                element_object = element_object->NextSiblingElement();
+            }
+        }
+        else
+            spawn_pos = { element_object->FloatAttribute("x") * tile_scale.x,
+                          element_object->FloatAttribute("y") * tile_scale.y };
+
+        element_object_group = element_object_group->NextSiblingElement();
     }
 }
 
@@ -174,6 +216,16 @@ prip_engine::texture* map::get_tileset()
 const std::vector<prip_engine::collider*>& map::get_colliders()
 {
     return colliders;
+}
+
+const std::vector<prip_engine::trigger*>& map::get_triggers()
+{
+    return triggers;
+}
+
+prip_engine::transform2d map::get_spawn_pos()
+{
+    return spawn_pos;
 }
 
 map::layer::object::object(prip_engine::transform2d pos, int tile_id)

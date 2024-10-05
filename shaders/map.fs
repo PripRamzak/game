@@ -10,5 +10,5 @@ uniform sampler2D tileset;
 
 void main()
 {
-    frag_color = texture2D(tileset, uv);
+    frag_color = texture(tileset, uv);
 }

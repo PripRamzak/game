@@ -44,19 +44,14 @@ target_include_directories(engine PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/imgui)
 
+target_link_libraries(imgui PUBLIC SDL3::SDL3-shared)
+
+target_link_libraries(engine PRIVATE imgui glm::glm tinyxml2::tinyxml2)
+
 if (ANDROID)
     target_link_libraries(engine PRIVATE
-            SDL3::SDL3-shared
-            glm::glm
             android
             log
             EGL
             GLESv2)
-else ()
-    target_link_libraries(engine PRIVATE
-            SDL3::SDL3-shared
-            glm::glm
-            tinyxml2::tinyxml2)
-endif ()
-
-target_link_libraries(engine PRIVATE imgui)
+endif()

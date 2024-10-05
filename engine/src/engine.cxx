@@ -71,7 +71,7 @@ static int         window_height        = 0;
 static int         window_width_pixels  = 0;
 static int         window_height_pixels = 0;
 
-static SDL_GLContext   context;
+static SDL_GLContext context;
 
 static std::vector<buttons> mobile_buttons;
 static index_buffer*        buttons_index_buffer;
@@ -96,7 +96,7 @@ bool init()
     std::cerr.rdbuf(&logcat);
 #endif
 
-    if (SDL_Init(SDL_INIT_AUDIO | SDL_INIT_VIDEO) != 0)
+    if (!SDL_Init(SDL_INIT_AUDIO | SDL_INIT_VIDEO))
     {
         std::cerr << "Init error : " << SDL_GetError() << std::endl;
         return false;
@@ -125,7 +125,7 @@ bool init()
     if (!window)
     {
         std::cerr << "CreateWindow error: " << SDL_GetError() << std::endl;
-        SDL_Quit();
+        destroy();
         return false;
     }
 
@@ -158,17 +158,14 @@ bool init()
     if (context == nullptr)
     {
         std::cerr << "CreateContext error: " << SDL_GetError() << std::endl;
-        SDL_DestroyWindow(window);
-        SDL_Quit();
+        destroy();
         return false;
     }
 
-    if (SDL_GL_GetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, &gl_major_version))
+    if (!SDL_GL_GetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, &gl_major_version))
     {
         std::cerr << "GL_GetAttribute error: " << SDL_GetError() << std::endl;
-        SDL_GL_DeleteContext(context);
-        SDL_DestroyWindow(window);
-        SDL_Quit();
+        destroy();
         return false;
     }
 
@@ -179,9 +176,7 @@ bool init()
         std::cerr << "Current OpenGL version: " << gl_major_version << '.'
                   << gl_minor_version << " ES" << std::endl;
         std::cerr << "Need OpenGL version: 3.2 ES" << std::endl;
-        SDL_GL_DeleteContext(context);
-        SDL_DestroyWindow(window);
-        SDL_Quit();
+        destroy();
         return false;
     }
     else if (platform == "Windows"sv && gl_major_version < 4 &&
@@ -190,9 +185,7 @@ bool init()
         std::cerr << "Current OpenGL version: " << gl_major_version << '.'
                   << gl_minor_version << std::endl;
         std::cerr << "At least need OpenGL version: 4.3" << std::endl;
-        SDL_GL_DeleteContext(context);
-        SDL_DestroyWindow(window);
-        SDL_Quit();
+        destroy();
         return false;
     }
 
@@ -211,9 +204,7 @@ bool init()
     if (!gladLoadGLES2Loader(gl_function_loader))
     {
         std::cerr << "LoadGlFunctions error" << std::endl;
-        SDL_GL_DeleteContext(context);
-        SDL_DestroyWindow(window);
-        SDL_Quit();
+        destroy();
         return false;
     }
 #endif
@@ -222,24 +213,18 @@ bool init()
     if (!sprite::shader->create_shader("shaders/sprite.vs",
                                        shader_type::vertex))
     {
-        SDL_GL_DeleteContext(context);
-        SDL_DestroyWindow(window);
-        SDL_Quit();
+        destroy();
         return false;
     }
     if (!sprite::shader->create_shader("shaders/sprite.fs",
                                        shader_type::fragment))
     {
-        SDL_GL_DeleteContext(context);
-        SDL_DestroyWindow(window);
-        SDL_Quit();
+        destroy();
         return false;
     }
     if (!sprite::shader->link())
     {
-        SDL_GL_DeleteContext(context);
-        SDL_DestroyWindow(window);
-        SDL_Quit();
+        destroy();
         return false;
     }
 
@@ -247,49 +232,37 @@ bool init()
     if (!animation::shader->create_shader("shaders/animation.vs",
                                           shader_type::vertex))
     {
-        SDL_GL_DeleteContext(context);
-        SDL_DestroyWindow(window);
-        SDL_Quit();
+        destroy();
         return false;
     }
     if (!animation::shader->create_shader("shaders/animation.fs",
                                           shader_type::fragment))
     {
-        SDL_GL_DeleteContext(context);
-        SDL_DestroyWindow(window);
-        SDL_Quit();
+        destroy();
         return false;
     }
     if (!animation::shader->link())
     {
-        SDL_GL_DeleteContext(context);
-        SDL_DestroyWindow(window);
-        SDL_Quit();
+        destroy();
         return false;
     }
 
     collider::shader = create_shader_program();
     if (!collider::shader->create_shader("shaders/collider.vs",
-                                        shader_type::vertex))
+                                         shader_type::vertex))
     {
-        SDL_GL_DeleteContext(context);
-        SDL_DestroyWindow(window);
-        SDL_Quit();
+        destroy();
         return false;
     }
     if (!collider::shader->create_shader("shaders/collider.fs",
-                                        shader_type::fragment))
+                                         shader_type::fragment))
     {
-        SDL_GL_DeleteContext(context);
-        SDL_DestroyWindow(window);
-        SDL_Quit();
+        destroy();
         return false;
     }
     if (!collider::shader->link())
     {
-        SDL_GL_DeleteContext(context);
-        SDL_DestroyWindow(window);
-        SDL_Quit();
+        destroy();
         return false;
     }
 
@@ -317,11 +290,7 @@ bool init()
 
     if (!init_sound())
     {
-        ImGui_ImplOpenGL3_Shutdown();
-        ImGui_ImplSDL3_Shutdown();
-        SDL_GL_DeleteContext(context);
-        SDL_DestroyWindow(window);
-        SDL_Quit();
+        destroy();
         return false;
     }
 
@@ -557,7 +526,7 @@ int get_window_height_pixels()
 
 bool swap_buffers()
 {
-    if (SDL_GL_SwapWindow(window) != 0)
+    if (!SDL_GL_SwapWindow(window))
     {
         std::cerr << "Swap Window error:" << SDL_GetError() << std::endl;
         return false;
@@ -571,15 +540,29 @@ void destroy()
     std::cout.rdbuf(cout_buf);
     std::cerr.rdbuf(cerr_buf);
 
-    ImGui_ImplOpenGL3_Shutdown();
-    ImGui_ImplSDL3_Shutdown();
+    if (ImGui::GetCurrentContext)
+    {
+        ImGuiIO io = ImGui::GetIO();
+
+        if (io.BackendRendererUserData)
+            ImGui_ImplOpenGL3_Shutdown();
+
+        if (io.BackendPlatformUserData)
+            ImGui_ImplSDL3_Shutdown();
+
+        ImGui::DestroyContext();
+    }
 
     delete sprite::shader;
     delete animation::shader;
     delete collider::shader;
 
-    SDL_GL_DeleteContext(context);
-    SDL_DestroyWindow(window);
+    if (context)
+        SDL_GL_DestroyContext(context);
+
+    if (window)
+        SDL_DestroyWindow(window);
+
     SDL_Quit();
 }
 } // namespace prip_engine

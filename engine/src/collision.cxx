@@ -54,6 +54,11 @@ collider::collider(transform2d& pos,
     ebo->add_indexes(primitives::line, 1);
 }
 
+collider::~collider()
+{
+    delete vao;
+}
+
 bool collider::detect(collider* other)
 {
     bool collision_x = pos->x + rect.pos.x + rect.size.x >=
@@ -61,9 +66,9 @@ bool collider::detect(collider* other)
                        other->pos->x + other->rect.pos.x + other->rect.size.x >=
                            pos->x + rect.pos.x;
     bool collision_y =
-        pos->y + pos->y + rect.size.y >= other->pos->y + other->rect.pos.y &&
+        pos->y + rect.pos.y + rect.size.y >= other->pos->y + other->rect.pos.y &&
         other->pos->y + other->rect.pos.y + other->rect.size.y >=
-            pos->y + pos->y;
+            pos->y + rect.pos.y;
     bool collision = collision_x && collision_y;
 
     if (collision)
@@ -156,9 +161,33 @@ const vertex_array* collider::get_vertex_array() const
     return vao;
 }
 
-collider::~collider()
+trigger::trigger(transform2d& pos,
+                 transform2d  offset,
+                 transform2d  rect_size,
+                 color        color,
+                 float        scale,
+                 int          direction,
+                 bool         dynamic,
+                 type         type)
+    : col(new collider(
+          pos, offset, rect_size, color, scale, direction, dynamic))
+    , t(type)
 {
-    delete vao;
+}
+
+trigger::~trigger()
+{
+    delete col;
+}
+
+bool trigger::detect(collider* other)
+{
+    return col->detect(other);
+}
+
+trigger::type trigger::get_type()
+{
+    return t;
 }
 
 } // namespace prip_engine

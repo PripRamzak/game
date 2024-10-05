@@ -20,13 +20,7 @@ character::character(prip_engine::transform2d global_pos,
 
 void character::draw()
 {
-    glm::mat4 model = glm::translate(
-        glm::mat4{ 1 }, glm::vec3{ global_pos.x, global_pos.y, 0.f });
-    if (direction == 1)
-        model =
-            glm::rotate(model, glm::radians(180.f), glm::vec3{ 0.f, 1.f, 0.f });
-    model = glm::scale(model, glm::vec3{ size, size, 1.f });
-    get_animation()->draw(glm::value_ptr(model));
+    get_animation()->draw(global_pos, {size, size}, direction == 1 ? 180.f : 0.f);
 
     if (state != character_state::dead)
     {
@@ -133,9 +127,12 @@ void character::resolve_map_collision(prip_engine::transform2d& delta_pos)
             current_hitbox->resolve(map_collider, dir);
         if (resol.first)
         {
-            global_pos.y -= resol.second;
+            global_pos.y -= std::fabs(resol.second) < std::fabs(delta_pos.y)
+                                ? resol.second
+                                : delta_pos.y;
             if (new_state == character_state::jump)
                 new_state = character_state::fall;
+            
             collision_y = true;
             break;
         }

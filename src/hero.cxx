@@ -3,75 +3,71 @@
 #include "include/hero.hxx"
 #include "include/resources.hxx"
 
-#include "glm/gtc/type_ptr.hpp"
-
 using namespace std::chrono_literals;
 
 hero::hero(prip_engine::transform2d global_pos, int direction, map* level_map)
-    : character(global_pos,
-                10.f,
-                2.25f,
-                direction,
-                level_map,
-                4,
-                character_state::idle)
+    : character(
+          global_pos, 10.f, 3.f, direction, level_map, 4, character_state::idle)
     , sound_attack(resources::warrior_attack_sound)
     , jump_height(300.f)
     , jump_force(12.f)
 {
     prip_engine::animation* anim_warrior_idle =
-        new prip_engine::animation(resources::warrior_idle, 6, 100ms);
+        new prip_engine::animation(resources::hero_idle, 10, 100ms);
     prip_engine::animation* anim_warrior_run =
-        new prip_engine::animation(resources::warrior_run, 6, 100ms);
+        new prip_engine::animation(resources::hero_run, 10, 100ms);
     prip_engine::animation* anim_warrior_attack =
-        new prip_engine::animation(resources::warrior_attack, 4, 100ms);
+        new prip_engine::animation(resources::hero_attack, 6, 100ms);
     prip_engine::animation* anim_warrior_jump =
-        new prip_engine::animation(resources::warrior_jump, 1, 250ms);
+        new prip_engine::animation(resources::hero_jump, 1, 250ms);
     prip_engine::animation* anim_warrior_fall =
-        new prip_engine::animation(resources::warrior_fall, 1, 250ms);
+        new prip_engine::animation(resources::hero_fall, 1, 250ms);
+    prip_engine::animation* anim_warrior_dead =
+        new prip_engine::animation(resources::hero_dead, 10, 100ms);
 
     sprites.emplace(character_state::idle, anim_warrior_idle);
     sprites.emplace(character_state::move, anim_warrior_run);
     sprites.emplace(character_state::melee_attack, anim_warrior_attack);
     sprites.emplace(character_state::jump, anim_warrior_jump);
     sprites.emplace(character_state::fall, anim_warrior_fall);
+    sprites.emplace(character_state::dead, anim_warrior_dead);
 
     prip_engine::collider* idle_hitbox =
         new prip_engine::collider(this->global_pos,
-                                  { -14.f, -20.f },
-                                  { 34.f, 44.f },
+                                  { -11.f, -20.f },
+                                  { 22.f, 40.f },
                                   { prip_engine::e_color::GREEN, 0.6f },
                                   size,
                                   direction,
                                   true);
     prip_engine::collider* run_hitbox =
         new prip_engine::collider(this->global_pos,
-                                  { -12.f, -20.f },
-                                  { 32.f, 44.f },
+                                  { -11.f, -20.f },
+                                  { 22.f, 40.f },
                                   { prip_engine::e_color::GREEN, 0.6f },
                                   size,
                                   direction,
                                   true);
     prip_engine::collider* attack_hitbox =
         new prip_engine::collider(this->global_pos,
-                                  { -15.f, -20.f },
-                                  { 26.f, 44.f },
+                                  { -13.f, -20.f },
+                                  { 26.f, 40.f },
                                   { prip_engine::e_color::GREEN, 0.6f },
                                   size,
                                   direction,
                                   true);
     prip_engine::collider* jump_hitbox =
         new prip_engine::collider(this->global_pos,
-                                  { -24.f, -24.f },
-                                  { 48.f, 48.f },
+                                  { -11.f, -20.f },
+                                  { 22.f, 40.f },
                                   { prip_engine::e_color::GREEN, 0.6f },
                                   size,
                                   direction,
                                   true);
     prip_engine::collider* fall_hitbox =
         new prip_engine::collider(this->global_pos,
-                                  { -24.f, -24.f },
-                                  { 48.f, 48.f },
+                                  { -11.f, -20.f },
+                                  { 22.f, 40.f },
                                   { prip_engine::e_color::GREEN, 0.6f },
                                   size,
                                   direction,
@@ -84,9 +80,9 @@ hero::hero(prip_engine::transform2d global_pos, int direction, map* level_map)
     hitboxes.emplace(character_state::fall, fall_hitbox);
 
     attack_collider =
-        new prip_engine::collider{ global_pos,
-                                   { 11.f, -10.f },
-                                   { 32.f, 34.f },
+        new prip_engine::collider{ this->global_pos,
+                                   { -30.f, -20.f },
+                                   { 75.f, 40.f },
                                    { prip_engine::e_color::ORANGE, 0.6f },
                                    size,
                                    direction,
@@ -166,9 +162,8 @@ bool hero::is_attacked()
 
 void hero::draw_health(int sprite_number, int pos_x)
 {
-    glm::mat4 model =
-        glm::translate(glm::mat4{ 1 }, glm::vec3{ pos_x, 34.f, 0.f });
-    health_interface[sprite_number]->draw(glm::value_ptr(model), false);
+    health_interface[sprite_number]->draw(
+        { static_cast<float>(pos_x), 34.f }, { 1.f, 1.f }, 0.f, false);
 }
 
 void hero::move(int dx, int dy)
@@ -183,6 +178,20 @@ void hero::move(int dx, int dy)
         change_direction(0);
     else if (delta_pos.x < 0.f)
         change_direction(1);
+
+    const std::vector<prip_engine::trigger*>& map_triggers =
+        level_map->get_triggers();
+    for (auto map_trigger : map_triggers)
+    {
+        if (map_trigger->detect(get_hitbox()))
+            switch (map_trigger->get_type())
+            {
+                case prip_engine::trigger::type::damage:
+                    hurt();
+                    global_pos = level_map->get_spawn_pos();
+                    break;
+            }
+    }
 
     resolve_map_collision(delta_pos);
 }

@@ -19,7 +19,7 @@ public:
               std::chrono::milliseconds animation_time);
     void    play(std::chrono::milliseconds delta_time_);
     void    reset();
-    void    draw(float* m_model);
+    void    draw(transform2d pos, transform2d scale, float rotation_angle);
     int     get_frames_quantity();
     int     get_current_frame_number();
     sprite* get_sprite();

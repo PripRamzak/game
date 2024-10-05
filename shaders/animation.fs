@@ -6,12 +6,11 @@ out vec4 frag_color;
 
 in vec2 uv;
 
-uniform float     quantity;
-uniform float     number;
-uniform sampler2D texture;
+uniform sampler2D tex;
+
+uniform float offset_u;
 
 void main()
 {
-    vec2 new_uv = vec2((1.f / quantity) * uv.x + number / quantity, uv.y);
-    frag_color  = texture2D(texture, new_uv);
+    frag_color = texture(tex, vec2(uv.x + offset_u, uv.y));
 }

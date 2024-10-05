@@ -53,7 +53,7 @@ bool is_key_down(key key)
 
     if (it != key_bindings.end())
     {
-        const uint8_t* state = SDL_GetKeyboardState(nullptr);
+        const bool* state = SDL_GetKeyboardState(nullptr);
 
         int sdl_scan_code = SDL_GetScancodeFromKey(it->keycode, SDL_KMOD_NONE);
         return state[sdl_scan_code];

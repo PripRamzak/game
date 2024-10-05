@@ -79,19 +79,30 @@ bool init_sound()
                                        &desired_audio_in_spec,
                                        new_audio_callback,
                                        nullptr);
+
     if (!stream)
     {
-        std::cerr << "Can't open audio device stream. " << SDL_GetError();
-        return false;
+        std::cerr << "Cant open audio device stream with desired spec. "
+                  << SDL_GetError() << std::endl;
+
+        stream = SDL_OpenAudioDeviceStream(SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK,
+                                           nullptr,
+                                           new_audio_callback,
+                                           nullptr);
+        if (!stream)
+        {
+            std::cerr << "Can't open audio device stream. " << SDL_GetError();
+            return false;
+        }
     }
 
-    if (SDL_GetAudioStreamFormat(stream, &audio_in_spec, nullptr) != 0)
+    if (!SDL_GetAudioStreamFormat(stream, &audio_in_spec, nullptr))
     {
         std::cerr << "Can't get audio stream format. " << SDL_GetError();
         return false;
     }
 
-    if (SDL_ResumeAudioDevice(SDL_GetAudioStreamDevice(stream)) != 0)
+    if (!SDL_ResumeAudioDevice(SDL_GetAudioStreamDevice(stream)))
     {
         std::cerr << "Can't resume audio device. " << SDL_GetError();
         return false;
@@ -106,8 +117,7 @@ public:
     game_sound_buffer(const char* file_path)
     {
         SDL_AudioSpec audio_spec_from_file{};
-        if (SDL_LoadWAV(file_path, &audio_spec_from_file, &buffer, &length) !=
-            0)
+        if (!SDL_LoadWAV(file_path, &audio_spec_from_file, &buffer, &length))
             throw std::runtime_error(
                 std::string("Can't parse and load audio samples from file: ") +
                 std::string(file_path));
@@ -119,14 +129,14 @@ public:
             uint8_t* output_bytes;
             int      output_length;
 
-            int convert_status =
+            bool convert_status =
                 SDL_ConvertAudioSamples(&audio_spec_from_file,
                                         buffer,
                                         static_cast<int>(length),
                                         &audio_in_spec,
                                         &output_bytes,
                                         &output_length);
-            if (convert_status != 0)
+            if (!convert_status)
                 throw std::runtime_error(
                     std::string("failed to convert WAV byte stream" +
                                 std::string(SDL_GetError())));

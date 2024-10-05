@@ -1,8 +1,6 @@
 #include "include/arrow.hxx"
 #include "include/resources.hxx"
 
-#include "glm/gtc/type_ptr.hpp"
-
 arrow::arrow(prip_engine::transform2d global_pos,
              int                      size,
              int                      direction,
@@ -42,14 +40,7 @@ void arrow::update(character* hero)
 
 void arrow::draw()
 {
-    glm::mat4 model = glm::translate(
-        glm::mat4{ 1 }, glm::vec3{ global_pos.x, global_pos.y, 0.f });
-    if (direction == 1)
-        model =
-            glm::rotate(model, glm::radians(180.f), glm::vec3{ 0.f, 1.f, 0.f });
-    model         = glm::scale(model, glm::vec3{ size, size, 1.f });
-    spr->draw(glm::value_ptr(model), true);
-
+    spr->draw(global_pos, {size, size}, direction == 1 ? 180.f : 0.f, true);
     hitbox->draw();
 }
 

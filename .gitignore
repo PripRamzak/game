@@ -4,7 +4,7 @@ cmake-build-debug/
 TODO.txt
 imgui.ini
 build/
-win-build/
+build-win/
 android-project/.gradle
 android-project/.idea
 android-project/local.properties
